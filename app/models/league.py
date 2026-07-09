@@ -28,6 +28,8 @@ class League(Base):
 
     flag: Mapped[str] = mapped_column(String(500))
 
+    
+
     teams = relationship(
     "Team",
     back_populates="league",

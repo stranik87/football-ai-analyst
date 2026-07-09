@@ -1,0 +1,24 @@
+from sqlalchemy import Boolean, Date, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database.base import Base
+
+
+class LeagueSeason(Base):
+    __tablename__ = "league_seasons"
+
+    id: Mapped[int] = mapped_column(
+    Integer,
+    primary_key=True,
+    autoincrement=True,
+    )
+    
+    league_id: Mapped[int] = mapped_column(
+    ForeignKey("leagues.id"),
+    nullable=False,
+    )
+
+    season: Mapped[int] = mapped_column(
+    Integer,
+    nullable=False,
+    )
