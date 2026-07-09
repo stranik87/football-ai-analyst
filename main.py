@@ -1,14 +1,20 @@
-from pprint import pprint
-
-from app.api.client import FootballAPIClient
+from app.core.logger import logger
+from app.database.database import create_database
+from app.importers.league_importer import LeagueImporter
+from app.importers.league_season_importer import LeagueSeasonImporter
 
 
 def main():
-    client = FootballAPIClient()
+    logger.info("Создание базы данных...")
+    create_database()
 
-    data = client.get("leagues")
+    logger.info("Импорт лиг...")
+    LeagueImporter().run()
 
-    pprint(data["response"][0])
+    logger.info("Импорт сезонов...")
+    LeagueSeasonImporter().run()
+
+    logger.success("Работа завершена.")
 
 
 if __name__ == "__main__":

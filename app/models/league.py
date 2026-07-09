@@ -30,8 +30,13 @@ class League(Base):
 
     
 
-    teams = relationship(
+    teams: Mapped[list["Team"]] = relationship(
     "Team",
+    back_populates="league",
+    cascade="all, delete-orphan",
+)
+    seasons: Mapped[list["LeagueSeason"]] = relationship(
+    "LeagueSeason",
     back_populates="league",
     cascade="all, delete-orphan",
 )

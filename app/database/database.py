@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from config import Config
+from app.database.base import Base
 
 # Создаем подключение к базе данных
 engine = create_engine(
@@ -15,3 +16,10 @@ SessionLocal = sessionmaker(
     autoflush=False,
     bind=engine
 )
+
+
+def create_database():
+    """
+    Создает все таблицы базы данных.
+    """
+    Base.metadata.create_all(bind=engine)

@@ -53,4 +53,7 @@ class Team(Base):
         default="",
     )
 
-    league = relationship("League")
+    league: Mapped["League"] = relationship(
+    "League",
+    back_populates="teams",
+)

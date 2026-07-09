@@ -46,3 +46,18 @@
 2026-07-07 07:43:27.491 | SUCCESS  | app.importers.base_importer:run:14 - Импорт завершён: LeagueImporter
 2026-07-07 07:43:27.491 | SUCCESS  | __main__:main:13 - Работа завершена.
 2026-07-07 08:21:16.359 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 20:10:47.161 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:06:48.612 | INFO     | __main__:main:8 - Создание базы данных...
+2026-07-09 21:06:48.614 | INFO     | __main__:main:11 - Импорт лиг...
+2026-07-09 21:06:48.615 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-09 21:06:48.616 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:06:49.516 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 1230
+2026-07-09 21:06:49.517 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 0
+2026-07-09 21:06:49.521 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-09 21:06:49.522 | INFO     | __main__:main:14 - Импорт сезонов...
+2026-07-09 21:06:49.523 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-09 21:06:49.524 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:06:54.414 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 8374
+2026-07-09 21:06:54.414 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 0
+2026-07-09 21:06:54.420 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-09 21:06:54.421 | SUCCESS  | __main__:main:17 - Работа завершена.
