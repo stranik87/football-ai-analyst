@@ -56,4 +56,14 @@ class Team(Base):
     league: Mapped["League"] = relationship(
     "League",
     back_populates="teams",
+        )
+
+    venue_id: Mapped[int | None] = mapped_column(
+    ForeignKey("venues.id"),
+    nullable=True,
+    )
+
+    venue: Mapped["Venue"] = relationship(
+    "Venue",
+    back_populates="teams",
 )

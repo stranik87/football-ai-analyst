@@ -61,3 +61,315 @@
 2026-07-09 21:06:54.414 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 0
 2026-07-09 21:06:54.420 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
 2026-07-09 21:06:54.421 | SUCCESS  | __main__:main:17 - Работа завершена.
+2026-07-09 21:15:27.187 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:37:12.313 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:38:38.803 | INFO     | __main__:main:8 - Создание базы данных...
+2026-07-09 21:38:38.804 | INFO     | __main__:main:11 - Импорт лиг...
+2026-07-09 21:38:38.806 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-09 21:38:38.806 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:38:39.457 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-09 21:38:39.458 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-09 21:38:39.460 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-09 21:38:39.461 | INFO     | __main__:main:14 - Импорт сезонов...
+2026-07-09 21:38:39.461 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-09 21:38:39.462 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:38:44.579 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-09 21:38:44.579 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8374
+2026-07-09 21:38:44.598 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-09 21:38:44.598 | SUCCESS  | __main__:main:17 - Работа завершена.
+2026-07-09 21:47:58.603 | INFO     | __main__:<module>:7 - Импорт команд...
+2026-07-09 21:47:58.603 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: TeamImporter
+2026-07-09 21:47:58.611 | INFO     | app.importers.team_importer:import_data:28 - Импорт команд пока не реализован полностью.
+2026-07-09 21:47:58.611 | INFO     | app.importers.team_importer:import_data:29 - Добавлено команд: 0
+2026-07-09 21:47:58.611 | INFO     | app.importers.team_importer:import_data:30 - Пропущено команд: 0
+2026-07-09 21:47:58.611 | INFO     | app.importers.team_importer:import_data:31 - Добавлено стадионов: 0
+2026-07-09 21:47:58.612 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: TeamImporter
+2026-07-09 21:47:58.612 | INFO     | __main__:main:11 - Создание базы данных...
+2026-07-09 21:47:58.614 | INFO     | __main__:main:14 - Импорт лиг...
+2026-07-09 21:47:58.614 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-09 21:47:58.615 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:47:59.422 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-09 21:47:59.422 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-09 21:47:59.429 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-09 21:47:59.429 | INFO     | __main__:main:17 - Импорт сезонов...
+2026-07-09 21:47:59.430 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-09 21:47:59.430 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:48:04.626 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-09 21:48:04.626 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8374
+2026-07-09 21:48:04.634 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-09 21:48:04.635 | SUCCESS  | __main__:main:20 - Работа завершена.
+2026-07-09 21:49:52.953 | INFO     | __main__:main:9 - Создание базы данных...
+2026-07-09 21:49:52.963 | INFO     | __main__:main:12 - Импорт лиг...
+2026-07-09 21:49:52.964 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-09 21:49:52.964 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:49:53.594 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-09 21:49:53.594 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-09 21:49:53.603 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-09 21:49:53.603 | INFO     | __main__:main:15 - Импорт сезонов...
+2026-07-09 21:49:53.603 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-09 21:49:53.603 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:49:58.938 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-09 21:49:58.938 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8374
+2026-07-09 21:49:58.958 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-09 21:49:58.958 | INFO     | __main__:main:18 - Импорт команд...
+2026-07-09 21:49:58.959 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: TeamImporter
+2026-07-09 21:49:58.959 | INFO     | app.importers.team_importer:import_data:28 - Импорт команд пока не реализован полностью.
+2026-07-09 21:49:58.960 | INFO     | app.importers.team_importer:import_data:29 - Добавлено команд: 0
+2026-07-09 21:49:58.960 | INFO     | app.importers.team_importer:import_data:30 - Пропущено команд: 0
+2026-07-09 21:49:58.961 | INFO     | app.importers.team_importer:import_data:31 - Добавлено стадионов: 0
+2026-07-09 21:49:58.961 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: TeamImporter
+2026-07-09 21:49:58.963 | SUCCESS  | __main__:main:21 - Работа завершена.
+2026-07-09 21:54:48.685 | INFO     | __main__:main:9 - Создание базы данных...
+2026-07-09 21:54:48.689 | INFO     | __main__:main:12 - Импорт лиг...
+2026-07-09 21:54:48.689 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-09 21:54:48.689 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:54:49.437 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-09 21:54:49.437 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-09 21:54:49.454 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-09 21:54:49.454 | INFO     | __main__:main:15 - Импорт сезонов...
+2026-07-09 21:54:49.455 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-09 21:54:49.455 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:54:54.798 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-09 21:54:54.813 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8374
+2026-07-09 21:54:54.818 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-09 21:54:54.818 | INFO     | __main__:main:18 - Импорт команд...
+2026-07-09 21:54:54.819 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: TeamImporter
+2026-07-09 21:54:54.831 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:55.421 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:55.634 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:55.797 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:55.961 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:56.163 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:56.402 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:56.605 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:56.906 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:57.084 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=49&season=2024
+2026-07-09 21:54:57.086 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:57.214 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=718&season=2024
+2026-07-09 21:54:57.215 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:57.317 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=808&season=2024
+2026-07-09 21:54:57.318 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:57.427 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=65&season=2024
+2026-07-09 21:54:57.427 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:57.552 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=264&season=2024
+2026-07-09 21:54:57.553 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:57.796 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=26&season=2024
+2026-07-09 21:54:57.796 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:57.991 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=557&season=2024
+2026-07-09 21:54:57.991 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:58.162 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=766&season=2024
+2026-07-09 21:54:58.164 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:58.281 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=769&season=2024
+2026-07-09 21:54:58.281 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:58.401 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=360&season=2024
+2026-07-09 21:54:58.402 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:58.518 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=483&season=2024
+2026-07-09 21:54:58.520 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:58.623 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=558&season=2024
+2026-07-09 21:54:58.624 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:58.724 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=670&season=2024
+2026-07-09 21:54:58.724 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:58.843 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=679&season=2024
+2026-07-09 21:54:58.843 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:58.970 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=683&season=2024
+2026-07-09 21:54:58.971 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:59.076 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=684&season=2024
+2026-07-09 21:54:59.077 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:59.215 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=437&season=2024
+2026-07-09 21:54:59.215 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:59.377 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=583&season=2024
+2026-07-09 21:54:59.377 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:59.529 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=438&season=2024
+2026-07-09 21:54:59.529 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:59.668 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=692&season=2024
+2026-07-09 21:54:59.669 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:54:59.890 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=693&season=2024
+2026-07-09 21:54:59.890 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:00.109 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=694&season=2024
+2026-07-09 21:55:00.109 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:00.245 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=198&season=2024
+2026-07-09 21:55:00.246 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:00.381 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=829&season=2024
+2026-07-09 21:55:00.381 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:00.496 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=502&season=2024
+2026-07-09 21:55:00.497 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:00.616 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=832&season=2024
+2026-07-09 21:55:00.617 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:00.814 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=881&season=2024
+2026-07-09 21:55:00.816 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:01.034 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=700&season=2024
+2026-07-09 21:55:01.034 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:01.165 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=678&season=2024
+2026-07-09 21:55:01.166 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:01.500 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=535&season=2024
+2026-07-09 21:55:01.500 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:01.617 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=337&season=2024
+2026-07-09 21:55:01.618 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:01.771 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=643&season=2024
+2026-07-09 21:55:01.772 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:01.931 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=681&season=2024
+2026-07-09 21:55:01.931 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:02.084 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=682&season=2024
+2026-07-09 21:55:02.099 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:02.216 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=801&season=2024
+2026-07-09 21:55:02.217 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:02.320 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=868&season=2024
+2026-07-09 21:55:02.322 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:02.422 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=883&season=2024
+2026-07-09 21:55:02.423 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:02.540 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=582&season=2024
+2026-07-09 21:55:02.541 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:02.653 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=902&season=2024
+2026-07-09 21:55:02.654 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:02.786 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=279&season=2024
+2026-07-09 21:55:02.788 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:02.995 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=767&season=2024
+2026-07-09 21:55:02.995 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:03.187 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=916&season=2024
+2026-07-09 21:55:03.187 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:03.307 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=861&season=2024
+2026-07-09 21:55:03.307 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:03.449 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=919&season=2024
+2026-07-09 21:55:03.449 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:03.563 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=687&season=2024
+2026-07-09 21:55:03.564 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:03.703 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=688&season=2024
+2026-07-09 21:55:03.703 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:03.820 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=800&season=2024
+2026-07-09 21:55:03.821 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:03.966 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=934&season=2024
+2026-07-09 21:55:03.966 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:04.098 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=935&season=2024
+2026-07-09 21:55:04.099 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:04.218 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=471&season=2024
+2026-07-09 21:55:04.219 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:04.390 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=472&season=2024
+2026-07-09 21:55:04.390 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:04.510 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=941&season=2024
+2026-07-09 21:55:04.510 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:04.614 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=945&season=2024
+2026-07-09 21:55:04.615 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:04.759 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=888&season=2024
+2026-07-09 21:55:04.761 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:04.866 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=889&season=2024
+2026-07-09 21:55:04.867 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:05.086 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=951&season=2024
+2026-07-09 21:55:05.086 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:05.207 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=953&season=2024
+2026-07-09 21:55:05.208 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:05.315 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=662&season=2024
+2026-07-09 21:55:05.316 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:05.435 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1016&season=2024
+2026-07-09 21:55:05.435 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:05.584 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=803&season=2024
+2026-07-09 21:55:05.584 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:05.714 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=841&season=2024
+2026-07-09 21:55:05.715 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:05.895 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=960&season=2024
+2026-07-09 21:55:05.897 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:06.014 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=590&season=2024
+2026-07-09 21:55:06.015 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:06.172 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=133&season=2024
+2026-07-09 21:55:06.172 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:06.319 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=768&season=2024
+2026-07-09 21:55:06.320 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:06.428 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=8&season=2024
+2026-07-09 21:55:06.429 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:06.601 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=855&season=2024
+2026-07-09 21:55:06.601 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:06.782 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=28&season=2024
+2026-07-09 21:55:06.784 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:06.909 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1015&season=2024
+2026-07-09 21:55:06.910 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.065 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=867&season=2024
+2026-07-09 21:55:07.067 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.176 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1018&season=2024
+2026-07-09 21:55:07.176 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.278 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1021&season=2024
+2026-07-09 21:55:07.279 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.383 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=873&season=2024
+2026-07-09 21:55:07.384 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.502 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1024&season=2024
+2026-07-09 21:55:07.502 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.609 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=70&season=2024
+2026-07-09 21:55:07.610 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.718 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=724&season=2024
+2026-07-09 21:55:07.719 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.830 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=470&season=2024
+2026-07-09 21:55:07.831 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:07.940 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=586&season=2024
+2026-07-09 21:55:07.941 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:08.043 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=29&season=2024
+2026-07-09 21:55:08.044 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:08.144 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1043&season=2024
+2026-07-09 21:55:08.145 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:08.248 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=485&season=2024
+2026-07-09 21:55:08.249 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:08.350 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=642&season=2024
+2026-07-09 21:55:08.351 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:08.453 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1045&season=2024
+2026-07-09 21:55:08.454 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:08.554 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=770&season=2024
+2026-07-09 21:55:08.555 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:08.781 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1072&season=2024
+2026-07-09 21:55:08.781 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:08.897 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1078&season=2024
+2026-07-09 21:55:08.898 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:09.000 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1079&season=2024
+2026-07-09 21:55:09.001 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:09.103 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1099&season=2024
+2026-07-09 21:55:09.104 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:09.206 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1014&season=2024
+2026-07-09 21:55:09.207 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:09.315 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=882&season=2024
+2026-07-09 21:55:09.316 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:09.416 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1046&season=2024
+2026-07-09 21:55:09.417 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:09.517 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=1047&season=2024
+2026-07-09 21:55:09.518 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:55:09.620 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/teams?league=4&season=2024
+2026-07-09 21:55:09.621 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 21:58:13.676 | INFO     | __main__:main:9 - Создание базы данных...
+2026-07-09 21:58:13.677 | INFO     | __main__:main:12 - Импорт лиг...
+2026-07-09 21:58:13.677 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-09 21:58:13.679 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:58:14.275 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-09 21:58:14.275 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-09 21:58:14.293 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-09 21:58:14.293 | INFO     | __main__:main:15 - Импорт сезонов...
+2026-07-09 21:58:14.293 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-09 21:58:14.293 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 21:58:19.562 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-09 21:58:19.578 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8374
+2026-07-09 21:58:19.582 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-09 21:58:19.582 | SUCCESS  | __main__:main:21 - Работа завершена.
+2026-07-09 22:06:14.449 | INFO     | __main__:main:9 - Создание базы данных...
+2026-07-09 22:06:14.462 | INFO     | __main__:main:12 - Импорт лиг...
+2026-07-09 22:06:14.463 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-09 22:06:14.463 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 22:06:15.203 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-09 22:06:15.203 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-09 22:06:15.214 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-09 22:06:15.214 | INFO     | __main__:main:15 - Импорт сезонов...
+2026-07-09 22:06:15.215 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-09 22:06:15.215 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-09 22:06:20.570 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-09 22:06:20.570 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8374
+2026-07-09 22:06:20.574 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-09 22:06:20.575 | INFO     | __main__:main:18 - Импорт команд...
+2026-07-09 22:06:20.575 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: TeamImporter
+2026-07-09 22:06:20.577 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Premier League league=39, season=2024
+2026-07-09 22:06:20.578 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 22:06:23.118 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Ligue 1 league=61, season=2024
+2026-07-09 22:06:23.118 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 22:06:25.278 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Bundesliga league=78, season=2024
+2026-07-09 22:06:25.278 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 22:06:27.427 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Serie A league=135, season=2024
+2026-07-09 22:06:27.427 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 22:06:29.580 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: La Liga league=140, season=2024
+2026-07-09 22:06:29.580 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-09 22:06:31.803 | SUCCESS  | app.importers.team_importer:import_data:103 - Добавлено команд: 98
+2026-07-09 22:06:31.804 | INFO     | app.importers.team_importer:import_data:104 - Пропущено команд: 0
+2026-07-09 22:06:31.804 | SUCCESS  | app.importers.team_importer:import_data:105 - Добавлено стадионов: 96
+2026-07-09 22:06:31.806 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: TeamImporter
+2026-07-09 22:06:31.806 | SUCCESS  | __main__:main:21 - Работа завершена.

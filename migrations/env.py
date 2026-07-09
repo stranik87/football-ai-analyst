@@ -8,6 +8,7 @@ from alembic import context
 from app.models.league import League
 from app.models.team import Team
 from app.models.league_season import LeagueSeason
+from app.models.venue import Venue
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
