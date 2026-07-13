@@ -14,3 +14,4 @@ class APIEndpoint:
     PREDICTIONS = "predictions"
     COACHES = "coachs"
     VENUES = "venues"
+    FIXTURE_STATISTICS = "fixtures/statistics"

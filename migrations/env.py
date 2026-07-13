@@ -38,7 +38,7 @@ from app.database.base import Base
 # Импортируем модели, чтобы Alembic их увидел
 from app.models.league import League
 from app.models.team import Team
-
+from app.models.fixture_team_statistics import FixtureTeamStatistics
 target_metadata = Base.metadata
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
