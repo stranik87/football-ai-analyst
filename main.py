@@ -3,7 +3,7 @@ from app.database.database import create_database
 from app.importers.league_importer import LeagueImporter
 from app.importers.league_season_importer import LeagueSeasonImporter
 from app.importers.team_importer import TeamImporter
-
+from app.importers.fixture_importer import FixtureImporter
 
 def main():
     logger.info("Создание базы данных...")
@@ -17,6 +17,8 @@ def main():
 
     logger.info("Импорт команд...")
     TeamImporter().run()
+    logger.info("Импорт матчей...")
+    FixtureImporter().run()
 
     logger.success("Работа завершена.")
 

@@ -3,3 +3,4 @@ from .league_season import LeagueSeason
 from .team import Team
 
 from .venue import Venue
+from .fixture import Fixture

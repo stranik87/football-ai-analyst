@@ -373,3 +373,203 @@
 2026-07-09 22:06:31.804 | SUCCESS  | app.importers.team_importer:import_data:105 - Добавлено стадионов: 96
 2026-07-09 22:06:31.806 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: TeamImporter
 2026-07-09 22:06:31.806 | SUCCESS  | __main__:main:21 - Работа завершена.
+2026-07-13 06:19:25.187 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:52:26.468 | INFO     | __main__:main:9 - Создание базы данных...
+2026-07-13 06:52:26.477 | INFO     | __main__:main:12 - Импорт лиг...
+2026-07-13 06:52:26.478 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-13 06:52:26.479 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-13 06:52:27.276 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-13 06:52:27.276 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-13 06:52:27.291 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-13 06:52:27.291 | INFO     | __main__:main:15 - Импорт сезонов...
+2026-07-13 06:52:27.292 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-13 06:52:27.292 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-13 06:52:32.562 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 4
+2026-07-13 06:52:32.562 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8374
+2026-07-13 06:52:32.571 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-13 06:52:32.572 | INFO     | __main__:main:18 - Импорт команд...
+2026-07-13 06:52:32.575 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: TeamImporter
+2026-07-13 06:52:32.577 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Premier League league=39, season=2024
+2026-07-13 06:52:32.578 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:52:35.103 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Ligue 1 league=61, season=2024
+2026-07-13 06:52:35.103 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:52:37.243 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Bundesliga league=78, season=2024
+2026-07-13 06:52:37.258 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:52:39.410 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Serie A league=135, season=2024
+2026-07-13 06:52:39.410 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:52:41.563 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: La Liga league=140, season=2024
+2026-07-13 06:52:41.563 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:52:43.713 | SUCCESS  | app.importers.team_importer:import_data:103 - Добавлено команд: 0
+2026-07-13 06:52:43.714 | INFO     | app.importers.team_importer:import_data:104 - Пропущено команд: 98
+2026-07-13 06:52:43.714 | SUCCESS  | app.importers.team_importer:import_data:105 - Добавлено стадионов: 0
+2026-07-13 06:52:43.716 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: TeamImporter
+2026-07-13 06:52:43.717 | INFO     | __main__:main:20 - Импорт матчей...
+2026-07-13 06:52:43.718 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: FixtureImporter
+2026-07-13 06:52:43.720 | INFO     | app.importers.fixture_importer:import_data:40 - Найдено сезонов для импорта матчей: 5
+2026-07-13 06:52:43.724 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: Ligue 1, league=61, season=2024
+2026-07-13 06:52:43.724 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:52:44.249 | INFO     | app.importers.fixture_importer:import_data:64 - Получено матчей: 308
+2026-07-13 06:52:44.264 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: Premier League, league=39, season=2024
+2026-07-13 06:52:44.264 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:52:44.436 | INFO     | app.importers.fixture_importer:import_data:64 - Получено матчей: 380
+2026-07-13 06:52:44.451 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: Bundesliga, league=78, season=2024
+2026-07-13 06:52:44.451 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:52:44.626 | INFO     | app.importers.fixture_importer:import_data:64 - Получено матчей: 308
+2026-07-13 06:52:44.626 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: Serie A, league=135, season=2024
+2026-07-13 06:52:44.631 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:52:44.724 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/fixtures?league=135&season=2024
+2026-07-13 06:52:44.725 | WARNING  | app.importers.fixture_importer:import_data:59 - Не удалось получить матчи: Serie A
+2026-07-13 06:52:44.726 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: La Liga, league=140, season=2024
+2026-07-13 06:52:44.727 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:52:44.819 | ERROR    | app.api.client:get:40 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/fixtures?league=140&season=2024
+2026-07-13 06:52:44.820 | WARNING  | app.importers.fixture_importer:import_data:59 - Не удалось получить матчи: La Liga
+2026-07-13 06:52:44.821 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: FixtureImporter
+2026-07-13 06:52:44.822 | SUCCESS  | __main__:main:23 - Работа завершена.
+2026-07-13 06:56:26.948 | INFO     | __main__:main:9 - Создание базы данных...
+2026-07-13 06:56:26.962 | INFO     | __main__:main:12 - Импорт лиг...
+2026-07-13 06:56:26.962 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-13 06:56:26.963 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-13 06:56:27.607 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-13 06:56:27.607 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-13 06:56:27.612 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-13 06:56:27.612 | INFO     | __main__:main:15 - Импорт сезонов...
+2026-07-13 06:56:27.612 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-13 06:56:27.613 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-13 06:56:32.709 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-13 06:56:32.709 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8378
+2026-07-13 06:56:32.713 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-13 06:56:32.714 | INFO     | __main__:main:18 - Импорт команд...
+2026-07-13 06:56:32.715 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: TeamImporter
+2026-07-13 06:56:32.717 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Premier League league=39, season=2024
+2026-07-13 06:56:32.717 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:56:35.249 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Ligue 1 league=61, season=2024
+2026-07-13 06:56:35.249 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:56:37.394 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Bundesliga league=78, season=2024
+2026-07-13 06:56:37.410 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:56:39.545 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Serie A league=135, season=2024
+2026-07-13 06:56:39.561 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:56:41.711 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: La Liga league=140, season=2024
+2026-07-13 06:56:41.711 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 06:56:43.861 | SUCCESS  | app.importers.team_importer:import_data:103 - Добавлено команд: 0
+2026-07-13 06:56:43.862 | INFO     | app.importers.team_importer:import_data:104 - Пропущено команд: 98
+2026-07-13 06:56:43.863 | SUCCESS  | app.importers.team_importer:import_data:105 - Добавлено стадионов: 0
+2026-07-13 06:56:43.865 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: TeamImporter
+2026-07-13 06:56:43.865 | INFO     | __main__:main:20 - Импорт матчей...
+2026-07-13 06:56:43.866 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: FixtureImporter
+2026-07-13 06:56:43.869 | INFO     | app.importers.fixture_importer:import_data:40 - Найдено сезонов для импорта матчей: 5
+2026-07-13 06:56:43.871 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: Ligue 1, league=61, season=2024
+2026-07-13 06:56:43.872 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:56:46.404 | INFO     | app.importers.fixture_importer:import_data:65 - Получено матчей: 308
+2026-07-13 06:56:46.405 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: Premier League, league=39, season=2024
+2026-07-13 06:56:46.405 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:56:48.579 | INFO     | app.importers.fixture_importer:import_data:65 - Получено матчей: 380
+2026-07-13 06:56:48.582 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: Bundesliga, league=78, season=2024
+2026-07-13 06:56:48.583 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:56:50.739 | INFO     | app.importers.fixture_importer:import_data:65 - Получено матчей: 308
+2026-07-13 06:56:50.742 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: Serie A, league=135, season=2024
+2026-07-13 06:56:50.744 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:56:52.875 | INFO     | app.importers.fixture_importer:import_data:65 - Получено матчей: 0
+2026-07-13 06:56:52.878 | INFO     | app.importers.fixture_importer:import_data:47 - Импорт матчей: La Liga, league=140, season=2024
+2026-07-13 06:56:52.880 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 06:56:55.011 | INFO     | app.importers.fixture_importer:import_data:65 - Получено матчей: 0
+2026-07-13 06:56:55.017 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: FixtureImporter
+2026-07-13 06:56:55.019 | SUCCESS  | __main__:main:23 - Работа завершена.
+2026-07-13 07:03:39.311 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:10:46.047 | INFO     | __main__:main:9 - Создание базы данных...
+2026-07-13 07:10:46.062 | INFO     | __main__:main:12 - Импорт лиг...
+2026-07-13 07:10:46.063 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-13 07:10:46.063 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-13 07:10:46.813 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-13 07:10:46.813 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-13 07:10:46.824 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-13 07:10:46.824 | INFO     | __main__:main:15 - Импорт сезонов...
+2026-07-13 07:10:46.825 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-13 07:10:46.825 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-13 07:10:52.038 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-13 07:10:52.038 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8378
+2026-07-13 07:10:52.048 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-13 07:10:52.048 | INFO     | __main__:main:18 - Импорт команд...
+2026-07-13 07:10:52.051 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: TeamImporter
+2026-07-13 07:10:52.053 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Premier League league=39, season=2024
+2026-07-13 07:10:52.054 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:10:54.574 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Ligue 1 league=61, season=2024
+2026-07-13 07:10:54.575 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:10:56.703 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Bundesliga league=78, season=2024
+2026-07-13 07:10:56.719 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:10:58.863 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Serie A league=135, season=2024
+2026-07-13 07:10:58.863 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:11:01.003 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: La Liga league=140, season=2024
+2026-07-13 07:11:01.003 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:11:03.145 | SUCCESS  | app.importers.team_importer:import_data:103 - Добавлено команд: 0
+2026-07-13 07:11:03.145 | INFO     | app.importers.team_importer:import_data:104 - Пропущено команд: 98
+2026-07-13 07:11:03.145 | SUCCESS  | app.importers.team_importer:import_data:105 - Добавлено стадионов: 0
+2026-07-13 07:11:03.149 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: TeamImporter
+2026-07-13 07:11:03.149 | INFO     | __main__:main:20 - Импорт матчей...
+2026-07-13 07:11:03.150 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: FixtureImporter
+2026-07-13 07:11:03.153 | INFO     | app.importers.fixture_importer:import_data:45 - Найдено сезонов для импорта матчей: 5
+2026-07-13 07:11:03.156 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: Ligue 1, season=2024
+2026-07-13 07:11:03.157 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:11:06.063 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: Premier League, season=2024
+2026-07-13 07:11:06.063 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:11:08.705 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: Bundesliga, season=2024
+2026-07-13 07:11:08.705 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:11:11.250 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: Serie A, season=2024
+2026-07-13 07:11:11.250 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:11:13.876 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: La Liga, season=2024
+2026-07-13 07:11:13.876 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:11:16.686 | SUCCESS  | app.importers.fixture_importer:import_data:137 - Добавлено матчей: 1756
+2026-07-13 07:11:16.686 | INFO     | app.importers.fixture_importer:import_data:138 - Пропущено матчей: 0
+2026-07-13 07:11:16.686 | WARNING  | app.importers.fixture_importer:import_data:139 - Пропущено из-за отсутствующих команд: 0
+2026-07-13 07:11:16.693 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: FixtureImporter
+2026-07-13 07:11:16.694 | SUCCESS  | __main__:main:23 - Работа завершена.
+2026-07-13 07:15:11.947 | INFO     | __main__:main:9 - Создание базы данных...
+2026-07-13 07:15:11.961 | INFO     | __main__:main:12 - Импорт лиг...
+2026-07-13 07:15:11.961 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueImporter
+2026-07-13 07:15:11.961 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-13 07:15:12.562 | SUCCESS  | app.importers.league_importer:import_data:61 - Добавлено: 0
+2026-07-13 07:15:12.562 | INFO     | app.importers.league_importer:import_data:62 - Пропущено: 1230
+2026-07-13 07:15:12.573 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueImporter
+2026-07-13 07:15:12.573 | INFO     | __main__:main:15 - Импорт сезонов...
+2026-07-13 07:15:12.573 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: LeagueSeasonImporter
+2026-07-13 07:15:12.574 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/leagues
+2026-07-13 07:15:17.708 | SUCCESS  | app.importers.league_season_importer:import_data:74 - Добавлено сезонов: 0
+2026-07-13 07:15:17.708 | INFO     | app.importers.league_season_importer:import_data:75 - Пропущено: 8378
+2026-07-13 07:15:17.726 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: LeagueSeasonImporter
+2026-07-13 07:15:17.726 | INFO     | __main__:main:18 - Импорт команд...
+2026-07-13 07:15:17.727 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: TeamImporter
+2026-07-13 07:15:17.729 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Premier League league=39, season=2024
+2026-07-13 07:15:17.730 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:15:20.237 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Ligue 1 league=61, season=2024
+2026-07-13 07:15:20.238 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:15:22.397 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Bundesliga league=78, season=2024
+2026-07-13 07:15:22.397 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:15:24.563 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: Serie A league=135, season=2024
+2026-07-13 07:15:24.563 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:15:26.720 | INFO     | app.importers.team_importer:import_data:42 - Импорт команд: La Liga league=140, season=2024
+2026-07-13 07:15:26.721 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/teams
+2026-07-13 07:15:28.879 | SUCCESS  | app.importers.team_importer:import_data:103 - Добавлено команд: 0
+2026-07-13 07:15:28.879 | INFO     | app.importers.team_importer:import_data:104 - Пропущено команд: 98
+2026-07-13 07:15:28.879 | SUCCESS  | app.importers.team_importer:import_data:105 - Добавлено стадионов: 0
+2026-07-13 07:15:28.883 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: TeamImporter
+2026-07-13 07:15:28.884 | INFO     | __main__:main:20 - Импорт матчей...
+2026-07-13 07:15:28.884 | INFO     | app.importers.base_importer:run:18 - Запуск импортёра: FixtureImporter
+2026-07-13 07:15:28.887 | INFO     | app.importers.fixture_importer:import_data:45 - Найдено сезонов для импорта матчей: 5
+2026-07-13 07:15:28.890 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: Ligue 1, season=2024
+2026-07-13 07:15:28.891 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:15:31.516 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: Premier League, season=2024
+2026-07-13 07:15:31.516 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:15:33.812 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: Bundesliga, season=2024
+2026-07-13 07:15:33.812 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:15:36.063 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: Serie A, season=2024
+2026-07-13 07:15:36.063 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:15:36.178 | ERROR    | app.api.client:get:48 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/fixtures?league=135&season=2024
+2026-07-13 07:15:38.179 | WARNING  | app.importers.fixture_importer:import_data:63 - Не удалось получить матчи: Serie A
+2026-07-13 07:15:38.183 | INFO     | app.importers.fixture_importer:import_data:51 - Импорт матчей: La Liga, season=2024
+2026-07-13 07:15:38.184 | INFO     | app.api.client:get:26 - GET https://v3.football.api-sports.io/fixtures
+2026-07-13 07:15:38.287 | ERROR    | app.api.client:get:48 - API ERROR: 429 Client Error: Too Many Requests for url: https://v3.football.api-sports.io/fixtures?league=140&season=2024
+2026-07-13 07:15:40.288 | WARNING  | app.importers.fixture_importer:import_data:63 - Не удалось получить матчи: La Liga
+2026-07-13 07:15:40.288 | SUCCESS  | app.importers.fixture_importer:import_data:137 - Добавлено матчей: 0
+2026-07-13 07:15:40.290 | INFO     | app.importers.fixture_importer:import_data:138 - Пропущено матчей: 996
+2026-07-13 07:15:40.290 | WARNING  | app.importers.fixture_importer:import_data:139 - Пропущено из-за отсутствующих команд: 0
+2026-07-13 07:15:40.292 | SUCCESS  | app.importers.base_importer:run:23 - Импорт завершён: FixtureImporter
+2026-07-13 07:15:40.292 | SUCCESS  | __main__:main:23 - Работа завершена.

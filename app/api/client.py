@@ -33,7 +33,15 @@ class FootballAPIClient:
 
             response.raise_for_status()
 
-            return response.json()
+            data = response.json()
+
+            api_errors = data.get("errors")
+
+            if api_errors:
+                logger.error(f"API RESPONSE ERROR: {api_errors}")
+                return None
+
+            return data
 
         except RequestException as e:
 
