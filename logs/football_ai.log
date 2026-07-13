@@ -863,3 +863,33 @@ AttributeError: type object 'Fixture' has no attribute 'date'
 2026-07-13 22:23:37.108 | ERROR    | app.api.client:get:79 - Дневной лимит API-Football исчерпан. Импорт необходимо остановить.
 2026-07-13 22:23:37.108 | ERROR    | app.importers.base_importer:run:32 - Импорт остановлен: LeagueImporter. Дневной лимит API-Football исчерпан.
 2026-07-13 22:23:37.117 | WARNING  | __main__:main:84 - Работа остановлена раньше времени.
+2026-07-13 22:47:53.492 | INFO     | __main__:main:77 - Создание базы данных...
+2026-07-13 22:47:53.495 | INFO     | __main__:run_importer:37 - Импорт турнирных таблиц...
+2026-07-13 22:47:53.495 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: StandingImporter
+2026-07-13 22:47:53.594 | INFO     | app.importers.standing_importer:import_data:44 - Найдено сезонов для импорта таблиц: 8380
+2026-07-13 22:47:53.603 | INFO     | app.importers.standing_importer:import_data:63 - Импорт турнирной таблицы: league=World Cup, season=2010
+2026-07-13 22:47:53.603 | INFO     | app.api.client:get:42 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-13 22:47:54.408 | ERROR    | app.api.client:get:71 - API RESPONSE ERROR: {'plan': 'Free plans do not have access to this season, try from 2022 to 2024.'}
+2026-07-13 22:47:54.409 | WARNING  | app.importers.standing_importer:import_data:76 - Турнирная таблица не получена: league=World Cup, season=2010
+2026-07-13 22:47:56.412 | INFO     | app.importers.standing_importer:import_data:63 - Импорт турнирной таблицы: league=World Cup, season=2014
+2026-07-13 22:47:56.412 | INFO     | app.api.client:get:42 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-13 22:47:56.624 | ERROR    | app.api.client:get:71 - API RESPONSE ERROR: {'plan': 'Free plans do not have access to this season, try from 2022 to 2024.'}
+2026-07-13 22:47:56.624 | WARNING  | app.importers.standing_importer:import_data:76 - Турнирная таблица не получена: league=World Cup, season=2014
+2026-07-13 22:47:58.629 | INFO     | app.importers.standing_importer:import_data:63 - Импорт турнирной таблицы: league=World Cup, season=2018
+2026-07-13 22:47:58.630 | INFO     | app.api.client:get:42 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-13 22:47:58.858 | ERROR    | app.api.client:get:71 - API RESPONSE ERROR: {'plan': 'Free plans do not have access to this season, try from 2022 to 2024.'}
+2026-07-13 22:47:58.859 | WARNING  | app.importers.standing_importer:import_data:76 - Турнирная таблица не получена: league=World Cup, season=2018
+2026-07-13 22:48:00.862 | INFO     | app.importers.standing_importer:import_data:63 - Импорт турнирной таблицы: league=World Cup, season=2022
+2026-07-13 22:48:00.862 | INFO     | app.api.client:get:42 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-13 22:48:01.067 | ERROR    | app.api.client:get:79 - Дневной лимит API-Football исчерпан. Импорт необходимо остановить.
+2026-07-13 22:48:01.128 | ERROR    | app.importers.base_importer:run:32 - Импорт остановлен: StandingImporter. Дневной лимит API-Football исчерпан.
+2026-07-13 22:48:01.143 | WARNING  | __main__:main:88 - Работа остановлена раньше времени.
+2026-07-13 22:57:01.199 | INFO     | __main__:main:77 - Создание базы данных...
+2026-07-13 22:57:01.203 | INFO     | __main__:run_importer:37 - Импорт турнирных таблиц...
+2026-07-13 22:57:01.203 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: StandingImporter
+2026-07-13 22:57:01.232 | INFO     | app.importers.standing_importer:import_data:50 - Найдено сезонов для импорта таблиц: 5
+2026-07-13 22:57:01.235 | INFO     | app.importers.standing_importer:import_data:69 - Импорт турнирной таблицы: league=Premier League, season=2024
+2026-07-13 22:57:01.235 | INFO     | app.api.client:get:42 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-13 22:57:01.914 | ERROR    | app.api.client:get:79 - Дневной лимит API-Football исчерпан. Импорт необходимо остановить.
+2026-07-13 22:57:01.916 | ERROR    | app.importers.base_importer:run:32 - Импорт остановлен: StandingImporter. Дневной лимит API-Football исчерпан.
+2026-07-13 22:57:01.920 | WARNING  | __main__:main:88 - Работа остановлена раньше времени.

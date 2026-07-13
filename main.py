@@ -10,7 +10,7 @@ from app.importers.fixture_team_statistics_importer import (
 from app.importers.league_importer import LeagueImporter
 from app.importers.league_season_importer import LeagueSeasonImporter
 from app.importers.team_importer import TeamImporter
-
+from app.importers.standing_importer import StandingImporter
 
 IMPORTERS = {
     "leagues": ("Импорт лиг", LeagueImporter),
@@ -21,6 +21,10 @@ IMPORTERS = {
         "Импорт статистики матчей",
         FixtureTeamStatisticsImporter,
     ),
+    "standings": (
+        "Импорт турнирных таблиц",
+        StandingImporter,
+),
 }
 
 
