@@ -5,7 +5,7 @@ from app.importers.fixture_team_statistics_importer import (
 
 
 def main():
-    logger.info("Запуск импорта статистики одного матча...")
+    logger.info("Запуск импорта статистики матчей...")
     FixtureTeamStatisticsImporter().run()
     logger.success("Проверка статистики завершена.")
 

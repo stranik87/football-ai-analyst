@@ -16,10 +16,20 @@ from app.repositories.fixture_team_statistics_repository import (
 class FixtureTeamStatisticsImporter(BaseImporter):
     """
     Импорт статистики команд по матчам.
+
+    Импорт выполняется небольшими пакетами.
+    Каждый матч сохраняется отдельной транзакцией,
+    чтобы при ошибке не потерять уже импортированные данные.
     """
 
     REQUEST_DELAY = 2
     LIMIT = 10
+
+    FINISHED_STATUSES = (
+        "FT",
+        "AET",
+        "PEN",
+    )
 
     def import_data(self):
         api = FixtureStatisticsService()
@@ -30,11 +40,13 @@ class FixtureTeamStatisticsImporter(BaseImporter):
         statistics_count = (
             db.query(
                 FixtureTeamStatistics.fixture_id,
-                func.count(FixtureTeamStatistics.id).label(
-                    "statistics_count"
-                ),
+                func.count(
+                    FixtureTeamStatistics.id
+                ).label("statistics_count"),
             )
-            .group_by(FixtureTeamStatistics.fixture_id)
+            .group_by(
+                FixtureTeamStatistics.fixture_id
+            )
             .subquery()
         )
 
@@ -42,9 +54,14 @@ class FixtureTeamStatisticsImporter(BaseImporter):
             db.query(Fixture)
             .outerjoin(
                 statistics_count,
-                statistics_count.c.fixture_id == Fixture.id,
+                statistics_count.c.fixture_id
+                == Fixture.id,
             )
-            .filter(Fixture.status_short == "FT")
+            .filter(
+                Fixture.status_short.in_(
+                    self.FINISHED_STATUSES
+                )
+            )
             .filter(
                 func.coalesce(
                     statistics_count.c.statistics_count,
@@ -52,49 +69,83 @@ class FixtureTeamStatisticsImporter(BaseImporter):
                 )
                 < 2
             )
-            .order_by(Fixture.kickoff.asc())
+            .order_by(
+                Fixture.kickoff.asc()
+            )
             .limit(self.LIMIT)
             .all()
         )
 
-        added = 0
-        skipped = 0
-        missing_teams = 0
+        total_added = 0
+        total_skipped = 0
+        total_missing_teams = 0
+        completed_fixtures = 0
+        empty_responses = 0
 
         logger.info(
-            f"Найдено завершённых матчей без полной статистики: "
-            f"{len(fixtures)}"
+            "Найдено завершённых матчей "
+            f"без полной статистики: {len(fixtures)}"
         )
 
-        try:
-            for fixture in fixtures:
+        for fixture in fixtures:
+            try:
                 logger.info(
-                    f"Получение статистики матча: "
+                    "Получение статистики матча: "
+                    f"id={fixture.id}, "
                     f"api_id={fixture.api_id}"
                 )
 
-                data = api.get_by_fixture_id(fixture.api_id)
+                data = api.get_by_fixture_id(
+                    fixture.api_id
+                )
 
-                time.sleep(self.REQUEST_DELAY)
+                if (
+                    not data
+                    or not data.get("response")
+                ):
+                    empty_responses += 1
 
-                if not data or not data.get("response"):
                     logger.warning(
-                        f"Статистика не получена: "
+                        "Статистика не получена: "
                         f"api_id={fixture.api_id}"
                     )
+
+                    time.sleep(self.REQUEST_DELAY)
                     continue
 
+                fixture_added = 0
+                fixture_skipped = 0
+                fixture_missing_teams = 0
+
                 for item in data["response"]:
-                    team_api_id = item["team"]["id"]
+                    team_data = item.get("team") or {}
+                    team_api_id = team_data.get("id")
+
+                    if team_api_id is None:
+                        fixture_missing_teams += 1
+
+                        logger.warning(
+                            "В ответе отсутствует ID команды: "
+                            f"fixture_api_id={fixture.api_id}"
+                        )
+                        continue
 
                     team = (
                         db.query(Team)
-                        .filter_by(api_id=team_api_id)
+                        .filter(
+                            Team.api_id == team_api_id
+                        )
                         .first()
                     )
 
                     if not team:
-                        missing_teams += 1
+                        fixture_missing_teams += 1
+
+                        logger.warning(
+                            "Команда не найдена в базе: "
+                            f"team_api_id={team_api_id}, "
+                            f"fixture_api_id={fixture.api_id}"
+                        )
                         continue
 
                     existing = repository.get(
@@ -103,12 +154,18 @@ class FixtureTeamStatisticsImporter(BaseImporter):
                     )
 
                     if existing:
-                        skipped += 1
+                        fixture_skipped += 1
                         continue
 
+                    statistics = (
+                        item.get("statistics") or []
+                    )
+
                     values = {
-                        statistic["type"]: statistic["value"]
-                        for statistic in item["statistics"]
+                        statistic.get("type"):
+                        statistic.get("value")
+                        for statistic in statistics
+                        if statistic.get("type")
                     }
 
                     repository.add(
@@ -116,90 +173,157 @@ class FixtureTeamStatisticsImporter(BaseImporter):
                             fixture_id=fixture.id,
                             team_id=team.id,
                             shots_on_goal=self._to_int(
-                                values.get("Shots on Goal")
+                                values.get(
+                                    "Shots on Goal"
+                                )
                             ),
                             shots_off_goal=self._to_int(
-                                values.get("Shots off Goal")
+                                values.get(
+                                    "Shots off Goal"
+                                )
                             ),
                             total_shots=self._to_int(
-                                values.get("Total Shots")
+                                values.get(
+                                    "Total Shots"
+                                )
                             ),
                             blocked_shots=self._to_int(
-                                values.get("Blocked Shots")
+                                values.get(
+                                    "Blocked Shots"
+                                )
                             ),
                             shots_inside_box=self._to_int(
-                                values.get("Shots insidebox")
+                                values.get(
+                                    "Shots insidebox"
+                                )
                             ),
                             shots_outside_box=self._to_int(
-                                values.get("Shots outsidebox")
+                                values.get(
+                                    "Shots outsidebox"
+                                )
                             ),
                             fouls=self._to_int(
                                 values.get("Fouls")
                             ),
                             corner_kicks=self._to_int(
-                                values.get("Corner Kicks")
+                                values.get(
+                                    "Corner Kicks"
+                                )
                             ),
                             offsides=self._to_int(
                                 values.get("Offsides")
                             ),
                             ball_possession=self._to_float(
-                                values.get("Ball Possession")
+                                values.get(
+                                    "Ball Possession"
+                                )
                             ),
                             yellow_cards=self._to_int(
-                                values.get("Yellow Cards")
+                                values.get(
+                                    "Yellow Cards"
+                                )
                             ),
                             red_cards=self._to_int(
-                                values.get("Red Cards")
+                                values.get(
+                                    "Red Cards"
+                                )
                             ),
                             goalkeeper_saves=self._to_int(
-                                values.get("Goalkeeper Saves")
+                                values.get(
+                                    "Goalkeeper Saves"
+                                )
                             ),
                             total_passes=self._to_int(
-                                values.get("Total passes")
+                                values.get(
+                                    "Total passes"
+                                )
                             ),
                             passes_accurate=self._to_int(
-                                values.get("Passes accurate")
+                                values.get(
+                                    "Passes accurate"
+                                )
                             ),
                             passes_percentage=self._to_float(
-                                values.get("Passes %")
+                                values.get(
+                                    "Passes %"
+                                )
                             ),
                             expected_goals=self._to_float(
-                                values.get("expected_goals")
+                                values.get(
+                                    "expected_goals"
+                                )
                             ),
                             goals_prevented=self._to_float(
-                                values.get("goals_prevented")
+                                values.get(
+                                    "goals_prevented"
+                                )
                             ),
                         )
                     )
 
-                    added += 1
+                    fixture_added += 1
 
-            repository.commit()
+                repository.commit()
 
-            logger.success(
-                f"Добавлено записей статистики: {added}"
-            )
-            logger.info(
-                f"Пропущено записей статистики: {skipped}"
-            )
-            logger.warning(
-                f"Команды не найдены: {missing_teams}"
-            )
+                total_added += fixture_added
+                total_skipped += fixture_skipped
+                total_missing_teams += (
+                    fixture_missing_teams
+                )
+                completed_fixtures += 1
 
-        except Exception:
-            repository.rollback()
-            logger.exception(
-                "Ошибка импорта статистики матчей"
-            )
-            raise
+                logger.success(
+                    "Матч обработан: "
+                    f"api_id={fixture.api_id}, "
+                    f"добавлено={fixture_added}, "
+                    f"пропущено={fixture_skipped}, "
+                    f"команд не найдено="
+                    f"{fixture_missing_teams}"
+                )
+
+                time.sleep(self.REQUEST_DELAY)
+
+            except Exception:
+                repository.rollback()
+
+                logger.exception(
+                    "Ошибка импорта статистики матча: "
+                    f"api_id={fixture.api_id}"
+                )
+
+                # Ошибка передаётся BaseImporter.
+                # При исчерпании API-лимита импорт
+                # корректно остановится, а уже сохранённые
+                # матчи останутся в базе.
+                raise
+
+        logger.success(
+            "Импорт статистики завершён. "
+            f"Обработано матчей: {completed_fixtures}"
+        )
+        logger.info(
+            f"Добавлено записей: {total_added}"
+        )
+        logger.info(
+            f"Пропущено существующих: {total_skipped}"
+        )
+        logger.warning(
+            f"Команды не найдены: {total_missing_teams}"
+        )
+        logger.warning(
+            f"Пустых ответов API: {empty_responses}"
+        )
 
     @staticmethod
     def _to_int(value):
         if value is None:
             return None
 
+        if isinstance(value, str):
+            value = value.replace("%", "").strip()
+
         try:
-            return int(value)
+            return int(float(value))
         except (TypeError, ValueError):
             return None
 
