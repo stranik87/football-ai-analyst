@@ -18,6 +18,11 @@ class FootballAPIClient:
     BASE_URL = "https://v3.football.api-sports.io"
 
     MAX_RETRIES = 3
+
+    # API разрешает 10 запросов в минуту.
+    # При временном лимите лучше подождать целую минуту.
+    RATE_LIMIT_DELAY = 61
+
     BASE_RETRY_DELAY = 5
     MAX_RETRY_DELAY = 60
 
@@ -50,8 +55,10 @@ class FootballAPIClient:
                     timeout=30,
                 )
 
+                # Вариант №1:
+                # API вернул настоящий HTTP-статус 429.
                 if response.status_code == 429:
-                    self._handle_rate_limit(
+                    self._handle_http_rate_limit(
                         response=response,
                         attempt=attempt,
                     )
@@ -63,10 +70,33 @@ class FootballAPIClient:
                 api_errors = data.get("errors")
 
                 if api_errors:
+                    # Дневной лимит — импорт нужно полностью остановить.
                     if self._is_daily_limit_error(api_errors):
                         raise APIDailyLimitError(
                             "Дневной лимит API-Football исчерпан"
                         )
+
+                    # Вариант №2:
+                    # API вернул HTTP 200, но внутри JSON сообщил
+                    # о лимите запросов в минуту.
+                    if self._is_temporary_rate_limit_error(
+                        api_errors
+                    ):
+                        if attempt >= self.MAX_RETRIES:
+                            logger.error(
+                                "Временный лимит API не снят "
+                                "после всех попыток."
+                            )
+                            return None
+
+                        logger.warning(
+                            "Достигнут лимит запросов в минуту. "
+                            f"Повтор через "
+                            f"{self.RATE_LIMIT_DELAY} сек."
+                        )
+
+                        time.sleep(self.RATE_LIMIT_DELAY)
+                        continue
 
                     logger.error(
                         f"API RESPONSE ERROR: {api_errors}"
@@ -112,7 +142,7 @@ class FootballAPIClient:
 
         return None
 
-    def _handle_rate_limit(
+    def _handle_http_rate_limit(
         self,
         response: requests.Response,
         attempt: int,
@@ -127,17 +157,19 @@ class FootballAPIClient:
         retry_after = response.headers.get("Retry-After")
 
         try:
-            delay = int(retry_after) if retry_after else 0
+            delay = (
+                int(retry_after)
+                if retry_after
+                else self.RATE_LIMIT_DELAY
+            )
         except (TypeError, ValueError):
-            delay = 0
+            delay = self.RATE_LIMIT_DELAY
 
-        if delay <= 0:
-            delay = self.BASE_RETRY_DELAY * attempt
-
-        delay = min(delay, self.MAX_RETRY_DELAY)
+        delay = max(delay, self.RATE_LIMIT_DELAY)
 
         logger.warning(
-            f"Временный лимит API. Повтор через {delay} сек."
+            "Временный лимит API. "
+            f"Повтор через {delay} сек."
         )
 
         time.sleep(delay)
@@ -165,9 +197,31 @@ class FootballAPIClient:
             "requests limit for the day",
             "reached the request limit",
             "daily request limit",
+            "daily limit",
         )
 
         return any(
             message in error_text
             for message in daily_limit_messages
+        )
+
+    @staticmethod
+    def _is_temporary_rate_limit_error(
+        errors: Any,
+    ) -> bool:
+        if not errors:
+            return False
+
+        error_text = str(errors).lower()
+
+        temporary_limit_messages = (
+            "too many requests",
+            "requests per minute",
+            "rate limit",
+            "ratelimit",
+        )
+
+        return any(
+            message in error_text
+            for message in temporary_limit_messages
         )
