@@ -1627,3 +1627,112 @@ sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint fail
 2026-07-18 21:25:25.177 | INFO     | app.importers.player_importer:import_data:167 - Пропущено записей: 0
 2026-07-18 21:25:25.281 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: PlayerImporter
 2026-07-18 21:25:25.282 | SUCCESS  | __main__:main:11 - Импорт игроков завершён.
+2026-07-18 21:30:48.955 | INFO     | __main__:main:61 - Запуск импорта игроков...
+2026-07-18 21:30:48.955 | INFO     | __main__:main:69 - Выбрана лига: api_id=39, лимит команд=2
+2026-07-18 21:30:48.960 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: PlayerImporter
+2026-07-18 21:30:49.019 | INFO     | app.importers.player_importer:import_data:62 - Найдено команд для импорта игроков: 2
+2026-07-18 21:30:49.020 | INFO     | app.importers.player_importer:import_data:65 - Сезон: 2024
+2026-07-18 21:30:49.020 | INFO     | app.importers.player_importer:import_data:68 - [1/2] Импорт игроков команды: Manchester United, api_id=33
+2026-07-18 21:30:49.028 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:30:49.745 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 1/4
+2026-07-18 21:30:56.754 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:30:56.920 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 2/4
+2026-07-18 21:31:03.922 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:31:04.080 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 3/4
+2026-07-18 21:31:04.080 | WARNING  | app.importers.player_importer:import_data:188 - Manchester United: импорт остановлен на странице 3. Бесплатный тариф API не разрешает запрашивать страницу 4 и выше.
+2026-07-18 21:31:04.080 | SUCCESS  | app.importers.player_importer:import_data:199 - Manchester United: добавлено=0, обновлено=60, пропущено=0
+2026-07-18 21:31:04.082 | INFO     | app.importers.player_importer:import_data:206 - Ожидание 7 секунд перед следующей командой...
+2026-07-18 21:31:11.083 | INFO     | app.importers.player_importer:import_data:68 - [2/2] Импорт игроков команды: Newcastle, api_id=34
+2026-07-18 21:31:11.085 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:31:11.266 | INFO     | app.importers.player_importer:import_data:179 - Newcastle: обработана страница 1/4
+2026-07-18 21:31:18.269 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:31:18.490 | INFO     | app.importers.player_importer:import_data:179 - Newcastle: обработана страница 2/4
+2026-07-18 21:31:25.494 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:31:25.684 | INFO     | app.importers.player_importer:import_data:179 - Newcastle: обработана страница 3/4
+2026-07-18 21:31:25.685 | WARNING  | app.importers.player_importer:import_data:188 - Newcastle: импорт остановлен на странице 3. Бесплатный тариф API не разрешает запрашивать страницу 4 и выше.
+2026-07-18 21:31:25.685 | SUCCESS  | app.importers.player_importer:import_data:199 - Newcastle: добавлено=60, обновлено=0, пропущено=0
+2026-07-18 21:31:25.686 | SUCCESS  | app.importers.player_importer:import_data:212 - Всего добавлено игроков: 60
+2026-07-18 21:31:25.687 | INFO     | app.importers.player_importer:import_data:215 - Всего обновлено игроков: 60
+2026-07-18 21:31:25.687 | INFO     | app.importers.player_importer:import_data:218 - Всего пропущено записей: 0
+2026-07-18 21:31:25.750 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: PlayerImporter
+2026-07-18 21:31:25.750 | SUCCESS  | __main__:main:84 - Импорт игроков завершён.
+2026-07-18 21:31:33.285 | INFO     | __main__:main:61 - Запуск импорта игроков...
+2026-07-18 21:31:33.285 | INFO     | __main__:main:64 - Выбрана конкретная команда: api_id=33
+2026-07-18 21:31:33.288 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: PlayerImporter
+2026-07-18 21:31:33.326 | INFO     | app.importers.player_importer:import_data:62 - Найдено команд для импорта игроков: 1
+2026-07-18 21:31:33.327 | INFO     | app.importers.player_importer:import_data:65 - Сезон: 2024
+2026-07-18 21:31:33.327 | INFO     | app.importers.player_importer:import_data:68 - [1/1] Импорт игроков команды: Manchester United, api_id=33
+2026-07-18 21:31:33.328 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:31:33.925 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 1/4
+2026-07-18 21:31:40.932 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:31:41.075 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 2/4
+2026-07-18 21:31:48.078 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:31:48.245 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 3/4
+2026-07-18 21:31:48.251 | WARNING  | app.importers.player_importer:import_data:188 - Manchester United: импорт остановлен на странице 3. Бесплатный тариф API не разрешает запрашивать страницу 4 и выше.
+2026-07-18 21:31:48.252 | SUCCESS  | app.importers.player_importer:import_data:199 - Manchester United: добавлено=0, обновлено=60, пропущено=0
+2026-07-18 21:31:48.253 | SUCCESS  | app.importers.player_importer:import_data:212 - Всего добавлено игроков: 0
+2026-07-18 21:31:48.254 | INFO     | app.importers.player_importer:import_data:215 - Всего обновлено игроков: 60
+2026-07-18 21:31:48.255 | INFO     | app.importers.player_importer:import_data:218 - Всего пропущено записей: 0
+2026-07-18 21:31:48.263 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: PlayerImporter
+2026-07-18 21:31:48.266 | SUCCESS  | __main__:main:84 - Импорт игроков завершён.
+2026-07-18 21:31:53.016 | INFO     | __main__:main:61 - Запуск импорта игроков...
+2026-07-18 21:31:53.016 | INFO     | __main__:main:69 - Выбрана лига: api_id=39, лимит команд=2
+2026-07-18 21:31:53.022 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: PlayerImporter
+2026-07-18 21:31:53.097 | INFO     | app.importers.player_importer:import_data:62 - Найдено команд для импорта игроков: 2
+2026-07-18 21:31:53.098 | INFO     | app.importers.player_importer:import_data:65 - Сезон: 2024
+2026-07-18 21:31:53.098 | INFO     | app.importers.player_importer:import_data:68 - [1/2] Импорт игроков команды: Manchester United, api_id=33
+2026-07-18 21:31:53.099 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:31:53.639 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 1/4
+2026-07-18 21:32:00.641 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:32:00.858 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 2/4
+2026-07-18 21:32:07.860 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:32:08.020 | INFO     | app.importers.player_importer:import_data:179 - Manchester United: обработана страница 3/4
+2026-07-18 21:32:08.020 | WARNING  | app.importers.player_importer:import_data:188 - Manchester United: импорт остановлен на странице 3. Бесплатный тариф API не разрешает запрашивать страницу 4 и выше.
+2026-07-18 21:32:08.020 | SUCCESS  | app.importers.player_importer:import_data:199 - Manchester United: добавлено=0, обновлено=60, пропущено=0
+2026-07-18 21:32:08.022 | INFO     | app.importers.player_importer:import_data:206 - Ожидание 7 секунд перед следующей командой...
+2026-07-18 21:32:15.024 | INFO     | app.importers.player_importer:import_data:68 - [2/2] Импорт игроков команды: Newcastle, api_id=34
+2026-07-18 21:32:15.024 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:32:15.172 | INFO     | app.importers.player_importer:import_data:179 - Newcastle: обработана страница 1/4
+2026-07-18 21:32:22.173 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:32:22.320 | INFO     | app.importers.player_importer:import_data:179 - Newcastle: обработана страница 2/4
+2026-07-18 21:32:29.323 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:32:29.480 | INFO     | app.importers.player_importer:import_data:179 - Newcastle: обработана страница 3/4
+2026-07-18 21:32:29.480 | WARNING  | app.importers.player_importer:import_data:188 - Newcastle: импорт остановлен на странице 3. Бесплатный тариф API не разрешает запрашивать страницу 4 и выше.
+2026-07-18 21:32:29.480 | SUCCESS  | app.importers.player_importer:import_data:199 - Newcastle: добавлено=0, обновлено=60, пропущено=0
+2026-07-18 21:32:29.482 | SUCCESS  | app.importers.player_importer:import_data:212 - Всего добавлено игроков: 0
+2026-07-18 21:32:29.482 | INFO     | app.importers.player_importer:import_data:215 - Всего обновлено игроков: 120
+2026-07-18 21:32:29.483 | INFO     | app.importers.player_importer:import_data:218 - Всего пропущено записей: 0
+2026-07-18 21:32:29.489 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: PlayerImporter
+2026-07-18 21:32:29.490 | SUCCESS  | __main__:main:84 - Импорт игроков завершён.
+2026-07-18 21:53:10.561 | INFO     | __main__:main:82 - Запуск импорта игроков...
+2026-07-18 21:53:10.561 | INFO     | __main__:main:90 - Выбрана лига: api_id=39, лимит команд=4
+2026-07-18 21:53:10.561 | INFO     | __main__:main:97 - Уже загруженные команды будут пропущены.
+2026-07-18 21:53:10.567 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: PlayerImporter
+2026-07-18 21:53:10.606 | INFO     | app.importers.player_importer:import_data:69 - Найдено команд для обработки: 4
+2026-07-18 21:53:10.607 | INFO     | app.importers.player_importer:import_data:72 - Сезон: 2024
+2026-07-18 21:53:10.608 | INFO     | app.importers.player_importer:import_data:73 - Пропуск уже загруженных команд: да
+2026-07-18 21:53:10.634 | INFO     | app.importers.player_importer:import_data:93 - [1/4] Manchester United пропущена: в базе уже есть 60 игроков.
+2026-07-18 21:53:10.635 | INFO     | app.importers.player_importer:import_data:93 - [2/4] Newcastle пропущена: в базе уже есть 60 игроков.
+2026-07-18 21:53:10.636 | INFO     | app.importers.player_importer:import_data:102 - [3/4] Импорт игроков команды: Bournemouth, api_id=35
+2026-07-18 21:53:10.637 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:53:11.341 | INFO     | app.importers.player_importer:import_data:247 - Bournemouth: обработана страница 1/3
+2026-07-18 21:53:18.348 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:53:18.541 | INFO     | app.importers.player_importer:import_data:247 - Bournemouth: обработана страница 2/3
+2026-07-18 21:53:25.551 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:53:25.731 | INFO     | app.importers.player_importer:import_data:247 - Bournemouth: обработана страница 3/3
+2026-07-18 21:53:25.731 | SUCCESS  | app.importers.player_importer:import_data:268 - Bournemouth: добавлено=50, обновлено=1, пропущено=0
+2026-07-18 21:53:25.731 | INFO     | app.importers.player_importer:import_data:276 - Ожидание 7 секунд перед следующей командой...
+2026-07-18 21:53:32.739 | INFO     | app.importers.player_importer:import_data:102 - [4/4] Импорт игроков команды: Fulham, api_id=36
+2026-07-18 21:53:32.741 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:53:32.931 | INFO     | app.importers.player_importer:import_data:247 - Fulham: обработана страница 1/3
+2026-07-18 21:53:39.941 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:53:40.161 | INFO     | app.importers.player_importer:import_data:247 - Fulham: обработана страница 2/3
+2026-07-18 21:53:47.169 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/players | попытка 1/3
+2026-07-18 21:53:47.341 | INFO     | app.importers.player_importer:import_data:247 - Fulham: обработана страница 3/3
+2026-07-18 21:53:47.341 | SUCCESS  | app.importers.player_importer:import_data:268 - Fulham: добавлено=46, обновлено=0, пропущено=0
+2026-07-18 21:53:47.341 | SUCCESS  | app.importers.player_importer:import_data:283 - Всего добавлено игроков: 96
+2026-07-18 21:53:47.347 | INFO     | app.importers.player_importer:import_data:287 - Всего обновлено игроков: 1
+2026-07-18 21:53:47.348 | INFO     | app.importers.player_importer:import_data:291 - Всего пропущено записей: 0
+2026-07-18 21:53:47.350 | INFO     | app.importers.player_importer:import_data:295 - Пропущено уже загруженных команд: 2
+2026-07-18 21:53:47.437 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: PlayerImporter
+2026-07-18 21:53:47.438 | SUCCESS  | __main__:main:113 - Импорт игроков завершён.
