@@ -66,4 +66,9 @@ class Team(Base):
     venue: Mapped["Venue"] = relationship(
     "Venue",
     back_populates="teams",
-)
+    )
+    players: Mapped[list["Player"]] = relationship(
+        "Player",
+        back_populates="team",
+    )
+    
