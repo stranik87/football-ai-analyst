@@ -21,8 +21,8 @@ class PlayerImporter(BaseImporter):
     REQUEST_DELAY = 7
     MAX_PAGE = 3
 
-    # Если у команды уже есть минимум 40 игроков,
-    # команда считается импортированной.
+    # Команда считается загруженной,
+    # если в базе уже есть минимум 40 игроков.
     MIN_EXISTING_PLAYERS = 40
 
     def __init__(
@@ -66,12 +66,21 @@ class PlayerImporter(BaseImporter):
 
             return
 
+        # Загружаем всех существующих игроков в память.
+        # Также сюда будут добавляться новые игроки
+        # во время текущего запуска.
+        players_cache = repository.get_all_by_api_id()
+
         logger.info(
             f"Найдено команд для обработки: {len(teams)}"
         )
         logger.info(f"Сезон: {self.season}")
         logger.info(
-            f"Пропуск уже загруженных команд: "
+            f"Игроков уже находится в базе: "
+            f"{len(players_cache)}"
+        )
+        logger.info(
+            "Пропуск уже загруженных команд: "
             f"{'да' if self.skip_existing else 'нет'}"
         )
 
@@ -210,11 +219,18 @@ class PlayerImporter(BaseImporter):
                         ),
                     }
 
-                    existing_player = (
-                        repository.get_by_api_id(api_id)
+                    # Сначала ищем игрока в кэше.
+                    # Кэш содержит игроков из базы
+                    # и игроков, добавленных в текущем запуске.
+                    existing_player = players_cache.get(
+                        api_id
                     )
 
                     if existing_player:
+                        previous_team_id = (
+                            existing_player.team_id
+                        )
+
                         self._update_player(
                             existing_player,
                             values,
@@ -222,13 +238,29 @@ class PlayerImporter(BaseImporter):
 
                         team_updated += 1
                         total_updated += 1
-                    else:
-                        repository.add(
-                            Player(
-                                api_id=api_id,
-                                **values,
+
+                        if (
+                            previous_team_id is not None
+                            and previous_team_id
+                            != team.id
+                        ):
+                            logger.debug(
+                                f"Игрок api_id={api_id} "
+                                f"переведён из team_id="
+                                f"{previous_team_id} "
+                                f"в team_id={team.id}."
                             )
+                    else:
+                        new_player = Player(
+                            api_id=api_id,
+                            **values,
                         )
+
+                        repository.add(new_player)
+
+                        # Сразу добавляем нового игрока
+                        # в кэш, даже до commit.
+                        players_cache[api_id] = new_player
 
                         team_added += 1
                         total_added += 1
@@ -295,6 +327,10 @@ class PlayerImporter(BaseImporter):
         logger.info(
             f"Пропущено уже загруженных команд: "
             f"{skipped_teams}"
+        )
+        logger.info(
+            f"Всего игроков в кэше после импорта: "
+            f"{len(players_cache)}"
         )
 
     def _get_teams(self) -> list[Team]:

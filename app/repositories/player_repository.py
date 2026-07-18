@@ -33,10 +33,6 @@ class PlayerRepository:
         self,
         team_id: int,
     ) -> int:
-        """
-        Возвращает количество игроков команды в базе.
-        """
-
         return (
             self.db.query(Player)
             .filter(Player.team_id == team_id)
@@ -45,6 +41,25 @@ class PlayerRepository:
 
     def get_all(self) -> list[Player]:
         return self.db.query(Player).all()
+
+    def get_all_by_api_id(self) -> dict[int, Player]:
+        """
+        Загружает игроков из базы в словарь:
+
+        {
+            api_id: Player
+        }
+
+        Это исключает повторные INSERT одного игрока
+        во время одного запуска импортёра.
+        """
+
+        players = self.db.query(Player).all()
+
+        return {
+            player.api_id: player
+            for player in players
+        }
 
     def add(
         self,
