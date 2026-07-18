@@ -2272,3 +2272,104 @@ sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed
 2026-07-18 22:14:59.857 | INFO     | app.importers.player_importer:import_data:331 - Всего игроков в кэше после импорта: 1056
 2026-07-18 22:14:59.944 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: PlayerImporter
 2026-07-18 22:14:59.944 | SUCCESS  | __main__:main:113 - Импорт игроков завершён.
+2026-07-18 22:32:07.931 | INFO     | __main__:main:6 - Запуск отдельного импорта матчей...
+2026-07-18 22:32:07.931 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: FixtureImporter
+2026-07-18 22:32:07.968 | INFO     | app.importers.fixture_importer:import_data:65 - Найдено сезонов для импорта матчей: 5
+2026-07-18 22:32:07.971 | INFO     | app.importers.fixture_importer:import_data:85 - [1/5] Импорт матчей: Premier League, league=39, season=2024
+2026-07-18 22:32:07.972 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures | попытка 1/3
+2026-07-18 22:32:08.731 | INFO     | app.importers.fixture_importer:_sleep_before_next_request:370 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:32:10.741 | INFO     | app.importers.fixture_importer:import_data:85 - [2/5] Импорт матчей: Ligue 1, league=61, season=2024
+2026-07-18 22:32:10.741 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures | попытка 1/3
+2026-07-18 22:32:11.011 | INFO     | app.importers.fixture_importer:_sleep_before_next_request:370 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:32:13.021 | INFO     | app.importers.fixture_importer:import_data:85 - [3/5] Импорт матчей: Bundesliga, league=78, season=2024
+2026-07-18 22:32:13.021 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures | попытка 1/3
+2026-07-18 22:32:13.311 | INFO     | app.importers.fixture_importer:_sleep_before_next_request:370 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:32:15.316 | INFO     | app.importers.fixture_importer:import_data:85 - [4/5] Импорт матчей: Serie A, league=135, season=2024
+2026-07-18 22:32:15.318 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures | попытка 1/3
+2026-07-18 22:32:15.621 | INFO     | app.importers.fixture_importer:_sleep_before_next_request:370 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:32:17.631 | INFO     | app.importers.fixture_importer:import_data:85 - [5/5] Импорт матчей: La Liga, league=140, season=2024
+2026-07-18 22:32:17.631 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures | попытка 1/3
+2026-07-18 22:32:17.951 | SUCCESS  | app.importers.fixture_importer:import_data:321 - Добавлено матчей: 0
+2026-07-18 22:32:17.951 | INFO     | app.importers.fixture_importer:import_data:324 - Пропущено существующих матчей: 1756
+2026-07-18 22:32:17.951 | WARNING  | app.importers.fixture_importer:import_data:327 - Пропущено из-за отсутствующих команд: 0
+2026-07-18 22:32:17.955 | WARNING  | app.importers.fixture_importer:import_data:331 - Некорректных записей: 0
+2026-07-18 22:32:17.956 | WARNING  | app.importers.fixture_importer:import_data:334 - Пустых ответов API: 0
+2026-07-18 22:32:17.958 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: FixtureImporter
+2026-07-18 22:32:17.959 | SUCCESS  | __main__:main:8 - Импорт матчей завершён.
+2026-07-18 22:40:58.906 | INFO     | __main__:main:6 - Запуск импорта сезонов лиг...
+2026-07-18 22:40:58.906 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: LeagueSeasonImporter
+2026-07-18 22:40:58.911 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/leagues | попытка 1/3
+2026-07-18 22:40:59.737 | INFO     | app.importers.league_season_importer:import_data:49 - Лиг загружено в кэш: 1230
+2026-07-18 22:41:02.762 | WARNING  | app.importers.league_season_importer:import_data:101 - Пропущен сезон с некорректными датами: league_api_id=663, season=2026, start=None, end=None
+2026-07-18 22:41:03.961 | WARNING  | app.importers.league_season_importer:import_data:101 - Пропущен сезон с некорректными датами: league_api_id=1167, season=2026, start=None, end=None
+2026-07-18 22:41:04.031 | SUCCESS  | app.importers.league_season_importer:import_data:150 - Добавлено сезонов: 44
+2026-07-18 22:41:04.032 | INFO     | app.importers.league_season_importer:import_data:153 - Обновлено сезонов: 96
+2026-07-18 22:41:04.032 | INFO     | app.importers.league_season_importer:import_data:156 - Пропущено без изменений: 8283
+2026-07-18 22:41:04.033 | WARNING  | app.importers.league_season_importer:import_data:159 - Не найдены локальные лиги: 5
+2026-07-18 22:41:04.033 | WARNING  | app.importers.league_season_importer:import_data:163 - Некорректных записей: 2
+2026-07-18 22:41:04.131 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: LeagueSeasonImporter
+2026-07-18 22:41:04.131 | SUCCESS  | __main__:main:11 - Импорт сезонов лиг завершён.
+2026-07-18 22:49:09.151 | INFO     | __main__:main:6 - Запуск импорта турнирных таблиц...
+2026-07-18 22:49:09.151 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: StandingImporter
+2026-07-18 22:49:09.187 | INFO     | app.importers.standing_importer:import_data:74 - Найдено сезонов для импорта таблиц: 5
+2026-07-18 22:49:09.188 | INFO     | app.importers.standing_importer:import_data:79 - Команд загружено в кэш: 98
+2026-07-18 22:49:09.188 | INFO     | app.importers.standing_importer:import_data:91 - [1/5] Импорт турнирной таблицы: league=Premier League, league_api_id=39, season=2024
+2026-07-18 22:49:09.189 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:49:09.815 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Premier League, season=2024, добавлено=20, обновлено=0, без изменений=0
+2026-07-18 22:49:09.816 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:49:11.817 | INFO     | app.importers.standing_importer:import_data:91 - [2/5] Импорт турнирной таблицы: league=Ligue 1, league_api_id=61, season=2024
+2026-07-18 22:49:11.817 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:49:11.971 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Ligue 1, season=2024, добавлено=18, обновлено=0, без изменений=0
+2026-07-18 22:49:11.971 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:49:13.972 | INFO     | app.importers.standing_importer:import_data:91 - [3/5] Импорт турнирной таблицы: league=Bundesliga, league_api_id=78, season=2024
+2026-07-18 22:49:13.973 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:49:14.134 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Bundesliga, season=2024, добавлено=18, обновлено=0, без изменений=0
+2026-07-18 22:49:14.136 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:49:16.137 | INFO     | app.importers.standing_importer:import_data:91 - [4/5] Импорт турнирной таблицы: league=Serie A, league_api_id=135, season=2024
+2026-07-18 22:49:16.137 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:49:16.301 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Serie A, season=2024, добавлено=20, обновлено=0, без изменений=0
+2026-07-18 22:49:16.301 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:49:18.311 | INFO     | app.importers.standing_importer:import_data:91 - [5/5] Импорт турнирной таблицы: league=La Liga, league_api_id=140, season=2024
+2026-07-18 22:49:18.312 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:49:18.470 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=La Liga, season=2024, добавлено=20, обновлено=0, без изменений=0
+2026-07-18 22:49:18.471 | SUCCESS  | app.importers.standing_importer:import_data:224 - Импорт турнирных таблиц завершён.
+2026-07-18 22:49:18.472 | SUCCESS  | app.importers.standing_importer:import_data:227 - Добавлено записей таблицы: 96
+2026-07-18 22:49:18.472 | INFO     | app.importers.standing_importer:import_data:230 - Обновлено записей таблицы: 0
+2026-07-18 22:49:18.473 | INFO     | app.importers.standing_importer:import_data:233 - Пропущено без изменений: 0
+2026-07-18 22:49:18.473 | WARNING  | app.importers.standing_importer:import_data:236 - Команды не найдены: 0
+2026-07-18 22:49:18.474 | WARNING  | app.importers.standing_importer:import_data:239 - Некорректных записей: 0
+2026-07-18 22:49:18.475 | WARNING  | app.importers.standing_importer:import_data:242 - Пустых ответов API: 0
+2026-07-18 22:49:18.550 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: StandingImporter
+2026-07-18 22:49:18.551 | SUCCESS  | __main__:main:11 - Импорт турнирных таблиц завершён.
+2026-07-18 22:50:17.701 | INFO     | __main__:main:6 - Запуск импорта турнирных таблиц...
+2026-07-18 22:50:17.701 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: StandingImporter
+2026-07-18 22:50:17.744 | INFO     | app.importers.standing_importer:import_data:74 - Найдено сезонов для импорта таблиц: 5
+2026-07-18 22:50:17.745 | INFO     | app.importers.standing_importer:import_data:79 - Команд загружено в кэш: 98
+2026-07-18 22:50:17.746 | INFO     | app.importers.standing_importer:import_data:91 - [1/5] Импорт турнирной таблицы: league=Premier League, league_api_id=39, season=2024
+2026-07-18 22:50:17.746 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:50:18.266 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Premier League, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-18 22:50:18.271 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:50:20.273 | INFO     | app.importers.standing_importer:import_data:91 - [2/5] Импорт турнирной таблицы: league=Ligue 1, league_api_id=61, season=2024
+2026-07-18 22:50:20.274 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:50:20.461 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Ligue 1, season=2024, добавлено=0, обновлено=0, без изменений=18
+2026-07-18 22:50:20.461 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:50:22.469 | INFO     | app.importers.standing_importer:import_data:91 - [3/5] Импорт турнирной таблицы: league=Bundesliga, league_api_id=78, season=2024
+2026-07-18 22:50:22.471 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:50:22.659 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Bundesliga, season=2024, добавлено=0, обновлено=0, без изменений=18
+2026-07-18 22:50:22.659 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:50:24.661 | INFO     | app.importers.standing_importer:import_data:91 - [4/5] Импорт турнирной таблицы: league=Serie A, league_api_id=135, season=2024
+2026-07-18 22:50:24.661 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:50:24.881 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Serie A, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-18 22:50:24.881 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-18 22:50:26.884 | INFO     | app.importers.standing_importer:import_data:91 - [5/5] Импорт турнирной таблицы: league=La Liga, league_api_id=140, season=2024
+2026-07-18 22:50:26.884 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-18 22:50:27.030 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=La Liga, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-18 22:50:27.031 | SUCCESS  | app.importers.standing_importer:import_data:224 - Импорт турнирных таблиц завершён.
+2026-07-18 22:50:27.032 | SUCCESS  | app.importers.standing_importer:import_data:227 - Добавлено записей таблицы: 0
+2026-07-18 22:50:27.032 | INFO     | app.importers.standing_importer:import_data:230 - Обновлено записей таблицы: 0
+2026-07-18 22:50:27.032 | INFO     | app.importers.standing_importer:import_data:233 - Пропущено без изменений: 96
+2026-07-18 22:50:27.033 | WARNING  | app.importers.standing_importer:import_data:236 - Команды не найдены: 0
+2026-07-18 22:50:27.033 | WARNING  | app.importers.standing_importer:import_data:239 - Некорректных записей: 0
+2026-07-18 22:50:27.034 | WARNING  | app.importers.standing_importer:import_data:242 - Пустых ответов API: 0
+2026-07-18 22:50:27.036 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: StandingImporter
+2026-07-18 22:50:27.037 | SUCCESS  | __main__:main:11 - Импорт турнирных таблиц завершён.

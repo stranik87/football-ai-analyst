@@ -1,0 +1,1734 @@
+===== PROJECT TREE =====
+app/__init__.py
+app/ai_agent/__init__.py
+app/analytics/__init__.py
+app/analytics/team_comparison_analyzer.py
+app/analytics/team_form_analyzer.py
+app/analytics/team_statistics_analyzer.py
+app/api/__init__.py
+app/api/client.py
+app/api/endpoints.py
+app/api/fixture_statistics.py
+app/api/fixtures.py
+app/api/league_seasons.py
+app/api/leagues.py
+app/api/players.py
+app/api/standings.py
+app/api/teams.py
+app/bot/__init__.py
+app/core/__init__.py
+app/core/logger.py
+app/dashboard/__init__.py
+app/database/__init__.py
+app/database/base.py
+app/database/database.py
+app/database/init_db.py
+app/database/session.py
+app/importers/__init__.py
+app/importers/base_importer.py
+app/importers/fixture_importer.py
+app/importers/fixture_team_statistics_importer.py
+app/importers/league_importer.py
+app/importers/league_season_importer.py
+app/importers/player_importer.py
+app/importers/standing_importer.py
+app/importers/team_importer.py
+app/ml/__init__.py
+app/models/__init__.py
+app/models/fixture.py
+app/models/fixture_team_statistics.py
+app/models/league.py
+app/models/league_season.py
+app/models/player.py
+app/models/standing.py
+app/models/team.py
+app/models/venue.py
+app/repositories/__init__.py
+app/repositories/fixture_repository.py
+app/repositories/fixture_team_statistics_repository.py
+app/repositories/league_repository.py
+app/repositories/league_season_repository.py
+app/repositories/player_repository.py
+app/repositories/standing_repository.py
+app/repositories/team_repository.py
+app/repositories/venue_repository.py
+app/scheduler/__init__.py
+app/services/__init__.py
+app/services/league_service.py
+app/utils/__init__.py
+scripts/analyze_team_form.py
+scripts/analyze_team_statistics.py
+scripts/compare_teams.py
+scripts/import_fixture_statistics.py
+scripts/import_fixtures.py
+scripts/import_players.py
+scripts/test_fixture_api.py
+scripts/test_fixture_statistics_api.py
+
+===== BASE IMPORTER =====
+from abc import ABC, abstractmethod
+
+from app.api.client import APIDailyLimitError, FootballAPIClient
+from app.core.logger import logger
+from app.database.database import SessionLocal
+
+
+class BaseImporter(ABC):
+    """
+    Базовый класс для всех импортёров.
+    """
+
+    def __init__(self):
+        self.client = FootballAPIClient()
+        self.session = SessionLocal()
+
+    def run(self) -> bool:
+        importer_name = self.__class__.__name__
+
+        logger.info(f"Запуск импортёра: {importer_name}")
+
+        try:
+            self.import_data()
+            self.session.commit()
+
+            logger.success(f"Импорт завершён: {importer_name}")
+            return True
+
+        except APIDailyLimitError:
+            self.session.rollback()
+
+            logger.error(
+                f"Импорт остановлен: {importer_name}. "
+                "Дневной лимит API-Football исчерпан."
+            )
+
+            return False
+
+        except Exception:
+            self.session.rollback()
+
+            logger.exception(
+                f"Ошибка работы импортёра: {importer_name}"
+            )
+
+            raise
+
+        finally:
+            self.session.close()
+
+    @abstractmethod
+    def import_data(self) -> None:
+        """
+        Выполнить импорт данных.
+        """
+        raise NotImplementedError
+===== PLAYER IMPORTER =====
+import time
+from datetime import date
+
+from app.api.players import PlayerService
+from app.core.logger import logger
+from app.importers.base_importer import BaseImporter
+from app.models.player import Player
+from app.models.team import Team
+from app.repositories.player_repository import PlayerRepository
+
+
+class PlayerImporter(BaseImporter):
+    """
+    Импорт футболистов команд из API-Football.
+    """
+
+    DEFAULT_SEASON = 2024
+    DEFAULT_LEAGUE_API_ID = 39
+    DEFAULT_TEAM_LIMIT = 1
+
+    REQUEST_DELAY = 7
+    MAX_PAGE = 3
+
+    # Команда считается загруженной,
+    # если в базе уже есть минимум 40 игроков.
+    MIN_EXISTING_PLAYERS = 40
+
+    def __init__(
+        self,
+        team_api_id: int | None = None,
+        league_api_id: int = DEFAULT_LEAGUE_API_ID,
+        season: int = DEFAULT_SEASON,
+        team_limit: int = DEFAULT_TEAM_LIMIT,
+        skip_existing: bool = False,
+    ) -> None:
+        super().__init__()
+
+        self.team_api_id = team_api_id
+        self.league_api_id = league_api_id
+        self.season = season
+        self.team_limit = team_limit
+        self.skip_existing = skip_existing
+
+    def import_data(self) -> None:
+        api = PlayerService()
+        repository = PlayerRepository(self.session)
+
+        total_added = 0
+        total_updated = 0
+        total_skipped = 0
+        skipped_teams = 0
+
+        teams = self._get_teams()
+
+        if not teams:
+            if self.team_api_id is not None:
+                logger.warning(
+                    f"Команда с API ID {self.team_api_id} "
+                    "не найдена в локальной базе."
+                )
+            else:
+                logger.warning(
+                    f"Не найдены команды лиги "
+                    f"api_id={self.league_api_id}."
+                )
+
+            return
+
+        # Загружаем всех существующих игроков в память.
+        # Также сюда будут добавляться новые игроки
+        # во время текущего запуска.
+        players_cache = repository.get_all_by_api_id()
+
+        logger.info(
+            f"Найдено команд для обработки: {len(teams)}"
+        )
+        logger.info(f"Сезон: {self.season}")
+        logger.info(
+            f"Игроков уже находится в базе: "
+            f"{len(players_cache)}"
+        )
+        logger.info(
+            "Пропуск уже загруженных команд: "
+            f"{'да' if self.skip_existing else 'нет'}"
+        )
+
+        for team_number, team in enumerate(
+            teams,
+            start=1,
+        ):
+            existing_count = repository.count_by_team_id(
+                team.id
+            )
+
+            if (
+                self.skip_existing
+                and existing_count
+                >= self.MIN_EXISTING_PLAYERS
+            ):
+                skipped_teams += 1
+
+                logger.info(
+                    f"[{team_number}/{len(teams)}] "
+                    f"{team.name} пропущена: "
+                    f"в базе уже есть "
+                    f"{existing_count} игроков."
+                )
+
+                continue
+
+            logger.info(
+                f"[{team_number}/{len(teams)}] "
+                f"Импорт игроков команды: "
+                f"{team.name}, api_id={team.api_id}"
+            )
+
+            team_added = 0
+            team_updated = 0
+            team_skipped = 0
+
+            page = 1
+
+            while True:
+                data = api.get_players(
+                    team=team.api_id,
+                    season=self.season,
+                    page=page,
+                )
+
+                if not data:
+                    logger.warning(
+                        f"Нет ответа API для команды "
+                        f"{team.name}."
+                    )
+                    break
+
+                response = data.get("response") or []
+
+                if not response:
+                    logger.info(
+                        f"Для команды {team.name} "
+                        f"на странице {page} "
+                        "игроки не найдены."
+                    )
+                    break
+
+                for item in response:
+                    player_data = (
+                        item.get("player") or {}
+                    )
+
+                    statistics = (
+                        item.get("statistics") or []
+                    )
+
+                    api_id = player_data.get("id")
+
+                    if not api_id:
+                        team_skipped += 1
+                        total_skipped += 1
+                        continue
+
+                    statistic = (
+                        statistics[0]
+                        if statistics
+                        else {}
+                    )
+
+                    games = (
+                        statistic.get("games") or {}
+                    )
+
+                    birth_data = (
+                        player_data.get("birth") or {}
+                    )
+
+                    values = {
+                        "team_id": team.id,
+                        "name": (
+                            player_data.get("name")
+                            or f"Player {api_id}"
+                        ),
+                        "firstname": player_data.get(
+                            "firstname"
+                        ),
+                        "lastname": player_data.get(
+                            "lastname"
+                        ),
+                        "age": player_data.get("age"),
+                        "birth_date": self._parse_date(
+                            birth_data.get("date")
+                        ),
+                        "birth_place": birth_data.get(
+                            "place"
+                        ),
+                        "birth_country": birth_data.get(
+                            "country"
+                        ),
+                        "nationality": player_data.get(
+                            "nationality"
+                        ),
+                        "height": player_data.get(
+                            "height"
+                        ),
+                        "weight": player_data.get(
+                            "weight"
+                        ),
+                        "position": games.get(
+                            "position"
+                        ),
+                        "photo": player_data.get(
+                            "photo"
+                        ),
+                        "is_injured": bool(
+                            player_data.get(
+                                "injured",
+                                False,
+                            )
+                        ),
+                    }
+
+                    # Сначала ищем игрока в кэше.
+                    # Кэш содержит игроков из базы
+                    # и игроков, добавленных в текущем запуске.
+                    existing_player = players_cache.get(
+                        api_id
+                    )
+
+                    if existing_player:
+                        previous_team_id = (
+                            existing_player.team_id
+                        )
+
+                        self._update_player(
+                            existing_player,
+                            values,
+                        )
+
+                        team_updated += 1
+                        total_updated += 1
+
+                        if (
+                            previous_team_id is not None
+                            and previous_team_id
+                            != team.id
+                        ):
+                            logger.debug(
+                                f"Игрок api_id={api_id} "
+                                f"переведён из team_id="
+                                f"{previous_team_id} "
+                                f"в team_id={team.id}."
+                            )
+                    else:
+                        new_player = Player(
+                            api_id=api_id,
+                            **values,
+                        )
+
+                        repository.add(new_player)
+
+                        # Сразу добавляем нового игрока
+                        # в кэш, даже до commit.
+                        players_cache[api_id] = new_player
+
+                        team_added += 1
+                        total_added += 1
+
+                paging = data.get("paging") or {}
+
+                current_page = (
+                    paging.get("current") or page
+                )
+
+                total_pages = (
+                    paging.get("total")
+                    or current_page
+                )
+
+                logger.info(
+                    f"{team.name}: обработана страница "
+                    f"{current_page}/{total_pages}"
+                )
+
+                if current_page >= total_pages:
+                    break
+
+                if current_page >= self.MAX_PAGE:
+                    logger.warning(
+                        f"{team.name}: импорт остановлен "
+                        f"на странице {self.MAX_PAGE}. "
+                        "Бесплатный тариф API "
+                        "не разрешает запрашивать "
+                        "страницу 4 и выше."
+                    )
+                    break
+
+                page += 1
+                time.sleep(self.REQUEST_DELAY)
+
+            logger.success(
+                f"{team.name}: "
+                f"добавлено={team_added}, "
+                f"обновлено={team_updated}, "
+                f"пропущено={team_skipped}"
+            )
+
+            if team_number < len(teams):
+                logger.info(
+                    f"Ожидание "
+                    f"{self.REQUEST_DELAY} секунд "
+                    "перед следующей командой..."
+                )
+                time.sleep(self.REQUEST_DELAY)
+
+        logger.success(
+            f"Всего добавлено игроков: "
+            f"{total_added}"
+        )
+        logger.info(
+            f"Всего обновлено игроков: "
+            f"{total_updated}"
+        )
+        logger.info(
+            f"Всего пропущено записей: "
+            f"{total_skipped}"
+        )
+        logger.info(
+            f"Пропущено уже загруженных команд: "
+            f"{skipped_teams}"
+        )
+        logger.info(
+            f"Всего игроков в кэше после импорта: "
+            f"{len(players_cache)}"
+        )
+
+    def _get_teams(self) -> list[Team]:
+        query = self.session.query(Team)
+
+        if self.team_api_id is not None:
+            return (
+                query
+                .filter(
+                    Team.api_id == self.team_api_id
+                )
+                .limit(1)
+                .all()
+            )
+
+        return (
+            query
+            .filter(
+                Team.league.has(
+                    api_id=self.league_api_id
+                )
+            )
+            .order_by(Team.id.asc())
+            .limit(self.team_limit)
+            .all()
+        )
+
+    @staticmethod
+    def _parse_date(
+        value: str | None,
+    ) -> date | None:
+        if not value:
+            return None
+
+        try:
+            return date.fromisoformat(value)
+        except ValueError:
+            logger.warning(
+                f"Некорректная дата рождения: "
+                f"{value}"
+            )
+            return None
+
+    @staticmethod
+    def _update_player(
+        player: Player,
+        values: dict,
+    ) -> None:
+        for field, value in values.items():
+            setattr(player, field, value)
+===== FIXTURE IMPORTER =====
+import time
+from datetime import datetime
+
+from app.api.fixtures import FixtureService
+from app.core.logger import logger
+from app.database.session import get_db
+from app.importers.base_importer import BaseImporter
+from app.models.fixture import Fixture
+from app.models.league import League
+from app.models.league_season import LeagueSeason
+from app.models.team import Team
+from app.models.venue import Venue
+from app.repositories.fixture_repository import FixtureRepository
+
+
+class FixtureImporter(BaseImporter):
+    """
+    Импорт футбольных матчей.
+    """
+
+    TARGET_LEAGUE_API_IDS = [39, 140, 135, 78, 61]
+    SEASON = 2024
+    REQUEST_DELAY = 2
+
+    def import_data(self):
+        api = FixtureService()
+        db = next(get_db())
+
+        repository = FixtureRepository(db)
+
+        added = 0
+        skipped = 0
+        missing_teams = 0
+
+        league_seasons = (
+            db.query(LeagueSeason)
+            .join(League)
+            .filter(
+                LeagueSeason.season == self.SEASON,
+                League.api_id.in_(self.TARGET_LEAGUE_API_IDS),
+            )
+            .all()
+        )
+
+        logger.info(f"Найдено сезонов для импорта матчей: {len(league_seasons)}")
+
+        try:
+            for league_season in league_seasons:
+                league = league_season.league
+
+                logger.info(
+                    f"Импорт матчей: {league.name}, " f"season={league_season.season}"
+                )
+
+                data = api.get_fixtures(
+                    league=league.api_id,
+                    season=league_season.season,
+                )
+
+                time.sleep(self.REQUEST_DELAY)
+
+                if not data:
+                    logger.warning(f"Не удалось получить матчи: {league.name}")
+                    continue
+
+                for item in data["response"]:
+                    fixture_data = item["fixture"]
+                    teams_data = item["teams"]
+                    goals_data = item["goals"]
+                    score_data = item["score"]
+                    league_data = item["league"]
+
+                    existing = repository.get_by_api_id(fixture_data["id"])
+
+                    if existing:
+                        skipped += 1
+                        continue
+
+                    home_team = (
+                        db.query(Team)
+                        .filter_by(api_id=teams_data["home"]["id"])
+                        .first()
+                    )
+
+                    away_team = (
+                        db.query(Team)
+                        .filter_by(api_id=teams_data["away"]["id"])
+                        .first()
+                    )
+
+                    if not home_team or not away_team:
+                        missing_teams += 1
+                        continue
+
+                    venue_api_id = fixture_data["venue"].get("id")
+
+                    venue = None
+
+                    if venue_api_id:
+                        venue = db.query(Venue).filter_by(api_id=venue_api_id).first()
+
+                    status = fixture_data["status"]
+
+                    repository.add(
+                        Fixture(
+                            api_id=fixture_data["id"],
+                            league_season_id=league_season.id,
+                            home_team_id=home_team.id,
+                            away_team_id=away_team.id,
+                            venue_id=venue.id if venue else None,
+                            kickoff=datetime.fromisoformat(fixture_data["date"]),
+                            timestamp=fixture_data["timestamp"],
+                            timezone=fixture_data["timezone"] or "UTC",
+                            round=league_data["round"] or "",
+                            referee=fixture_data["referee"],
+                            status_short=status["short"] or "",
+                            status_long=status["long"] or "",
+                            elapsed=status["elapsed"],
+                            extra_time=status["extra"],
+                            home_goals=goals_data["home"],
+                            away_goals=goals_data["away"],
+                            halftime_home=score_data["halftime"]["home"],
+                            halftime_away=score_data["halftime"]["away"],
+                            fulltime_home=score_data["fulltime"]["home"],
+                            fulltime_away=score_data["fulltime"]["away"],
+                            extratime_home=score_data["extratime"]["home"],
+                            extratime_away=score_data["extratime"]["away"],
+                            penalty_home=score_data["penalty"]["home"],
+                            penalty_away=score_data["penalty"]["away"],
+                        )
+                    )
+
+                    added += 1
+
+            repository.commit()
+
+            logger.success(f"Добавлено матчей: {added}")
+            logger.info(f"Пропущено матчей: {skipped}")
+            logger.warning(f"Пропущено из-за отсутствующих команд: {missing_teams}")
+
+        except Exception:
+            repository.rollback()
+            logger.exception("Ошибка импорта матчей")
+            raise
+
+===== FIXTURE STATISTICS IMPORTER =====
+import time
+
+from sqlalchemy import func
+
+from app.api.fixture_statistics import FixtureStatisticsService
+from app.core.logger import logger
+from app.importers.base_importer import BaseImporter
+from app.models.fixture import Fixture
+from app.models.fixture_team_statistics import FixtureTeamStatistics
+from app.models.team import Team
+from app.repositories.fixture_team_statistics_repository import (
+    FixtureTeamStatisticsRepository,
+)
+
+
+class FixtureTeamStatisticsImporter(BaseImporter):
+    """
+    Импорт статистики команд по матчам.
+
+    Импорт выполняется небольшими пакетами.
+    Каждый матч сохраняется отдельной транзакцией,
+    чтобы при ошибке не потерять уже импортированные данные.
+    """
+
+    REQUEST_DELAY = 2
+    LIMIT = 10
+
+    FINISHED_STATUSES = (
+        "FT",
+        "AET",
+        "PEN",
+    )
+
+    def import_data(self):
+        api = FixtureStatisticsService()
+        db = self.session
+
+        repository = FixtureTeamStatisticsRepository(db)
+
+        statistics_count = (
+            db.query(
+                FixtureTeamStatistics.fixture_id,
+                func.count(
+                    FixtureTeamStatistics.id
+                ).label("statistics_count"),
+            )
+            .group_by(
+                FixtureTeamStatistics.fixture_id
+            )
+            .subquery()
+        )
+
+        fixtures = (
+            db.query(Fixture)
+            .outerjoin(
+                statistics_count,
+                statistics_count.c.fixture_id
+                == Fixture.id,
+            )
+            .filter(
+                Fixture.status_short.in_(
+                    self.FINISHED_STATUSES
+                )
+            )
+            .filter(
+                func.coalesce(
+                    statistics_count.c.statistics_count,
+                    0,
+                )
+                < 2
+            )
+            .order_by(
+                Fixture.kickoff.asc()
+            )
+            .limit(self.LIMIT)
+            .all()
+        )
+
+        total_added = 0
+        total_skipped = 0
+        total_missing_teams = 0
+        completed_fixtures = 0
+        empty_responses = 0
+
+        logger.info(
+            "Найдено завершённых матчей "
+            f"без полной статистики: {len(fixtures)}"
+        )
+
+        for fixture in fixtures:
+            try:
+                logger.info(
+                    "Получение статистики матча: "
+                    f"id={fixture.id}, "
+                    f"api_id={fixture.api_id}"
+                )
+
+                data = api.get_by_fixture_id(
+                    fixture.api_id
+                )
+
+                if (
+                    not data
+                    or not data.get("response")
+                ):
+                    empty_responses += 1
+
+                    logger.warning(
+                        "Статистика не получена: "
+                        f"api_id={fixture.api_id}"
+                    )
+
+                    time.sleep(self.REQUEST_DELAY)
+                    continue
+
+                fixture_added = 0
+                fixture_skipped = 0
+                fixture_missing_teams = 0
+
+                for item in data["response"]:
+                    team_data = item.get("team") or {}
+                    team_api_id = team_data.get("id")
+
+                    if team_api_id is None:
+                        fixture_missing_teams += 1
+
+                        logger.warning(
+                            "В ответе отсутствует ID команды: "
+                            f"fixture_api_id={fixture.api_id}"
+                        )
+                        continue
+
+                    team = (
+                        db.query(Team)
+                        .filter(
+                            Team.api_id == team_api_id
+                        )
+                        .first()
+                    )
+
+                    if not team:
+                        fixture_missing_teams += 1
+
+                        logger.warning(
+                            "Команда не найдена в базе: "
+                            f"team_api_id={team_api_id}, "
+                            f"fixture_api_id={fixture.api_id}"
+                        )
+                        continue
+
+                    existing = repository.get(
+                        fixture_id=fixture.id,
+                        team_id=team.id,
+                    )
+
+                    if existing:
+                        fixture_skipped += 1
+                        continue
+
+                    statistics = (
+                        item.get("statistics") or []
+                    )
+
+                    values = {
+                        statistic.get("type"):
+                        statistic.get("value")
+                        for statistic in statistics
+                        if statistic.get("type")
+                    }
+
+                    repository.add(
+                        FixtureTeamStatistics(
+                            fixture_id=fixture.id,
+                            team_id=team.id,
+                            shots_on_goal=self._to_int(
+                                values.get(
+                                    "Shots on Goal"
+                                )
+                            ),
+                            shots_off_goal=self._to_int(
+                                values.get(
+                                    "Shots off Goal"
+                                )
+                            ),
+                            total_shots=self._to_int(
+                                values.get(
+                                    "Total Shots"
+                                )
+                            ),
+                            blocked_shots=self._to_int(
+                                values.get(
+                                    "Blocked Shots"
+                                )
+                            ),
+                            shots_inside_box=self._to_int(
+                                values.get(
+                                    "Shots insidebox"
+                                )
+                            ),
+                            shots_outside_box=self._to_int(
+                                values.get(
+                                    "Shots outsidebox"
+                                )
+                            ),
+                            fouls=self._to_int(
+                                values.get("Fouls")
+                            ),
+                            corner_kicks=self._to_int(
+                                values.get(
+                                    "Corner Kicks"
+                                )
+                            ),
+                            offsides=self._to_int(
+                                values.get("Offsides")
+                            ),
+                            ball_possession=self._to_float(
+                                values.get(
+                                    "Ball Possession"
+                                )
+                            ),
+                            yellow_cards=self._to_int(
+                                values.get(
+                                    "Yellow Cards"
+                                )
+                            ),
+                            red_cards=self._to_int(
+                                values.get(
+                                    "Red Cards"
+                                )
+                            ),
+                            goalkeeper_saves=self._to_int(
+                                values.get(
+                                    "Goalkeeper Saves"
+                                )
+                            ),
+                            total_passes=self._to_int(
+                                values.get(
+                                    "Total passes"
+                                )
+                            ),
+                            passes_accurate=self._to_int(
+                                values.get(
+                                    "Passes accurate"
+                                )
+                            ),
+                            passes_percentage=self._to_float(
+                                values.get(
+                                    "Passes %"
+                                )
+                            ),
+                            expected_goals=self._to_float(
+                                values.get(
+                                    "expected_goals"
+                                )
+                            ),
+                            goals_prevented=self._to_float(
+                                values.get(
+                                    "goals_prevented"
+                                )
+                            ),
+                        )
+                    )
+
+                    fixture_added += 1
+
+                repository.commit()
+
+                total_added += fixture_added
+                total_skipped += fixture_skipped
+                total_missing_teams += (
+                    fixture_missing_teams
+                )
+                completed_fixtures += 1
+
+                logger.success(
+                    "Матч обработан: "
+                    f"api_id={fixture.api_id}, "
+                    f"добавлено={fixture_added}, "
+                    f"пропущено={fixture_skipped}, "
+                    f"команд не найдено="
+                    f"{fixture_missing_teams}"
+                )
+
+                time.sleep(self.REQUEST_DELAY)
+
+            except Exception:
+                repository.rollback()
+
+                logger.exception(
+                    "Ошибка импорта статистики матча: "
+                    f"api_id={fixture.api_id}"
+                )
+
+                # Ошибка передаётся BaseImporter.
+                # При исчерпании API-лимита импорт
+                # корректно остановится, а уже сохранённые
+                # матчи останутся в базе.
+                raise
+
+        logger.success(
+            "Импорт статистики завершён. "
+            f"Обработано матчей: {completed_fixtures}"
+        )
+        logger.info(
+            f"Добавлено записей: {total_added}"
+        )
+        logger.info(
+            f"Пропущено существующих: {total_skipped}"
+        )
+        logger.warning(
+            f"Команды не найдены: {total_missing_teams}"
+        )
+        logger.warning(
+            f"Пустых ответов API: {empty_responses}"
+        )
+
+    @staticmethod
+    def _to_int(value):
+        if value is None:
+            return None
+
+        if isinstance(value, str):
+            value = value.replace("%", "").strip()
+
+        try:
+            return int(float(value))
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _to_float(value):
+        if value is None:
+            return None
+
+        if isinstance(value, str):
+            value = value.replace("%", "").strip()
+
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+===== STANDING IMPORTER =====
+import time
+from typing import Any
+
+from app.api.standings import StandingsService
+from app.core.logger import logger
+from app.importers.base_importer import BaseImporter
+from app.models.league import League
+from app.models.league_season import LeagueSeason
+from app.models.standing import Standing
+from app.models.team import Team
+from app.repositories.standing_repository import StandingRepository
+
+
+class StandingImporter(BaseImporter):
+    """
+    Импорт турнирных таблиц по лигам и сезонам.
+    """
+
+    REQUEST_DELAY = 2
+    SUPPORTED_LEAGUES = [39, 61, 78, 135, 140]
+    SUPPORTED_SEASONS = [2024]
+
+    def import_data(self) -> None:
+        api = StandingsService()
+        db = self.session
+        repository = StandingRepository(db)
+
+        league_seasons = (
+            db.query(LeagueSeason)
+            .join(
+                League,
+                League.id == LeagueSeason.league_id,
+    )
+            .filter(
+                League.api_id.in_(self.SUPPORTED_LEAGUES),
+                LeagueSeason.season.in_(self.SUPPORTED_SEASONS),
+    )
+            .order_by(
+                League.api_id.asc(),
+                LeagueSeason.season.asc(),
+    )
+            .all()
+)
+
+        added = 0
+        updated = 0
+        missing_teams = 0
+        empty_responses = 0
+
+        logger.info(
+            f"Найдено сезонов для импорта таблиц: "
+            f"{len(league_seasons)}"
+        )
+
+        for league_season in league_seasons:
+            league = (
+                db.query(League)
+                .filter(League.id == league_season.league_id)
+                .first()
+            )
+
+            if not league:
+                logger.warning(
+                    "Лига не найдена: "
+                    f"league_season_id={league_season.id}"
+                )
+                continue
+
+            logger.info(
+                "Импорт турнирной таблицы: "
+                f"league={league.name}, "
+                f"season={league_season.season}"
+            )
+
+            data = api.get_by_league_and_season(
+                league_api_id=league.api_id,
+                season=league_season.season,
+            )
+
+            if not data or not data.get("response"):
+                empty_responses += 1
+                logger.warning(
+                    "Турнирная таблица не получена: "
+                    f"league={league.name}, "
+                    f"season={league_season.season}"
+                )
+
+                time.sleep(self.REQUEST_DELAY)
+                continue
+
+            standings = self._extract_standings(data)
+
+            for item in standings:
+                team_data = item.get("team") or {}
+                team_api_id = team_data.get("id")
+
+                if team_api_id is None:
+                    missing_teams += 1
+                    continue
+
+                team = (
+                    db.query(Team)
+                    .filter(Team.api_id == team_api_id)
+                    .first()
+                )
+
+                if not team:
+                    missing_teams += 1
+                    logger.warning(
+                        "Команда из таблицы не найдена: "
+                        f"team_api_id={team_api_id}, "
+                        f"league={league.name}"
+                    )
+                    continue
+
+                values = self._build_values(item)
+
+                existing = repository.get(
+                    league_season_id=league_season.id,
+                    team_id=team.id,
+                )
+
+                if existing:
+                    for field, value in values.items():
+                        setattr(existing, field, value)
+
+                    updated += 1
+                    continue
+
+                db.add(
+                    Standing(
+                        league_season_id=league_season.id,
+                        team_id=team.id,
+                        **values,
+                    )
+                )
+
+                added += 1
+
+            db.commit()
+            time.sleep(self.REQUEST_DELAY)
+
+        logger.success(
+            f"Добавлено записей таблицы: {added}"
+        )
+        logger.info(
+            f"Обновлено записей таблицы: {updated}"
+        )
+        logger.warning(
+            f"Команды не найдены: {missing_teams}"
+        )
+        logger.warning(
+            f"Пустые ответы API: {empty_responses}"
+        )
+
+    @staticmethod
+    def _extract_standings(
+        data: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        """
+        Извлечь все группы турнирной таблицы из ответа API.
+        """
+        result: list[dict[str, Any]] = []
+
+        for response_item in data.get("response", []):
+            league_data = response_item.get("league") or {}
+
+            for group in league_data.get("standings", []):
+                result.extend(group)
+
+        return result
+
+    @classmethod
+    def _build_values(
+        cls,
+        item: dict[str, Any],
+    ) -> dict[str, Any]:
+        all_stats = item.get("all") or {}
+        home_stats = item.get("home") or {}
+        away_stats = item.get("away") or {}
+
+        return {
+            "rank": cls._to_int(item.get("rank")),
+            "points": cls._to_int(item.get("points")),
+            "goals_diff": cls._to_int(
+                item.get("goalsDiff")
+            ),
+            "group_name": item.get("group"),
+            "form": item.get("form"),
+            "status": item.get("status"),
+            "description": item.get("description"),
+
+            "played": cls._to_int(
+                all_stats.get("played")
+            ),
+            "wins": cls._to_int(
+                all_stats.get("win")
+            ),
+            "draws": cls._to_int(
+                all_stats.get("draw")
+            ),
+            "losses": cls._to_int(
+                all_stats.get("lose")
+            ),
+            "goals_for": cls._to_int(
+                cls._nested_get(
+                    all_stats,
+                    "goals",
+                    "for",
+                )
+            ),
+            "goals_against": cls._to_int(
+                cls._nested_get(
+                    all_stats,
+                    "goals",
+                    "against",
+                )
+            ),
+
+            "home_played": cls._to_int(
+                home_stats.get("played")
+            ),
+            "home_wins": cls._to_int(
+                home_stats.get("win")
+            ),
+            "home_draws": cls._to_int(
+                home_stats.get("draw")
+            ),
+            "home_losses": cls._to_int(
+                home_stats.get("lose")
+            ),
+            "home_goals_for": cls._to_int(
+                cls._nested_get(
+                    home_stats,
+                    "goals",
+                    "for",
+                )
+            ),
+            "home_goals_against": cls._to_int(
+                cls._nested_get(
+                    home_stats,
+                    "goals",
+                    "against",
+                )
+            ),
+
+            "away_played": cls._to_int(
+                away_stats.get("played")
+            ),
+            "away_wins": cls._to_int(
+                away_stats.get("win")
+            ),
+            "away_draws": cls._to_int(
+                away_stats.get("draw")
+            ),
+            "away_losses": cls._to_int(
+                away_stats.get("lose")
+            ),
+            "away_goals_for": cls._to_int(
+                cls._nested_get(
+                    away_stats,
+                    "goals",
+                    "for",
+                )
+            ),
+            "away_goals_against": cls._to_int(
+                cls._nested_get(
+                    away_stats,
+                    "goals",
+                    "against",
+                )
+            ),
+        }
+
+    @staticmethod
+    def _nested_get(
+        data: dict[str, Any],
+        *keys: str,
+    ) -> Any:
+        value: Any = data
+
+        for key in keys:
+            if not isinstance(value, dict):
+                return None
+
+            value = value.get(key)
+
+        return value
+
+    @staticmethod
+    def _to_int(value: Any) -> int:
+        if value is None:
+            return 0
+
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+===== TEAM IMPORTER =====
+import time
+
+from app.api.teams import TeamService
+from app.core.logger import logger
+from app.database.session import get_db
+from app.importers.base_importer import BaseImporter
+from app.models.league import League
+from app.models.team import Team
+from app.models.venue import Venue
+from app.repositories.team_repository import TeamRepository
+from app.repositories.venue_repository import VenueRepository
+
+
+class TeamImporter(BaseImporter):
+    """
+    Безопасный импорт команд и стадионов только для топ-лиг.
+    """
+
+    TARGET_LEAGUE_API_IDS = [39, 140, 135, 78, 61]
+    SEASON = 2024
+    REQUEST_DELAY = 2
+
+    def import_data(self):
+        api = TeamService()
+        db = next(get_db())
+
+        team_repository = TeamRepository(db)
+        venue_repository = VenueRepository(db)
+
+        added_teams = 0
+        skipped_teams = 0
+        added_venues = 0
+
+        leagues = (
+            db.query(League)
+            .filter(League.api_id.in_(self.TARGET_LEAGUE_API_IDS))
+            .all()
+        )
+
+        try:
+            for league in leagues:
+                logger.info(
+                    f"Импорт команд: {league.name} "
+                    f"league={league.api_id}, season={self.SEASON}"
+                )
+
+                data = api.get_teams(
+                    league=league.api_id,
+                    season=self.SEASON,
+                )
+
+                time.sleep(self.REQUEST_DELAY)
+
+                if not data:
+                    logger.warning(f"Нет данных по лиге {league.name}")
+                    continue
+
+                for item in data["response"]:
+                    team_data = item["team"]
+                    venue_data = item["venue"]
+
+                    venue = venue_repository.get_by_api_id(venue_data["id"])
+
+                    if not venue:
+                        venue = Venue(
+                            api_id=venue_data["id"],
+                            name=venue_data["name"] or "",
+                            address=venue_data["address"] or "",
+                            city=venue_data["city"] or "",
+                            capacity=venue_data["capacity"] or 0,
+                            surface=venue_data["surface"] or "",
+                            image=venue_data["image"] or "",
+                        )
+
+                        venue_repository.add(venue)
+                        db.flush()
+                        added_venues += 1
+
+                    existing_team = team_repository.get_by_api_id(
+                        team_data["id"]
+                    )
+
+                    if existing_team:
+                        skipped_teams += 1
+                        continue
+
+                    team = Team(
+                        api_id=team_data["id"],
+                        league_id=league.id,
+                        venue_id=venue.id,
+                        name=team_data["name"] or "",
+                        code=team_data["code"] or "",
+                        country=team_data["country"] or "",
+                        founded=team_data["founded"] or 0,
+                        logo=team_data["logo"] or "",
+                    )
+
+                    team_repository.add(team)
+                    added_teams += 1
+
+            team_repository.commit()
+
+            logger.success(f"Добавлено команд: {added_teams}")
+            logger.info(f"Пропущено команд: {skipped_teams}")
+            logger.success(f"Добавлено стадионов: {added_venues}")
+
+        except Exception:
+            team_repository.rollback()
+            logger.exception("Ошибка импорта команд")
+===== LEAGUE IMPORTER =====
+from app.api.leagues import LeagueService
+from app.core.logger import logger
+from app.database.session import get_db
+from app.importers.base_importer import BaseImporter
+from app.models.league import League
+from app.repositories.league_repository import LeagueRepository
+
+
+class LeagueImporter(BaseImporter):
+
+    def import_data(self):
+
+        api = LeagueService()
+
+        data = api.get_current_leagues()
+
+        if not data:
+            logger.error("Не удалось получить список лиг.")
+            return
+
+        db = next(get_db())
+
+        repository = LeagueRepository(db)
+
+        added = 0
+        skipped = 0
+
+        # Загружаем все существующие api_id одним запросом
+        existing_ids = {
+            league.api_id
+            for league in repository.get_all()
+        }
+
+        try:
+
+            for item in data["response"]:
+
+                league = item["league"]
+                country = item["country"]
+
+                if league["id"] in existing_ids:
+                    skipped += 1
+                    continue
+
+                repository.add(
+                    League(
+                        api_id=league["id"],
+                        name=league["name"],
+                        type=league["type"],
+                        logo=league["logo"],
+                        country=country["name"],
+                        country_code=country["code"] or "",
+                        flag=country["flag"] or "",
+                    )
+                )
+
+                added += 1
+
+            repository.commit()
+
+            logger.success(f"Добавлено: {added}")
+            logger.info(f"Пропущено: {skipped}")
+
+        except Exception:
+            repository.rollback()
+            logger.exception("Ошибка импорта лиг")
+===== PLAYER REPOSITORY =====
+from app.models.player import Player
+
+
+class PlayerRepository:
+    """
+    Репозиторий футболистов.
+    """
+
+    def __init__(self, db):
+        self.db = db
+
+    def get_by_api_id(
+        self,
+        api_id: int,
+    ) -> Player | None:
+        return (
+            self.db.query(Player)
+            .filter(Player.api_id == api_id)
+            .first()
+        )
+
+    def get_by_team_id(
+        self,
+        team_id: int,
+    ) -> list[Player]:
+        return (
+            self.db.query(Player)
+            .filter(Player.team_id == team_id)
+            .all()
+        )
+
+    def count_by_team_id(
+        self,
+        team_id: int,
+    ) -> int:
+        return (
+            self.db.query(Player)
+            .filter(Player.team_id == team_id)
+            .count()
+        )
+
+    def get_all(self) -> list[Player]:
+        return self.db.query(Player).all()
+
+    def get_all_by_api_id(self) -> dict[int, Player]:
+        """
+        Загружает игроков из базы в словарь:
+
+        {
+            api_id: Player
+        }
+
+        Это исключает повторные INSERT одного игрока
+        во время одного запуска импортёра.
+        """
+
+        players = self.db.query(Player).all()
+
+        return {
+            player.api_id: player
+            for player in players
+        }
+
+    def add(
+        self,
+        player: Player,
+    ) -> None:
+        self.db.add(player)
+
+    def commit(self) -> None:
+        self.db.commit()
+
+    def rollback(self) -> None:
+        self.db.rollback()
+===== IMPORT PLAYERS SCRIPT =====
+import argparse
+
+from app.core.logger import logger
+from app.importers.player_importer import PlayerImporter
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Импорт игроков из API-Football."
+        )
+    )
+
+    parser.add_argument(
+        "--team-id",
+        type=int,
+        default=None,
+        help=(
+            "API ID конкретной команды. "
+            "Например: 33 для Manchester United."
+        ),
+    )
+
+    parser.add_argument(
+        "--league-id",
+        type=int,
+        default=39,
+        help=(
+            "API ID лиги. "
+            "По умолчанию: 39 — Premier League."
+        ),
+    )
+
+    parser.add_argument(
+        "--season",
+        type=int,
+        default=2024,
+        help=(
+            "Сезон для импорта. "
+            "По умолчанию: 2024."
+        ),
+    )
+
+    parser.add_argument(
+        "--team-limit",
+        type=int,
+        default=1,
+        help=(
+            "Количество команд для обработки. "
+            "По умолчанию: 1."
+        ),
+    )
+
+    parser.add_argument(
+        "--skip-existing",
+        action="store_true",
+        help=(
+            "Пропускать команды, у которых "
+            "в базе уже есть минимум 40 игроков."
+        ),
+    )
+
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+
+    if args.team_limit < 1:
+        logger.error(
+            "Параметр --team-limit "
+            "должен быть больше нуля."
+        )
+        return
+
+    if args.season < 2000:
+        logger.error(
+            "Указан некорректный сезон."
+        )
+        return
+
+    logger.info("Запуск импорта игроков...")
+
+    if args.team_id is not None:
+        logger.info(
+            f"Выбрана конкретная команда: "
+            f"api_id={args.team_id}"
+        )
+    else:
+        logger.info(
+            f"Выбрана лига: "
+            f"api_id={args.league_id}, "
+            f"лимит команд={args.team_limit}"
+        )
+
+    if args.skip_existing:
+        logger.info(
+            "Уже загруженные команды "
+            "будут пропущены."
+        )
+
+    importer = PlayerImporter(
+        team_api_id=args.team_id,
+        league_api_id=args.league_id,
+        season=args.season,
+        team_limit=args.team_limit,
+        skip_existing=args.skip_existing,
+    )
+
+    success = importer.run()
+
+    if success:
+        logger.success(
+            "Импорт игроков завершён."
+        )
+    else:
+        logger.error(
+            "Импорт игроков завершился "
+            "с ошибкой."
+        )
+
+
+if __name__ == "__main__":
+    main()
+===== DATABASE SESSION =====
+
+===== app/database/base.py =====
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    """
+    Базовый класс для всех моделей базы данных.
+    """
+    pass
+===== app/database/database.py =====
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from config import Config
+from app.database.base import Base
+
+# Создаем подключение к базе данных
+engine = create_engine(
+    Config.DATABASE_URL,
+    echo=Config.DEBUG
+)
+
+# Фабрика сессий
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+
+def create_database():
+    """
+    Создает все таблицы базы данных.
+    """
+    Base.metadata.create_all(bind=engine)
+===== app/database/init_db.py =====
+from app.database.base import Base
+from app.database.database import engine
+
+from app.models.league import League
+from app.models.team import Team
+
+
+def init_database():
+    Base.metadata.create_all(bind=engine)
+===== app/database/session.py =====
+from app.database.database import SessionLocal
+
+
+def get_db():
+    """
+    Создает сессию базы данных.
+    """
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
+===== app/database/__init__.py =====
