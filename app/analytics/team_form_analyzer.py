@@ -24,13 +24,32 @@ class TeamFormResult:
     losses: int
     points: int
 
+    win_percentage: float
+    draw_percentage: float
+    loss_percentage: float
+
     goals_for: int
     goals_against: int
     goal_difference: int
 
     average_goals_for: float
     average_goals_against: float
+    average_total_goals: float
     points_per_match: float
+
+    clean_sheets: int
+    failed_to_score: int
+
+    both_teams_scored: int
+    both_teams_scored_percentage: float
+
+    over_1_5: int
+    over_2_5: int
+    over_3_5: int
+
+    under_1_5: int
+    under_2_5: int
+    under_3_5: int
 
     home_matches: int
     away_matches: int
@@ -76,8 +95,8 @@ class TeamFormAnalyzer:
         - home — только домашние;
         - away — только выездные.
 
-        before_fixture_id позволяет брать только матчи,
-        сыгранные до определённого матча.
+        before_fixture_id позволяет использовать только матчи,
+        сыгранные до указанного матча.
         """
         if limit <= 0:
             raise ValueError(
@@ -108,7 +127,9 @@ class TeamFormAnalyzer:
             .filter(
                 Fixture.status_short.in_(
                     self.FINISHED_STATUSES
-                )
+                ),
+                Fixture.home_goals.isnot(None),
+                Fixture.away_goals.isnot(None),
             )
         )
 
@@ -151,7 +172,10 @@ class TeamFormAnalyzer:
 
         fixtures = (
             query
-            .order_by(Fixture.kickoff.desc())
+            .order_by(
+                Fixture.kickoff.desc(),
+                Fixture.id.desc(),
+            )
             .limit(limit)
             .all()
         )
@@ -163,6 +187,19 @@ class TeamFormAnalyzer:
 
         goals_for = 0
         goals_against = 0
+        total_goals_sum = 0
+
+        clean_sheets = 0
+        failed_to_score = 0
+        both_teams_scored = 0
+
+        over_1_5 = 0
+        over_2_5 = 0
+        over_3_5 = 0
+
+        under_1_5 = 0
+        under_2_5 = 0
+        under_3_5 = 0
 
         home_matches = 0
         away_matches = 0
@@ -192,6 +229,12 @@ class TeamFormAnalyzer:
             goals_for += team_goals
             goals_against += opponent_goals
 
+            match_total_goals = (
+                team_goals + opponent_goals
+            )
+
+            total_goals_sum += match_total_goals
+
             if team_goals > opponent_goals:
                 wins += 1
                 points += 3
@@ -206,25 +249,34 @@ class TeamFormAnalyzer:
                 losses += 1
                 form_items.append("L")
 
+            if opponent_goals == 0:
+                clean_sheets += 1
+
+            if team_goals == 0:
+                failed_to_score += 1
+
+            if (
+                team_goals > 0
+                and opponent_goals > 0
+            ):
+                both_teams_scored += 1
+
+            if match_total_goals > 1.5:
+                over_1_5 += 1
+            else:
+                under_1_5 += 1
+
+            if match_total_goals > 2.5:
+                over_2_5 += 1
+            else:
+                under_2_5 += 1
+
+            if match_total_goals > 3.5:
+                over_3_5 += 1
+            else:
+                under_3_5 += 1
+
         matches = wins + draws + losses
-
-        average_goals_for = (
-            round(goals_for / matches, 2)
-            if matches
-            else 0.0
-        )
-
-        average_goals_against = (
-            round(goals_against / matches, 2)
-            if matches
-            else 0.0
-        )
-
-        points_per_match = (
-            round(points / matches, 2)
-            if matches
-            else 0.0
-        )
 
         return TeamFormResult(
             team_id=team.id,
@@ -236,17 +288,89 @@ class TeamFormAnalyzer:
             draws=draws,
             losses=losses,
             points=points,
+            win_percentage=self._percentage(
+                wins,
+                matches,
+            ),
+            draw_percentage=self._percentage(
+                draws,
+                matches,
+            ),
+            loss_percentage=self._percentage(
+                losses,
+                matches,
+            ),
             goals_for=goals_for,
             goals_against=goals_against,
             goal_difference=(
                 goals_for - goals_against
             ),
-            average_goals_for=average_goals_for,
-            average_goals_against=(
-                average_goals_against
+            average_goals_for=self._average(
+                goals_for,
+                matches,
             ),
-            points_per_match=points_per_match,
+            average_goals_against=self._average(
+                goals_against,
+                matches,
+            ),
+            average_total_goals=self._average(
+                total_goals_sum,
+                matches,
+            ),
+            points_per_match=self._average(
+                points,
+                matches,
+            ),
+            clean_sheets=clean_sheets,
+            failed_to_score=failed_to_score,
+            both_teams_scored=both_teams_scored,
+            both_teams_scored_percentage=(
+                self._percentage(
+                    both_teams_scored,
+                    matches,
+                )
+            ),
+            over_1_5=over_1_5,
+            over_2_5=over_2_5,
+            over_3_5=over_3_5,
+            under_1_5=under_1_5,
+            under_2_5=under_2_5,
+            under_3_5=under_3_5,
             home_matches=home_matches,
             away_matches=away_matches,
-            form="".join(reversed(form_items)),
+            form="".join(
+                reversed(form_items)
+            ),
+        )
+
+    @staticmethod
+    def _average(
+        value: int | float,
+        matches: int,
+    ) -> float:
+        """
+        Рассчитать среднее значение за матч.
+        """
+        if matches == 0:
+            return 0.0
+
+        return round(
+            value / matches,
+            2,
+        )
+
+    @staticmethod
+    def _percentage(
+        value: int,
+        total: int,
+    ) -> float:
+        """
+        Рассчитать процент.
+        """
+        if total == 0:
+            return 0.0
+
+        return round(
+            value / total * 100,
+            2,
         )

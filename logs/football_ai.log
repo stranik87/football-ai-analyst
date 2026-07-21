@@ -2373,3 +2373,227 @@ sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed
 2026-07-18 22:50:27.034 | WARNING  | app.importers.standing_importer:import_data:242 - Пустых ответов API: 0
 2026-07-18 22:50:27.036 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: StandingImporter
 2026-07-18 22:50:27.037 | SUCCESS  | __main__:main:11 - Импорт турнирных таблиц завершён.
+2026-07-21 20:24:50.609 | INFO     | __main__:main:6 - Запуск импорта турнирных таблиц...
+2026-07-21 20:24:50.645 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: StandingImporter
+2026-07-21 20:24:50.694 | INFO     | app.importers.standing_importer:import_data:74 - Найдено сезонов для импорта таблиц: 5
+2026-07-21 20:24:50.695 | INFO     | app.importers.standing_importer:import_data:79 - Команд загружено в кэш: 98
+2026-07-21 20:24:50.695 | INFO     | app.importers.standing_importer:import_data:91 - [1/5] Импорт турнирной таблицы: league=Premier League, league_api_id=39, season=2024
+2026-07-21 20:24:50.696 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:24:51.508 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Premier League, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-21 20:24:51.509 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-21 20:24:53.511 | INFO     | app.importers.standing_importer:import_data:91 - [2/5] Импорт турнирной таблицы: league=Ligue 1, league_api_id=61, season=2024
+2026-07-21 20:24:53.511 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:24:53.681 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Ligue 1, season=2024, добавлено=0, обновлено=0, без изменений=18
+2026-07-21 20:24:53.682 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-21 20:24:55.684 | INFO     | app.importers.standing_importer:import_data:91 - [3/5] Импорт турнирной таблицы: league=Bundesliga, league_api_id=78, season=2024
+2026-07-21 20:24:55.685 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:24:55.855 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Bundesliga, season=2024, добавлено=0, обновлено=0, без изменений=18
+2026-07-21 20:24:55.856 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-21 20:24:57.857 | INFO     | app.importers.standing_importer:import_data:91 - [4/5] Импорт турнирной таблицы: league=Serie A, league_api_id=135, season=2024
+2026-07-21 20:24:57.857 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:24:58.037 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Serie A, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-21 20:24:58.038 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-21 20:25:00.039 | INFO     | app.importers.standing_importer:import_data:91 - [5/5] Импорт турнирной таблицы: league=La Liga, league_api_id=140, season=2024
+2026-07-21 20:25:00.039 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:25:00.264 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=La Liga, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-21 20:25:00.264 | SUCCESS  | app.importers.standing_importer:import_data:224 - Импорт турнирных таблиц завершён.
+2026-07-21 20:25:00.264 | SUCCESS  | app.importers.standing_importer:import_data:227 - Добавлено записей таблицы: 0
+2026-07-21 20:25:00.264 | INFO     | app.importers.standing_importer:import_data:230 - Обновлено записей таблицы: 0
+2026-07-21 20:25:00.268 | INFO     | app.importers.standing_importer:import_data:233 - Пропущено без изменений: 96
+2026-07-21 20:25:00.268 | WARNING  | app.importers.standing_importer:import_data:236 - Команды не найдены: 0
+2026-07-21 20:25:00.269 | WARNING  | app.importers.standing_importer:import_data:239 - Некорректных записей: 0
+2026-07-21 20:25:00.269 | WARNING  | app.importers.standing_importer:import_data:242 - Пустых ответов API: 0
+2026-07-21 20:25:00.272 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: StandingImporter
+2026-07-21 20:25:00.273 | SUCCESS  | __main__:main:11 - Импорт турнирных таблиц завершён.
+2026-07-21 20:25:12.141 | INFO     | __main__:main:6 - Запуск импорта турнирных таблиц...
+2026-07-21 20:25:12.142 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: StandingImporter
+2026-07-21 20:25:12.179 | INFO     | app.importers.standing_importer:import_data:74 - Найдено сезонов для импорта таблиц: 5
+2026-07-21 20:25:12.179 | INFO     | app.importers.standing_importer:import_data:79 - Команд загружено в кэш: 98
+2026-07-21 20:25:12.180 | INFO     | app.importers.standing_importer:import_data:91 - [1/5] Импорт турнирной таблицы: league=Premier League, league_api_id=39, season=2024
+2026-07-21 20:25:12.180 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:25:12.746 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Premier League, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-21 20:25:12.746 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-21 20:25:14.748 | INFO     | app.importers.standing_importer:import_data:91 - [2/5] Импорт турнирной таблицы: league=Ligue 1, league_api_id=61, season=2024
+2026-07-21 20:25:14.749 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:25:14.911 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Ligue 1, season=2024, добавлено=0, обновлено=0, без изменений=18
+2026-07-21 20:25:14.911 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-21 20:25:16.922 | INFO     | app.importers.standing_importer:import_data:91 - [3/5] Импорт турнирной таблицы: league=Bundesliga, league_api_id=78, season=2024
+2026-07-21 20:25:16.922 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:25:17.066 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Bundesliga, season=2024, добавлено=0, обновлено=0, без изменений=18
+2026-07-21 20:25:17.066 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-21 20:25:19.081 | INFO     | app.importers.standing_importer:import_data:91 - [4/5] Импорт турнирной таблицы: league=Serie A, league_api_id=135, season=2024
+2026-07-21 20:25:19.081 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:25:19.246 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=Serie A, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-21 20:25:19.246 | INFO     | app.importers.standing_importer:_sleep_before_next_request:258 - Ожидание 2 секунд перед следующей лигой...
+2026-07-21 20:25:21.252 | INFO     | app.importers.standing_importer:import_data:91 - [5/5] Импорт турнирной таблицы: league=La Liga, league_api_id=140, season=2024
+2026-07-21 20:25:21.252 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/standings | попытка 1/3
+2026-07-21 20:25:21.417 | SUCCESS  | app.importers.standing_importer:import_data:210 - Турнирная таблица обработана: league=La Liga, season=2024, добавлено=0, обновлено=0, без изменений=20
+2026-07-21 20:25:21.417 | SUCCESS  | app.importers.standing_importer:import_data:224 - Импорт турнирных таблиц завершён.
+2026-07-21 20:25:21.417 | SUCCESS  | app.importers.standing_importer:import_data:227 - Добавлено записей таблицы: 0
+2026-07-21 20:25:21.426 | INFO     | app.importers.standing_importer:import_data:230 - Обновлено записей таблицы: 0
+2026-07-21 20:25:21.426 | INFO     | app.importers.standing_importer:import_data:233 - Пропущено без изменений: 96
+2026-07-21 20:25:21.427 | WARNING  | app.importers.standing_importer:import_data:236 - Команды не найдены: 0
+2026-07-21 20:25:21.428 | WARNING  | app.importers.standing_importer:import_data:239 - Некорректных записей: 0
+2026-07-21 20:25:21.428 | WARNING  | app.importers.standing_importer:import_data:242 - Пустых ответов API: 0
+2026-07-21 20:25:21.431 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: StandingImporter
+2026-07-21 20:25:21.432 | SUCCESS  | __main__:main:11 - Импорт турнирных таблиц завершён.
+2026-07-21 20:26:27.683 | INFO     | __main__:main:8 - Запуск импорта статистики матчей...
+2026-07-21 20:26:27.683 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: FixtureTeamStatisticsImporter
+2026-07-21 20:26:27.740 | INFO     | app.importers.fixture_team_statistics_importer:import_data:85 - Найдено завершённых матчей без полной статистики: 10
+2026-07-21 20:26:27.741 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=336, api_id=1208048
+2026-07-21 20:26:27.741 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:28.358 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208048, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:30.374 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=337, api_id=1208043
+2026-07-21 20:26:30.375 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:30.604 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208043, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:32.606 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=23, api_id=1213770
+2026-07-21 20:26:32.606 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:32.827 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1213770, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:34.833 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=705, api_id=1223988
+2026-07-21 20:26:34.833 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:35.038 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223988, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:37.039 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=24, api_id=1213769
+2026-07-21 20:26:37.039 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:37.241 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1213769, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:39.253 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=25, api_id=1213772
+2026-07-21 20:26:39.253 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:39.460 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1213772, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:41.475 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=26, api_id=1213771
+2026-07-21 20:26:41.475 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:41.684 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1213771, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:43.686 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=338, api_id=1208047
+2026-07-21 20:26:43.687 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:43.905 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208047, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:45.908 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1411, api_id=1208525
+2026-07-21 20:26:45.908 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:46.109 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208525, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:48.117 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1412, api_id=1208528
+2026-07-21 20:26:48.117 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:26:48.333 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208528, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:26:50.335 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:300 - Импорт статистики завершён. Обработано матчей: 10
+2026-07-21 20:26:50.336 | INFO     | app.importers.fixture_team_statistics_importer:import_data:304 - Добавлено записей: 20
+2026-07-21 20:26:50.337 | INFO     | app.importers.fixture_team_statistics_importer:import_data:307 - Пропущено существующих: 0
+2026-07-21 20:26:50.337 | WARNING  | app.importers.fixture_team_statistics_importer:import_data:310 - Команды не найдены: 0
+2026-07-21 20:26:50.338 | WARNING  | app.importers.fixture_team_statistics_importer:import_data:313 - Пустых ответов API: 0
+2026-07-21 20:26:50.340 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: FixtureTeamStatisticsImporter
+2026-07-21 20:26:50.340 | SUCCESS  | __main__:main:10 - Проверка статистики завершена.
+2026-07-21 20:30:34.615 | INFO     | __main__:main:8 - Запуск импорта статистики матчей...
+2026-07-21 20:30:34.616 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: FixtureTeamStatisticsImporter
+2026-07-21 20:30:34.649 | INFO     | app.importers.fixture_team_statistics_importer:import_data:85 - Найдено завершённых матчей без полной статистики: 10
+2026-07-21 20:30:34.650 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=706, api_id=1223986
+2026-07-21 20:30:34.650 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:35.650 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223986, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:37.654 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1023, api_id=1223617
+2026-07-21 20:30:37.655 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:38.034 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223617, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:40.044 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1024, api_id=1223616
+2026-07-21 20:30:40.044 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:40.280 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223616, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:42.294 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1413, api_id=1208529
+2026-07-21 20:30:42.294 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:42.562 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208529, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:44.563 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1414, api_id=1208523
+2026-07-21 20:30:44.563 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:44.830 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208523, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:46.833 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=27, api_id=1213765
+2026-07-21 20:30:46.835 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:47.062 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1213765, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:49.066 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1025, api_id=1223623
+2026-07-21 20:30:49.066 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:49.328 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223623, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:51.332 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1026, api_id=1223619
+2026-07-21 20:30:51.334 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:51.545 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223619, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:53.561 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1415, api_id=1208527
+2026-07-21 20:30:53.561 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:30:56.265 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208527, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:30:58.273 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=707, api_id=1223994
+2026-07-21 20:30:58.273 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:31:00.046 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223994, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:31:02.051 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:300 - Импорт статистики завершён. Обработано матчей: 10
+2026-07-21 20:31:02.051 | INFO     | app.importers.fixture_team_statistics_importer:import_data:304 - Добавлено записей: 20
+2026-07-21 20:31:02.054 | INFO     | app.importers.fixture_team_statistics_importer:import_data:307 - Пропущено существующих: 0
+2026-07-21 20:31:02.055 | WARNING  | app.importers.fixture_team_statistics_importer:import_data:310 - Команды не найдены: 0
+2026-07-21 20:31:02.057 | WARNING  | app.importers.fixture_team_statistics_importer:import_data:313 - Пустых ответов API: 0
+2026-07-21 20:31:02.060 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: FixtureTeamStatisticsImporter
+2026-07-21 20:31:02.061 | SUCCESS  | __main__:main:10 - Проверка статистики завершена.
+2026-07-21 20:49:35.219 | INFO     | __main__:main:8 - Запуск импорта статистики матчей...
+2026-07-21 20:49:35.219 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: FixtureTeamStatisticsImporter
+2026-07-21 20:49:35.258 | INFO     | app.importers.fixture_team_statistics_importer:import_data:85 - Найдено завершённых матчей без полной статистики: 10
+2026-07-21 20:49:35.259 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=28, api_id=1213780
+2026-07-21 20:49:35.259 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:35.937 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1213780, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:37.945 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1416, api_id=1208531
+2026-07-21 20:49:37.946 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:38.124 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208531, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:40.134 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=339, api_id=1208058
+2026-07-21 20:49:40.136 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:40.343 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208058, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:42.356 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1417, api_id=1208533
+2026-07-21 20:49:42.356 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:42.547 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208533, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:44.551 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1027, api_id=1223627
+2026-07-21 20:49:44.556 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:44.745 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223627, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:46.747 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=708, api_id=1223996
+2026-07-21 20:49:46.749 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:47.032 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223996, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:49.038 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=709, api_id=1223998
+2026-07-21 20:49:49.038 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:49.234 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223998, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:51.243 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=710, api_id=1224000
+2026-07-21 20:49:51.243 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:51.434 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1224000, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:53.447 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=711, api_id=1223995
+2026-07-21 20:49:53.447 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:53.652 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223995, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:55.654 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=712, api_id=1223993
+2026-07-21 20:49:55.655 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:49:55.942 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223993, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:49:57.953 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:300 - Импорт статистики завершён. Обработано матчей: 10
+2026-07-21 20:49:57.954 | INFO     | app.importers.fixture_team_statistics_importer:import_data:304 - Добавлено записей: 20
+2026-07-21 20:49:57.956 | INFO     | app.importers.fixture_team_statistics_importer:import_data:307 - Пропущено существующих: 0
+2026-07-21 20:49:57.958 | WARNING  | app.importers.fixture_team_statistics_importer:import_data:310 - Команды не найдены: 0
+2026-07-21 20:49:57.960 | WARNING  | app.importers.fixture_team_statistics_importer:import_data:313 - Пустых ответов API: 0
+2026-07-21 20:49:57.963 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: FixtureTeamStatisticsImporter
+2026-07-21 20:49:57.964 | SUCCESS  | __main__:main:10 - Проверка статистики завершена.
+2026-07-21 20:53:33.016 | INFO     | __main__:main:8 - Запуск импорта статистики матчей...
+2026-07-21 20:53:33.016 | INFO     | app.importers.base_importer:run:20 - Запуск импортёра: FixtureTeamStatisticsImporter
+2026-07-21 20:53:33.052 | INFO     | app.importers.fixture_team_statistics_importer:import_data:85 - Найдено завершённых матчей без полной статистики: 10
+2026-07-21 20:53:33.052 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=340, api_id=1208055
+2026-07-21 20:53:33.053 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:33.718 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208055, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:35.729 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=341, api_id=1208056
+2026-07-21 20:53:35.731 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:35.949 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208056, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:37.951 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=342, api_id=1208057
+2026-07-21 20:53:37.951 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:38.215 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208057, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:40.216 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=343, api_id=1208053
+2026-07-21 20:53:40.217 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:40.415 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208053, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:42.417 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=344, api_id=1208054
+2026-07-21 20:53:42.417 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:42.702 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208054, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:44.709 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1418, api_id=1212914
+2026-07-21 20:53:44.710 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:44.915 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1212914, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:46.923 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=29, api_id=1213781
+2026-07-21 20:53:46.923 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:47.128 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1213781, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:49.130 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=1028, api_id=1223628
+2026-07-21 20:53:49.130 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:49.327 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1223628, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:51.337 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=345, api_id=1208052
+2026-07-21 20:53:51.339 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:51.559 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1208052, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:53.561 | INFO     | app.importers.fixture_team_statistics_importer:import_data:92 - Получение статистики матча: id=713, api_id=1224001
+2026-07-21 20:53:53.561 | INFO     | app.api.client:get:47 - GET https://v3.football.api-sports.io/fixtures/statistics | попытка 1/3
+2026-07-21 20:53:53.758 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:275 - Матч обработан: api_id=1224001, добавлено=2, пропущено=0, команд не найдено=0
+2026-07-21 20:53:55.770 | SUCCESS  | app.importers.fixture_team_statistics_importer:import_data:300 - Импорт статистики завершён. Обработано матчей: 10
+2026-07-21 20:53:55.770 | INFO     | app.importers.fixture_team_statistics_importer:import_data:304 - Добавлено записей: 20
+2026-07-21 20:53:55.770 | INFO     | app.importers.fixture_team_statistics_importer:import_data:307 - Пропущено существующих: 0
+2026-07-21 20:53:55.771 | WARNING  | app.importers.fixture_team_statistics_importer:import_data:310 - Команды не найдены: 0
+2026-07-21 20:53:55.772 | WARNING  | app.importers.fixture_team_statistics_importer:import_data:313 - Пустых ответов API: 0
+2026-07-21 20:53:55.774 | SUCCESS  | app.importers.base_importer:run:26 - Импорт завершён: FixtureTeamStatisticsImporter
+2026-07-21 20:53:55.775 | SUCCESS  | __main__:main:10 - Проверка статистики завершена.
