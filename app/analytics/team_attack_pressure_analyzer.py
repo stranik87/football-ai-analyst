@@ -4,9 +4,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.models.fixture import Fixture
-from app.models.fixture_team_statistics import (
-    FixtureTeamStatistics,
-)
+from app.models.fixture_team_statistics import FixtureTeamStatistics
 from app.models.team import Team
 
 
@@ -63,6 +61,7 @@ class TeamAttackPressureAnalyzer:
         team_id: int,
         limit: int = 10,
         venue: str = "all",
+        before_fixture_id: int | None = None,
     ) -> TeamAttackPressureResult:
         if limit <= 0:
             raise ValueError(
@@ -85,6 +84,21 @@ class TeamAttackPressureAnalyzer:
                 f"Команда не найдена: team_id={team_id}"
             )
 
+        target_fixture = None
+
+        if before_fixture_id is not None:
+            target_fixture = (
+                self.session.query(Fixture)
+                .filter(Fixture.id == before_fixture_id)
+                .first()
+            )
+
+            if not target_fixture:
+                raise ValueError(
+                    "Матч не найден: "
+                    f"fixture_id={before_fixture_id}"
+                )
+
         fixture_query = (
             self.session.query(Fixture)
             .join(
@@ -101,6 +115,12 @@ class TeamAttackPressureAnalyzer:
                 Fixture.away_goals.isnot(None),
             )
         )
+
+        if target_fixture is not None:
+            fixture_query = fixture_query.filter(
+                Fixture.kickoff
+                < target_fixture.kickoff
+            )
 
         if venue == "home":
             fixture_query = fixture_query.filter(

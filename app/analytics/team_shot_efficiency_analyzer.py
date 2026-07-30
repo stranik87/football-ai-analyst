@@ -60,6 +60,7 @@ class TeamShotEfficiencyAnalyzer:
         team_id: int,
         limit: int = 10,
         venue: str = "all",
+        before_fixture_id: int | None = None,
     ) -> TeamShotEfficiencyResult:
         if limit <= 0:
             raise ValueError(
@@ -82,6 +83,20 @@ class TeamShotEfficiencyAnalyzer:
                 f"Команда не найдена: team_id={team_id}"
             )
 
+        target_fixture = None
+
+        if before_fixture_id is not None:
+            target_fixture = (
+                self.session.query(Fixture)
+                .filter(Fixture.id == before_fixture_id)
+                .first()
+            )
+
+            if target_fixture is None:
+                raise ValueError(
+                    f"Матч не найден: fixture_id={before_fixture_id}"
+                )
+
         fixture_query = (
             self.session.query(Fixture)
             .join(
@@ -98,6 +113,11 @@ class TeamShotEfficiencyAnalyzer:
                 Fixture.away_goals.isnot(None),
             )
         )
+
+        if target_fixture is not None:
+            fixture_query = fixture_query.filter(
+                Fixture.kickoff < target_fixture.kickoff
+            )
 
         if venue == "home":
             fixture_query = fixture_query.filter(

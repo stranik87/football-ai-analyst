@@ -4,9 +4,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.models.fixture import Fixture
-from app.models.fixture_team_statistics import (
-    FixtureTeamStatistics,
-)
+from app.models.fixture_team_statistics import FixtureTeamStatistics
 from app.models.team import Team
 
 
@@ -67,6 +65,7 @@ class TeamDefensivePressureAnalyzer:
         team_id: int,
         limit: int = 10,
         venue: str = "all",
+        before_fixture_id: int | None = None,
     ) -> TeamDefensivePressureResult:
         if limit <= 0:
             raise ValueError(
@@ -89,6 +88,21 @@ class TeamDefensivePressureAnalyzer:
                 f"Команда не найдена: team_id={team_id}"
             )
 
+        target_fixture = None
+
+        if before_fixture_id is not None:
+            target_fixture = (
+                self.session.query(Fixture)
+                .filter(Fixture.id == before_fixture_id)
+                .first()
+            )
+
+            if not target_fixture:
+                raise ValueError(
+                    "Матч не найден: "
+                    f"fixture_id={before_fixture_id}"
+                )
+
         fixture_query = (
             self.session.query(Fixture)
             .join(
@@ -105,6 +119,12 @@ class TeamDefensivePressureAnalyzer:
                 Fixture.away_goals.isnot(None),
             )
         )
+
+        if target_fixture is not None:
+            fixture_query = fixture_query.filter(
+                Fixture.kickoff
+                < target_fixture.kickoff
+            )
 
         if venue == "home":
             fixture_query = fixture_query.filter(
@@ -214,30 +234,15 @@ class TeamDefensivePressureAnalyzer:
             is_clean_sheet = goals_conceded == 0
 
             match_defensive_score = self._calculate_score(
-                opponent_total_shots=(
-                    match_opponent_total_shots
-                ),
-                opponent_shots_on_goal=(
-                    match_opponent_shots_on_goal
-                ),
-                goalkeeper_saves=(
-                    match_goalkeeper_saves
-                ),
+                opponent_total_shots=match_opponent_total_shots,
+                opponent_shots_on_goal=match_opponent_shots_on_goal,
+                goalkeeper_saves=match_goalkeeper_saves,
                 goals_conceded=goals_conceded,
             )
 
-            opponent_total_shots += (
-                match_opponent_total_shots
-            )
-
-            opponent_shots_on_goal += (
-                match_opponent_shots_on_goal
-            )
-
-            goalkeeper_saves += (
-                match_goalkeeper_saves
-            )
-
+            opponent_total_shots += match_opponent_total_shots
+            opponent_shots_on_goal += match_opponent_shots_on_goal
+            goalkeeper_saves += match_goalkeeper_saves
             fouls += match_fouls
 
             if is_clean_sheet:
@@ -249,10 +254,8 @@ class TeamDefensivePressureAnalyzer:
 
             if match_defensive_score >= 70:
                 strong_defensive_matches += 1
-
             elif match_defensive_score >= 45:
                 medium_defensive_matches += 1
-
             else:
                 weak_defensive_matches += 1
 
@@ -264,32 +267,22 @@ class TeamDefensivePressureAnalyzer:
             venue=venue,
             requested_limit=limit,
             matches=matches,
-            opponent_total_shots=(
-                opponent_total_shots
-            ),
-            opponent_shots_on_goal=(
-                opponent_shots_on_goal
-            ),
+            opponent_total_shots=opponent_total_shots,
+            opponent_shots_on_goal=opponent_shots_on_goal,
             goalkeeper_saves=goalkeeper_saves,
             fouls=fouls,
             clean_sheets=clean_sheets,
-            average_opponent_total_shots=(
-                self._average(
-                    opponent_total_shots,
-                    matches,
-                )
+            average_opponent_total_shots=self._average(
+                opponent_total_shots,
+                matches,
             ),
-            average_opponent_shots_on_goal=(
-                self._average(
-                    opponent_shots_on_goal,
-                    matches,
-                )
+            average_opponent_shots_on_goal=self._average(
+                opponent_shots_on_goal,
+                matches,
             ),
-            average_goalkeeper_saves=(
-                self._average(
-                    goalkeeper_saves,
-                    matches,
-                )
+            average_goalkeeper_saves=self._average(
+                goalkeeper_saves,
+                matches,
             ),
             average_fouls=self._average(
                 fouls,
@@ -299,44 +292,28 @@ class TeamDefensivePressureAnalyzer:
                 goalkeeper_saves,
                 opponent_shots_on_goal,
             ),
-            clean_sheet_percentage=(
-                self._percentage(
-                    clean_sheets,
-                    matches,
-                )
+            clean_sheet_percentage=self._percentage(
+                clean_sheets,
+                matches,
             ),
-            defensive_pressure_score=(
-                self._average_float(
-                    sum(defensive_scores),
-                    matches,
-                )
+            defensive_pressure_score=self._average_float(
+                sum(defensive_scores),
+                matches,
             ),
-            strong_defensive_matches=(
-                strong_defensive_matches
+            strong_defensive_matches=strong_defensive_matches,
+            medium_defensive_matches=medium_defensive_matches,
+            weak_defensive_matches=weak_defensive_matches,
+            strong_defensive_percentage=self._percentage(
+                strong_defensive_matches,
+                matches,
             ),
-            medium_defensive_matches=(
-                medium_defensive_matches
+            medium_defensive_percentage=self._percentage(
+                medium_defensive_matches,
+                matches,
             ),
-            weak_defensive_matches=(
-                weak_defensive_matches
-            ),
-            strong_defensive_percentage=(
-                self._percentage(
-                    strong_defensive_matches,
-                    matches,
-                )
-            ),
-            medium_defensive_percentage=(
-                self._percentage(
-                    medium_defensive_matches,
-                    matches,
-                )
-            ),
-            weak_defensive_percentage=(
-                self._percentage(
-                    weak_defensive_matches,
-                    matches,
-                )
+            weak_defensive_percentage=self._percentage(
+                weak_defensive_matches,
+                matches,
             ),
         )
 
@@ -346,13 +323,9 @@ class TeamDefensivePressureAnalyzer:
         team_id: int,
     ) -> int:
         if fixture.home_team_id == team_id:
-            return int(
-                fixture.away_goals or 0
-            )
+            return int(fixture.away_goals or 0)
 
-        return int(
-            fixture.home_goals or 0
-        )
+        return int(fixture.home_goals or 0)
 
     @staticmethod
     def _calculate_score(
@@ -373,16 +346,10 @@ class TeamDefensivePressureAnalyzer:
 
         score = max(
             0.0,
-            min(
-                score,
-                100.0,
-            ),
+            min(score, 100.0),
         )
 
-        return round(
-            score,
-            2,
-        )
+        return round(score, 2)
 
     @staticmethod
     def _average(
@@ -392,10 +359,7 @@ class TeamDefensivePressureAnalyzer:
         if matches == 0:
             return 0.0
 
-        return round(
-            value / matches,
-            2,
-        )
+        return round(value / matches, 2)
 
     @staticmethod
     def _average_float(
@@ -405,10 +369,7 @@ class TeamDefensivePressureAnalyzer:
         if matches == 0:
             return 0.0
 
-        return round(
-            value / matches,
-            2,
-        )
+        return round(value / matches, 2)
 
     @staticmethod
     def _percentage(

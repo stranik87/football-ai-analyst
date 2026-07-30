@@ -43,6 +43,7 @@ class TeamRestDaysAnalyzer:
         self,
         team_id: int,
         limit: int = 10,
+        before_fixture_id: int | None = None,
     ) -> TeamRestDaysResult:
         if limit <= 0:
             raise ValueError(
@@ -60,7 +61,21 @@ class TeamRestDaysAnalyzer:
                 f"Команда не найдена: team_id={team_id}"
             )
 
-        fixtures = (
+        target_fixture = None
+
+        if before_fixture_id is not None:
+            target_fixture = (
+                self.session.query(Fixture)
+                .filter(Fixture.id == before_fixture_id)
+                .first()
+            )
+
+            if target_fixture is None:
+                raise ValueError(
+                    f"Матч не найден: fixture_id={before_fixture_id}"
+                )
+
+        fixture_query = (
             self.session.query(Fixture)
             .filter(
                 Fixture.status_short.in_(
@@ -74,7 +89,15 @@ class TeamRestDaysAnalyzer:
                     Fixture.away_team_id == team_id,
                 )
             )
-            .order_by(
+        )
+
+        if target_fixture is not None:
+            fixture_query = fixture_query.filter(
+                Fixture.kickoff < target_fixture.kickoff
+            )
+
+        fixtures = (
+            fixture_query.order_by(
                 Fixture.kickoff.desc(),
                 Fixture.id.desc(),
             )
