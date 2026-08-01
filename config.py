@@ -29,6 +29,14 @@ class Config:
 
     API_FOOTBALL_BASE_URL = "https://v3.football.api-sports.io"
 
+        # -----------------------------
+    # Telegram
+    # -----------------------------
+    TELEGRAM_BOT_TOKEN = os.getenv(
+        "TELEGRAM_BOT_TOKEN",
+        "",
+    )
+    
     # -----------------------------
     # База данных
     # -----------------------------
