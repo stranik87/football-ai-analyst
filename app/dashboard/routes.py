@@ -1,6 +1,11 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request,
+)
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
@@ -12,9 +17,9 @@ from app.models.league import League
 from app.models.standing import Standing
 from app.models.team import Team
 from app.services.fixture_service import FixtureService
-
-from fastapi import APIRouter, Depends, HTTPException, Request
 from app.services.prediction_service import PredictionService
+from app.services.team_service import TeamService
+
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -84,6 +89,7 @@ def dashboard_home(
         },
     )
 
+
 @router.get(
     "/predict/{fixture_id}",
     response_class=HTMLResponse,
@@ -99,7 +105,9 @@ def dashboard_prediction(
 
     try:
         prediction_service = PredictionService(db)
-        prediction = prediction_service.predict(fixture_id)
+        prediction = prediction_service.predict(
+            fixture_id
+        )
 
     except ValueError as error:
         raise HTTPException(
@@ -129,6 +137,7 @@ def dashboard_prediction(
             ),
         },
     )
+
 
 @router.get(
     "/fixtures",
@@ -167,5 +176,94 @@ def dashboard_fixtures(
             "title": "Матчи",
             "fixtures": serialized_fixtures,
             "team_query": team or "",
+        },
+    )
+
+
+@router.get(
+    "/teams",
+    response_class=HTMLResponse,
+)
+def dashboard_teams(
+    request: Request,
+    name: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """
+    HTML-страница списка команд.
+    """
+
+    team_service = TeamService(db)
+
+    if name:
+        teams = team_service.search(
+            name=name,
+            limit=50,
+        )
+    else:
+        teams = team_service.get_all(
+            limit=50,
+            offset=0,
+        )
+
+    serialized_teams = [
+        team_service.serialize(team)
+        for team in teams
+    ]
+
+    return templates.TemplateResponse(
+        request=request,
+        name="teams.html",
+        context={
+            "title": "Команды",
+            "teams": serialized_teams,
+            "name_query": name or "",
+        },
+    )
+
+
+@router.get(
+    "/team/{team_id}",
+    response_class=HTMLResponse,
+)
+def dashboard_team(
+    team_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """
+    HTML-страница одной команды.
+    """
+
+    team_service = TeamService(db)
+    fixture_service = FixtureService(db)
+
+    team = team_service.get_by_id(team_id)
+
+    if team is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Команда {team_id} не найдена.",
+        )
+
+    team_data = team_service.serialize(team)
+
+    fixtures = fixture_service.search_team_matches(
+        team_name=team.name,
+        limit=10,
+    )
+
+    serialized_fixtures = [
+        fixture_service.serialize(fixture)
+        for fixture in fixtures
+    ]
+
+    return templates.TemplateResponse(
+        request=request,
+        name="team.html",
+        context={
+            "title": team.name,
+            "team": team_data,
+            "fixtures": serialized_fixtures,
         },
     )

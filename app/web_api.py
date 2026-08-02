@@ -8,6 +8,10 @@ from app.api.routes.teams import router as teams_router
 from app.api.routes.leagues import router as leagues_router
 from app.api.routes.standings import router as standings_router
 from app.dashboard.routes import router as dashboard_router
+from pathlib import Path
+
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI(
     title=Config.APP_NAME,
@@ -17,6 +21,12 @@ app = FastAPI(
     ),
 )
 
+BASE_DIR = Path(__file__).resolve().parent
+app.mount(
+    "/static",
+    StaticFiles(directory=str(BASE_DIR / "dashboard" / "static")),
+    name="static",
+)
 
 @app.get("/")
 def root() -> dict[str, str]:
