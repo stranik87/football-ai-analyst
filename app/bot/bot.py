@@ -4,16 +4,21 @@ from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     ContextTypes,
+    ConversationHandler,
     MessageHandler,
     filters,
 )
 
 from config import Config
 from app.bot.handlers import (
+    WAITING_FIXTURE_ID,
+    cancel_command,
     help_command,
-    menu_message_handler,
     predict_command,
+    receive_fixture_id,
     start_command,
+    start_prediction_dialog,
+    unknown_message_handler,
 )
 from app.core.logger import logger
 
@@ -41,6 +46,37 @@ class FootballTelegramBot:
             .build()
         )
 
+        prediction_conversation = ConversationHandler(
+            entry_points=[
+                MessageHandler(
+                    filters.Regex(
+                        r"^📊 Прогноз матча$"
+                    ),
+                    start_prediction_dialog,
+                ),
+            ],
+            states={
+                WAITING_FIXTURE_ID: [
+                    MessageHandler(
+                        filters.TEXT
+                        & ~filters.COMMAND,
+                        receive_fixture_id,
+                    ),
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel",
+                    cancel_command,
+                ),
+                CommandHandler(
+                    "start",
+                    start_command,
+                ),
+            ],
+            allow_reentry=True,
+        )
+
         application.add_handler(
             CommandHandler(
                 "start",
@@ -63,9 +99,13 @@ class FootballTelegramBot:
         )
 
         application.add_handler(
+            prediction_conversation
+        )
+
+        application.add_handler(
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                menu_message_handler,
+                unknown_message_handler,
             )
         )
 

@@ -1,9 +1,14 @@
+from typing import Any
+
 from telegram import ReplyKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, ConversationHandler
 
 from app.core.logger import logger
 from app.database.database import SessionLocal
 from app.services.prediction_service import PredictionService
+
+
+WAITING_FIXTURE_ID = 1
 
 
 MAIN_MENU_KEYBOARD = ReplyKeyboardMarkup(
@@ -27,11 +32,14 @@ async def start_command(
     if update.message is None:
         return
 
+    context.user_data.clear()
+
     text = (
         "⚽ Football AI Analyst\n\n"
         "Бот анализирует футбольные матчи "
         "и рассчитывает вероятности исходов.\n\n"
-        "Выбери действие в меню или используй команду:\n"
+        "Нажми «📊 Прогноз матча» "
+        "или используй команду:\n"
         "/predict <ID матча>\n\n"
         "Пример:\n"
         "/predict 1377"
@@ -56,16 +64,15 @@ async def help_command(
 
     text = (
         "📖 Помощь\n\n"
-        "Для получения прогноза введи:\n"
+        "Получить прогноз можно двумя способами:\n\n"
+        "1. Нажать кнопку «📊 Прогноз матча» "
+        "и отправить ID матча.\n\n"
+        "2. Ввести команду:\n"
         "/predict <ID матча>\n\n"
         "Пример:\n"
         "/predict 1377\n\n"
-        "Бот покажет:\n"
-        "• команды;\n"
-        "• дату матча;\n"
-        "• вероятности исходов;\n"
-        "• основной прогноз;\n"
-        "• уверенность модели."
+        "Для отмены ввода используй:\n"
+        "/cancel"
     )
 
     await update.message.reply_text(
@@ -74,36 +81,67 @@ async def help_command(
     )
 
 
-async def menu_message_handler(
+async def start_prediction_dialog(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-) -> None:
+) -> int:
     """
-    Обработка кнопок главного меню.
+    Начать диалог получения прогноза.
     """
 
     if update.message is None:
-        return
-
-    text = update.message.text or ""
-
-    if text == "📊 Прогноз матча":
-        await update.message.reply_text(
-            "Введи команду с ID матча:\n\n"
-            "/predict 1377",
-            reply_markup=MAIN_MENU_KEYBOARD,
-        )
-        return
-
-    if text == "ℹ️ Помощь":
-        await help_command(update, context)
-        return
+        return ConversationHandler.END
 
     await update.message.reply_text(
-        "Команда не распознана.\n"
-        "Выбери действие в меню.",
+        "📊 Введи ID матча одним числом.\n\n"
+        "Например:\n"
+        "1377\n\n"
+        "Для отмены введи /cancel",
         reply_markup=MAIN_MENU_KEYBOARD,
     )
+
+    return WAITING_FIXTURE_ID
+
+
+async def receive_fixture_id(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    """
+    Получить ID матча обычным сообщением.
+    """
+
+    if update.message is None:
+        return ConversationHandler.END
+
+    fixture_id_value = (
+        update.message.text or ""
+    ).strip()
+
+    try:
+        fixture_id = int(fixture_id_value)
+    except ValueError:
+        await update.message.reply_text(
+            "❌ ID матча должен быть целым числом.\n\n"
+            "Попробуй ещё раз, например:\n"
+            "1377\n\n"
+            "Для отмены введи /cancel"
+        )
+        return WAITING_FIXTURE_ID
+
+    if fixture_id <= 0:
+        await update.message.reply_text(
+            "❌ ID матча должен быть больше нуля.\n"
+            "Попробуй ещё раз."
+        )
+        return WAITING_FIXTURE_ID
+
+    await send_prediction(
+        update=update,
+        fixture_id=fixture_id,
+    )
+
+    return ConversationHandler.END
 
 
 async def predict_command(
@@ -146,6 +184,23 @@ async def predict_command(
         )
         return
 
+    await send_prediction(
+        update=update,
+        fixture_id=fixture_id,
+    )
+
+
+async def send_prediction(
+    update: Update,
+    fixture_id: int,
+) -> None:
+    """
+    Построить прогноз и отправить его пользователю.
+    """
+
+    if update.message is None:
+        return
+
     status_message = await update.message.reply_text(
         "⏳ Анализирую матч..."
     )
@@ -156,55 +211,8 @@ async def predict_command(
         service = PredictionService(session)
         prediction = service.predict(fixture_id)
 
-        probabilities = prediction["probabilities"]
-
-        home_probability = probabilities["home_win"] * 100
-        draw_probability = probabilities["draw"] * 100
-        away_probability = probabilities["away_win"] * 100
-        confidence = prediction["confidence"] * 100
-
-        kickoff = prediction.get("kickoff")
-
-        if kickoff is not None:
-            kickoff_text = kickoff.strftime(
-                "%d.%m.%Y %H:%M"
-            )
-        else:
-            kickoff_text = "не указана"
-
-        actual_score = prediction.get("actual_score") or {}
-
-        home_goals = actual_score.get("home_goals")
-        away_goals = actual_score.get("away_goals")
-
-        score_text = ""
-
-        if (
-            home_goals is not None
-            and away_goals is not None
-        ):
-            score_text = (
-                f"\nФактический счёт: "
-                f"{home_goals}:{away_goals}\n"
-            )
-
-        response_text = (
-            "⚽ Прогноз матча\n\n"
-            f"{prediction['home_team']} — "
-            f"{prediction['away_team']}\n"
-            f"Дата: {kickoff_text}\n"
-            f"{score_text}\n"
-            "Вероятности:\n"
-            f"🏠 Победа хозяев: "
-            f"{home_probability:.1f}%\n"
-            f"🤝 Ничья: "
-            f"{draw_probability:.1f}%\n"
-            f"✈️ Победа гостей: "
-            f"{away_probability:.1f}%\n\n"
-            f"Прогноз: "
-            f"{prediction['predicted_result_name']}\n"
-            f"Уверенность модели: "
-            f"{confidence:.1f}%"
+        response_text = build_prediction_text(
+            prediction
         )
 
         await status_message.edit_text(
@@ -220,7 +228,8 @@ async def predict_command(
             "Telegram-прогноз: "
             f"fixture_id={fixture_id}, "
             f"result={prediction['predicted_result']}, "
-            f"confidence={prediction['confidence']:.4f}"
+            f"confidence="
+            f"{prediction['confidence']:.4f}"
         )
 
     except ValueError as error:
@@ -253,3 +262,111 @@ async def predict_command(
 
     finally:
         session.close()
+
+
+def build_prediction_text(
+    prediction: dict[str, Any],
+) -> str:
+    """
+    Сформировать текст прогноза.
+    """
+
+    probabilities = prediction["probabilities"]
+
+    home_probability = (
+        probabilities["home_win"] * 100
+    )
+    draw_probability = (
+        probabilities["draw"] * 100
+    )
+    away_probability = (
+        probabilities["away_win"] * 100
+    )
+    confidence = prediction["confidence"] * 100
+
+    kickoff = prediction.get("kickoff")
+
+    if kickoff is not None:
+        kickoff_text = kickoff.strftime(
+            "%d.%m.%Y %H:%M"
+        )
+    else:
+        kickoff_text = "не указана"
+
+    actual_score = (
+        prediction.get("actual_score") or {}
+    )
+
+    home_goals = actual_score.get("home_goals")
+    away_goals = actual_score.get("away_goals")
+
+    score_text = ""
+
+    if (
+        home_goals is not None
+        and away_goals is not None
+    ):
+        score_text = (
+            f"\nФактический счёт: "
+            f"{home_goals}:{away_goals}\n"
+        )
+
+    return (
+        "⚽ Прогноз матча\n\n"
+        f"{prediction['home_team']} — "
+        f"{prediction['away_team']}\n"
+        f"Дата: {kickoff_text}\n"
+        f"{score_text}\n"
+        "Вероятности:\n"
+        f"🏠 Победа хозяев: "
+        f"{home_probability:.1f}%\n"
+        f"🤝 Ничья: "
+        f"{draw_probability:.1f}%\n"
+        f"✈️ Победа гостей: "
+        f"{away_probability:.1f}%\n\n"
+        f"Прогноз: "
+        f"{prediction['predicted_result_name']}\n"
+        f"Уверенность модели: "
+        f"{confidence:.1f}%"
+    )
+
+
+async def cancel_command(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    """
+    Отменить текущий диалог.
+    """
+
+    if update.message is not None:
+        await update.message.reply_text(
+            "Ввод отменён.",
+            reply_markup=MAIN_MENU_KEYBOARD,
+        )
+
+    return ConversationHandler.END
+
+
+async def unknown_message_handler(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> None:
+    """
+    Обработка неизвестного текста.
+    """
+
+    if update.message is None:
+        return
+
+    text = update.message.text or ""
+
+    if text == "ℹ️ Помощь":
+        await help_command(update, context)
+        return
+
+    await update.message.reply_text(
+        "Команда не распознана.\n"
+        "Выбери действие в меню.",
+        reply_markup=MAIN_MENU_KEYBOARD,
+    )
