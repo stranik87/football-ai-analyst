@@ -7,6 +7,7 @@ from telegram.ext import (
     ConversationHandler,
     MessageHandler,
     filters,
+    CallbackQueryHandler,
 )
 
 from config import Config
@@ -19,6 +20,8 @@ from app.bot.handlers import (
     start_command,
     start_prediction_dialog,
     unknown_message_handler,
+    fixture_callback_handler,
+    show_fixture_list,
 )
 from app.core.logger import logger
 
@@ -52,18 +55,25 @@ class FootballTelegramBot:
                     filters.Regex(
                         r"^📊 Прогноз матча$"
                     ),
-                    start_prediction_dialog,
+                    show_fixture_list,
                 ),
             ],
             states={
                 WAITING_FIXTURE_ID: [
+                    CallbackQueryHandler(
+                        fixture_callback_handler,
+                        pattern=(
+                            r"^(predict_fixture:\d+|"
+                            r"predict_manual)$"
+            ),
+        ),
                     MessageHandler(
                         filters.TEXT
                         & ~filters.COMMAND,
                         receive_fixture_id,
-                    ),
-                ],
-            },
+        ),
+    ],
+},
             fallbacks=[
                 CommandHandler(
                     "cancel",

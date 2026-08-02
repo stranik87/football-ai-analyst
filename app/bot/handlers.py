@@ -7,6 +7,14 @@ from app.core.logger import logger
 from app.database.database import SessionLocal
 from app.services.prediction_service import PredictionService
 
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    Update,
+)
+
+from app.services.fixture_service import FixtureService
 
 WAITING_FIXTURE_ID = 1
 
@@ -80,6 +88,193 @@ async def help_command(
         reply_markup=MAIN_MENU_KEYBOARD,
     )
 
+async def show_fixture_list(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    """
+    Показать последние матчи для выбора.
+    """
+
+    if update.message is None:
+        return ConversationHandler.END
+
+    session = SessionLocal()
+
+    try:
+        fixture_service = FixtureService(session)
+        fixtures = fixture_service.get_latest_matches(
+            limit=5
+        )
+
+        if not fixtures:
+            await update.message.reply_text(
+                "Матчи в базе не найдены.",
+                reply_markup=MAIN_MENU_KEYBOARD,
+            )
+            return ConversationHandler.END
+
+        keyboard = []
+
+        for fixture in fixtures:
+            home_team = (
+                fixture.home_team.name
+                if fixture.home_team is not None
+                else "Неизвестная команда"
+            )
+
+            away_team = (
+                fixture.away_team.name
+                if fixture.away_team is not None
+                else "Неизвестная команда"
+            )
+
+            keyboard.append(
+                [
+                    InlineKeyboardButton(
+                        text=f"{home_team} — {away_team}",
+                        callback_data=(
+                            f"predict_fixture:{fixture.id}"
+                        ),
+                    )
+                ]
+            )
+
+        keyboard.append(
+            [
+                InlineKeyboardButton(
+                    text="⌨️ Ввести ID вручную",
+                    callback_data="predict_manual",
+                )
+            ]
+        )
+
+        await update.message.reply_text(
+            "⚽ Выбери матч:",
+            reply_markup=InlineKeyboardMarkup(
+                keyboard
+            ),
+        )
+
+        return WAITING_FIXTURE_ID
+
+    finally:
+        session.close()
+
+async def fixture_callback_handler(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    """
+    Обработать выбор матча или ручной ввод ID.
+    """
+
+    query = update.callback_query
+
+    if query is None:
+        return ConversationHandler.END
+
+    await query.answer()
+
+    callback_data = query.data or ""
+
+    if callback_data == "predict_manual":
+        await query.edit_message_text(
+            "📊 Введи ID матча одним числом.\n\n"
+            "Например:\n"
+            "1377\n\n"
+            "Для отмены введи /cancel"
+        )
+
+        return WAITING_FIXTURE_ID
+
+    if not callback_data.startswith(
+        "predict_fixture:"
+    ):
+        await query.edit_message_text(
+            "❌ Не удалось определить выбранный матч."
+        )
+
+        return ConversationHandler.END
+
+    fixture_id_value = callback_data.split(
+        ":",
+        maxsplit=1,
+    )[1]
+
+    try:
+        fixture_id = int(fixture_id_value)
+    except ValueError:
+        await query.edit_message_text(
+            "❌ Некорректный ID матча."
+        )
+
+        return ConversationHandler.END
+
+    await query.edit_message_text(
+        "⏳ Анализирую матч..."
+    )
+
+    session = SessionLocal()
+
+    try:
+        service = PredictionService(session)
+        prediction = service.predict(fixture_id)
+
+        response_text = build_prediction_text(
+            prediction
+        )
+
+        await query.edit_message_text(
+            response_text
+        )
+
+        if query.message is not None:
+            await query.message.reply_text(
+                "Выбери следующее действие:",
+                reply_markup=MAIN_MENU_KEYBOARD,
+            )
+
+        logger.info(
+            "Telegram-прогноз из списка: "
+            f"fixture_id={fixture_id}, "
+            f"result={prediction['predicted_result']}, "
+            f"confidence="
+            f"{prediction['confidence']:.4f}"
+        )
+
+    except ValueError as error:
+        logger.warning(
+            f"Ошибка Telegram-прогноза: {error}"
+        )
+
+        await query.edit_message_text(
+            f"❌ {error}"
+        )
+
+    except FileNotFoundError as error:
+        logger.error(
+            f"Файл модели не найден: {error}"
+        )
+
+        await query.edit_message_text(
+            "❌ Модель прогнозирования не найдена."
+        )
+
+    except Exception:
+        logger.exception(
+            "Ошибка прогноза выбранного матча."
+        )
+
+        await query.edit_message_text(
+            "❌ Не удалось построить прогноз.\n"
+            "Ошибка записана в журнал."
+        )
+
+    finally:
+        session.close()
+
+    return ConversationHandler.END
 
 async def start_prediction_dialog(
     update: Update,
