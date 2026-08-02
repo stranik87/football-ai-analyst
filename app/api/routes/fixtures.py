@@ -31,6 +31,28 @@ def get_latest_fixtures(
     ]
 
 
+@router.get("/search")
+def search_fixtures(
+    team: str,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """
+    Найти последние матчи команды по названию.
+    """
+
+    service = FixtureService(db)
+
+    fixtures = service.search_team_matches(
+        team_name=team,
+        limit=limit,
+    )
+
+    return [
+        service.serialize(fixture)
+        for fixture in fixtures
+    ]
+
 @router.get("/{fixture_id}")
 def get_fixture(
     fixture_id: int,
