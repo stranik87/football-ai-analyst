@@ -1,61 +1,96 @@
-from app.api.leagues import LeagueService as APLeagueService
-from app.core.logger import logger
-from app.database.session import get_db
+from sqlalchemy.orm import joinedload
+
 from app.models.league import League
-from app.repositories.league_repository import LeagueRepository
 
 
-class LeagueImportService:
+class LeagueService:
+    """
+    Сервис для работы с футбольными лигами.
+    """
 
-    def import_leagues(self):
+    def __init__(self, session) -> None:
+        self.session = session
 
-        api = APLeagueService()
+    def get_by_id(
+        self,
+        league_id: int,
+    ) -> League | None:
+        """
+        Получить лигу по локальному ID.
+        """
 
-        data = api.get_current_leagues()
+        return (
+            self.session.query(League)
+            .options(
+                joinedload(League.seasons),
+            )
+            .filter(
+                League.id == league_id
+            )
+            .first()
+        )
 
-        if not data:
-            logger.error("Не удалось получить список лиг.")
-            return
+    def get_all(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[League]:
+        """
+        Получить список лиг.
+        """
 
-        db = next(get_db())
+        safe_limit = max(1, min(limit, 100))
+        safe_offset = max(0, offset)
 
-        repository = LeagueRepository(db)
+        return (
+            self.session.query(League)
+            .order_by(League.name.asc())
+            .offset(safe_offset)
+            .limit(safe_limit)
+            .all()
+        )
 
-        added = 0
-        skipped = 0
+    def search(
+        self,
+        name: str,
+        limit: int = 20,
+    ) -> list[League]:
+        """
+        Найти лиги по части названия.
+        """
 
-        try:
+        normalized_name = name.strip()
 
-            for item in data["response"]:
+        if not normalized_name:
+            return []
 
-                league = item["league"]
-                country = item["country"]
+        safe_limit = max(1, min(limit, 50))
 
-                if repository.get_by_api_id(league["id"]):
-                    skipped += 1
-                    continue
-
-                repository.add(
-                    League(
-                        api_id=league["id"],
-                        name=league["name"],
-                        type=league["type"],
-                        logo=league["logo"],
-                        country=country["name"],
-                        country_code=country["code"] or "",
-                        flag=country["flag"] or "",
-                    )
+        return (
+            self.session.query(League)
+            .filter(
+                League.name.ilike(
+                    f"%{normalized_name}%"
                 )
+            )
+            .order_by(League.name.asc())
+            .limit(safe_limit)
+            .all()
+        )
 
-                added += 1
+    @staticmethod
+    def serialize(
+        league: League,
+    ) -> dict:
+        """
+        Преобразовать лигу в словарь.
+        """
 
-            repository.commit()
-
-            logger.success(f"Добавлено: {added}")
-            logger.info(f"Пропущено: {skipped}")
-
-        except Exception as e:
-
-            repository.rollback()
-
-            logger.exception(e)
+        return {
+            "league_id": league.id,
+            "api_id": league.api_id,
+            "name": league.name,
+            "type": league.type,
+            "country": league.country,
+            "logo": league.logo,
+        }

@@ -5,6 +5,7 @@ from app.api.routes.fixtures import router as fixtures_router
 from app.api.routes.predictions import router as predictions_router
 
 from app.api.routes.teams import router as teams_router
+from app.api.routes.leagues import router as leagues_router
 
 app = FastAPI(
     title=Config.APP_NAME,
@@ -34,3 +35,4 @@ def health_check() -> dict[str, str]:
 app.include_router(fixtures_router)
 app.include_router(predictions_router)
 app.include_router(teams_router)
+app.include_router(leagues_router)
