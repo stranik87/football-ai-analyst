@@ -129,3 +129,43 @@ def dashboard_prediction(
             ),
         },
     )
+
+@router.get(
+    "/fixtures",
+    response_class=HTMLResponse,
+)
+def dashboard_fixtures(
+    request: Request,
+    team: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """
+    HTML-страница списка матчей.
+    """
+
+    fixture_service = FixtureService(db)
+
+    if team:
+        fixtures = fixture_service.search_team_matches(
+            team_name=team,
+            limit=50,
+        )
+    else:
+        fixtures = fixture_service.get_latest_matches(
+            limit=50
+        )
+
+    serialized_fixtures = [
+        fixture_service.serialize(fixture)
+        for fixture in fixtures
+    ]
+
+    return templates.TemplateResponse(
+        request=request,
+        name="fixtures.html",
+        context={
+            "title": "Матчи",
+            "fixtures": serialized_fixtures,
+            "team_query": team or "",
+        },
+    )
