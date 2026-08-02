@@ -2,81 +2,141 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>{{ title }}</title>
 
-    <style>
-        body{
-            font-family: Arial, Helvetica, sans-serif;
-            background:#f5f5f5;
-            margin:40px;
-        }
-
-        h1{
-            color:#222;
-        }
-
-        table{
-            border-collapse:collapse;
-            width:100%;
-            background:white;
-        }
-
-        th,td{
-            border:1px solid #ddd;
-            padding:10px;
-            text-align:center;
-        }
-
-        th{
-            background:#1f2937;
-            color:white;
-        }
-
-        tr:nth-child(even){
-            background:#f7f7f7;
-        }
-    </style>
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
 </head>
 
 <body>
 
-<h1>⚽ Football AI Analyst</h1>
+<header class="header">
+    <h1>⚽ Football AI Analyst</h1>
+</header>
 
-<h2>Последние матчи</h2>
+<div class="wrapper">
 
-<table>
+    <aside class="sidebar">
+        <a href="/dashboard">
+            📊 Dashboard
+        </a>
 
-<tr>
-    <th>ID</th>
-    <th>Дата</th>
-    <th>Хозяева</th>
-    <th>Гости</th>
-    <th>Счет</th>
-</tr>
+        <a href="/fixtures/latest">
+            ⚽ Матчи
+        </a>
 
-{% for fixture in fixtures %}
+        <a href="/teams">
+            👥 Команды
+        </a>
 
-<tr>
+        <a href="/leagues">
+            🏆 Лиги
+        </a>
 
-<td>{{ fixture.fixture_id }}</td>
+        <a href="/standings/39/2024">
+            📈 Турнирная таблица
+        </a>
 
-<td>{{ fixture.kickoff }}</td>
+        <a href="/docs">
+            🛠 API Swagger
+        </a>
+    </aside>
 
-<td>{{ fixture.home_team }}</td>
+    <main class="content">
 
-<td>{{ fixture.away_team }}</td>
+        <h2>Обзор проекта</h2>
 
-<td>
-{{ fixture.home_goals }}
-:
-{{ fixture.away_goals }}
-</td>
+        <section class="cards">
 
-</tr>
+            <article class="card">
+                <h2>{{ total_fixtures }}</h2>
+                <p>Матчей в базе</p>
+            </article>
 
-{% endfor %}
+            <article class="card">
+                <h2>{{ total_teams }}</h2>
+                <p>Команд</p>
+            </article>
 
-</table>
+            <article class="card">
+                <h2>{{ total_leagues }}</h2>
+                <p>Лиг</p>
+            </article>
+
+            <article class="card">
+                <h2>{{ total_standings }}</h2>
+                <p>Позиций в таблицах</p>
+            </article>
+
+        </section>
+
+        <section>
+            <h2>Последние матчи</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Дата</th>
+                        <th>Хозяева</th>
+                        <th>Гости</th>
+                        <th>Счёт</th>
+                        <th>Прогноз</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for fixture in fixtures %}
+                    <tr>
+                        <td>
+                            {{ fixture.fixture_id }}
+                        </td>
+
+                        <td>
+                            {{ fixture.kickoff.strftime(
+                                "%d.%m.%Y %H:%M"
+                            ) }}
+                        </td>
+
+                        <td>
+                            {{ fixture.home_team }}
+                        </td>
+
+                        <td>
+                            {{ fixture.away_team }}
+                        </td>
+
+                        <td>
+                            {{ fixture.home_goals }}
+                            :
+                            {{ fixture.away_goals }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="/dashboard/predict/{{ fixture.fixture_id }}"
+                                target="_blank"
+                            >
+                                Получить прогноз
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+</div>
 
 </body>
 </html>
