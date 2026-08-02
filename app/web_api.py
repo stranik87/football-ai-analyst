@@ -7,6 +7,7 @@ from app.api.routes.predictions import router as predictions_router
 from app.api.routes.teams import router as teams_router
 from app.api.routes.leagues import router as leagues_router
 from app.api.routes.standings import router as standings_router
+from app.dashboard.routes import router as dashboard_router
 
 app = FastAPI(
     title=Config.APP_NAME,
@@ -38,3 +39,4 @@ app.include_router(predictions_router)
 app.include_router(teams_router)
 app.include_router(leagues_router)
 app.include_router(standings_router)
+app.include_router(dashboard_router)
