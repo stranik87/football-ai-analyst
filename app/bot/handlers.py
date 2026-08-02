@@ -1,9 +1,19 @@
-from telegram import Update
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from app.core.logger import logger
 from app.database.database import SessionLocal
 from app.services.prediction_service import PredictionService
+
+
+MAIN_MENU_KEYBOARD = ReplyKeyboardMarkup(
+    keyboard=[
+        ["📊 Прогноз матча"],
+        ["ℹ️ Помощь"],
+    ],
+    resize_keyboard=True,
+    is_persistent=True,
+)
 
 
 async def start_command(
@@ -21,15 +31,16 @@ async def start_command(
         "⚽ Football AI Analyst\n\n"
         "Бот анализирует футбольные матчи "
         "и рассчитывает вероятности исходов.\n\n"
-        "Доступные команды:\n"
-        "/start — запуск бота\n"
-        "/help — помощь\n"
-        "/predict <ID матча> — прогноз матча\n\n"
+        "Выбери действие в меню или используй команду:\n"
+        "/predict <ID матча>\n\n"
         "Пример:\n"
         "/predict 1377"
     )
 
-    await update.message.reply_text(text)
+    await update.message.reply_text(
+        text,
+        reply_markup=MAIN_MENU_KEYBOARD,
+    )
 
 
 async def help_command(
@@ -57,7 +68,42 @@ async def help_command(
         "• уверенность модели."
     )
 
-    await update.message.reply_text(text)
+    await update.message.reply_text(
+        text,
+        reply_markup=MAIN_MENU_KEYBOARD,
+    )
+
+
+async def menu_message_handler(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> None:
+    """
+    Обработка кнопок главного меню.
+    """
+
+    if update.message is None:
+        return
+
+    text = update.message.text or ""
+
+    if text == "📊 Прогноз матча":
+        await update.message.reply_text(
+            "Введи команду с ID матча:\n\n"
+            "/predict 1377",
+            reply_markup=MAIN_MENU_KEYBOARD,
+        )
+        return
+
+    if text == "ℹ️ Помощь":
+        await help_command(update, context)
+        return
+
+    await update.message.reply_text(
+        "Команда не распознана.\n"
+        "Выбери действие в меню.",
+        reply_markup=MAIN_MENU_KEYBOARD,
+    )
 
 
 async def predict_command(
@@ -75,7 +121,8 @@ async def predict_command(
         await update.message.reply_text(
             "Укажи ID матча.\n\n"
             "Пример:\n"
-            "/predict 1377"
+            "/predict 1377",
+            reply_markup=MAIN_MENU_KEYBOARD,
         )
         return
 
@@ -87,13 +134,15 @@ async def predict_command(
         await update.message.reply_text(
             "ID матча должен быть целым числом.\n\n"
             "Пример:\n"
-            "/predict 1377"
+            "/predict 1377",
+            reply_markup=MAIN_MENU_KEYBOARD,
         )
         return
 
     if fixture_id <= 0:
         await update.message.reply_text(
-            "ID матча должен быть больше нуля."
+            "ID матча должен быть больше нуля.",
+            reply_markup=MAIN_MENU_KEYBOARD,
         )
         return
 
@@ -109,15 +158,9 @@ async def predict_command(
 
         probabilities = prediction["probabilities"]
 
-        home_probability = (
-            probabilities["home_win"] * 100
-        )
-        draw_probability = (
-            probabilities["draw"] * 100
-        )
-        away_probability = (
-            probabilities["away_win"] * 100
-        )
+        home_probability = probabilities["home_win"] * 100
+        draw_probability = probabilities["draw"] * 100
+        away_probability = probabilities["away_win"] * 100
         confidence = prediction["confidence"] * 100
 
         kickoff = prediction.get("kickoff")
@@ -141,8 +184,7 @@ async def predict_command(
             and away_goals is not None
         ):
             score_text = (
-                "\n"
-                f"Фактический счёт: "
+                f"\nФактический счёт: "
                 f"{home_goals}:{away_goals}\n"
             )
 
@@ -167,6 +209,11 @@ async def predict_command(
 
         await status_message.edit_text(
             response_text
+        )
+
+        await update.message.reply_text(
+            "Выбери следующее действие:",
+            reply_markup=MAIN_MENU_KEYBOARD,
         )
 
         logger.info(

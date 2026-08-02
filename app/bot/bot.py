@@ -4,11 +4,14 @@ from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     ContextTypes,
+    MessageHandler,
+    filters,
 )
 
 from config import Config
 from app.bot.handlers import (
     help_command,
+    menu_message_handler,
     predict_command,
     start_command,
 )
@@ -59,6 +62,13 @@ class FootballTelegramBot:
             )
         )
 
+        application.add_handler(
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                menu_message_handler,
+            )
+        )
+
         application.add_error_handler(
             self._error_handler
         )
@@ -70,7 +80,7 @@ class FootballTelegramBot:
         update: object,
         context: ContextTypes.DEFAULT_TYPE,
     ) -> None:
-        logger.exception(
+        logger.error(
             "Ошибка Telegram-бота: "
             f"{context.error}"
         )
