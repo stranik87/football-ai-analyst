@@ -15,30 +15,41 @@ from app.repositories.fixture_repository import FixtureRepository
 
 class FixtureImporter(BaseImporter):
     """
-    Импорт футбольных матчей для поддерживаемых лиг.
-
-    Транзакцией управляет BaseImporter.
+    Импорт и обновление футбольных матчей.
     """
 
-    TARGET_LEAGUE_API_IDS = [
+    DEFAULT_LEAGUE_API_IDS = [
         39,
-        140,
-        135,
-        78,
         61,
+        78,
+        135,
+        140,
     ]
 
-    SEASON = 2024
+    DEFAULT_SEASON = 2024
     REQUEST_DELAY = 2
+
+    def __init__(
+        self,
+        season: int = DEFAULT_SEASON,
+        league_api_ids: list[int] | None = None,
+    ) -> None:
+        super().__init__()
+
+        self.season = season
+        self.league_api_ids = (
+            league_api_ids
+            if league_api_ids is not None
+            else self.DEFAULT_LEAGUE_API_IDS
+        )
 
     def import_data(self) -> None:
         api = FixtureService()
         db = self.session
-
         repository = FixtureRepository(db)
 
         added = 0
-        skipped = 0
+        updated = 0
         missing_teams = 0
         invalid_records = 0
         empty_responses = 0
@@ -50,22 +61,33 @@ class FixtureImporter(BaseImporter):
                 League.id == LeagueSeason.league_id,
             )
             .filter(
-                LeagueSeason.season == self.SEASON,
+                LeagueSeason.season == self.season,
                 League.api_id.in_(
-                    self.TARGET_LEAGUE_API_IDS
+                    self.league_api_ids
                 ),
             )
             .order_by(
                 League.api_id.asc(),
-                LeagueSeason.season.asc(),
             )
             .all()
+        )
+
+        logger.info(
+            "Параметры импорта матчей: "
+            f"season={self.season}, "
+            f"leagues={self.league_api_ids}"
         )
 
         logger.info(
             "Найдено сезонов для импорта матчей: "
             f"{len(league_seasons)}"
         )
+
+        if not league_seasons:
+            logger.warning(
+                "Подходящие сезоны не найдены в базе."
+            )
+            return
 
         for season_number, league_season in enumerate(
             league_seasons,
@@ -123,19 +145,6 @@ class FixtureImporter(BaseImporter):
 
                 if fixture_api_id is None:
                     invalid_records += 1
-
-                    logger.warning(
-                        "Пропущен матч без API ID: "
-                        f"league={league.name}"
-                    )
-                    continue
-
-                existing = repository.get_by_api_id(
-                    fixture_api_id
-                )
-
-                if existing:
-                    skipped += 1
                     continue
 
                 home_data = teams_data.get("home") or {}
@@ -149,11 +158,6 @@ class FixtureImporter(BaseImporter):
                     or away_team_api_id is None
                 ):
                     invalid_records += 1
-
-                    logger.warning(
-                        "Пропущен матч без ID команд: "
-                        f"fixture_api_id={fixture_api_id}"
-                    )
                     continue
 
                 home_team = (
@@ -172,22 +176,16 @@ class FixtureImporter(BaseImporter):
                     .first()
                 )
 
-                if not home_team or not away_team:
+                if home_team is None or away_team is None:
                     missing_teams += 1
 
                     logger.warning(
                         "Команды матча не найдены в базе: "
                         f"fixture_api_id={fixture_api_id}, "
-                        f"home_team_api_id="
-                        f"{home_team_api_id}, "
-                        f"away_team_api_id="
-                        f"{away_team_api_id}"
+                        f"home={home_team_api_id}, "
+                        f"away={away_team_api_id}"
                     )
                     continue
-
-                venue = self._get_venue(
-                    fixture_data=fixture_data,
-                )
 
                 kickoff = self._parse_datetime(
                     fixture_data.get("date")
@@ -195,119 +193,41 @@ class FixtureImporter(BaseImporter):
 
                 if kickoff is None:
                     invalid_records += 1
-
-                    logger.warning(
-                        "Пропущен матч с некорректной датой: "
-                        f"fixture_api_id={fixture_api_id}, "
-                        f"date={fixture_data.get('date')}"
-                    )
                     continue
 
-                status_data = (
-                    fixture_data.get("status") or {}
+                venue = self._get_venue(
+                    fixture_data
                 )
 
-                halftime_data = (
-                    score_data.get("halftime") or {}
+                values = self._build_values(
+                    league_season_id=league_season.id,
+                    home_team_id=home_team.id,
+                    away_team_id=away_team.id,
+                    venue=venue,
+                    fixture_data=fixture_data,
+                    league_data=league_data,
+                    goals_data=goals_data,
+                    score_data=score_data,
+                    kickoff=kickoff,
                 )
-                fulltime_data = (
-                    score_data.get("fulltime") or {}
+
+                existing = repository.get_by_api_id(
+                    fixture_api_id
                 )
-                extratime_data = (
-                    score_data.get("extratime") or {}
-                )
-                penalty_data = (
-                    score_data.get("penalty") or {}
-                )
+
+                if existing is not None:
+                    self._update_fixture(
+                        fixture=existing,
+                        values=values,
+                    )
+
+                    updated += 1
+                    continue
 
                 repository.add(
                     Fixture(
                         api_id=fixture_api_id,
-                        league_season_id=(
-                            league_season.id
-                        ),
-                        home_team_id=home_team.id,
-                        away_team_id=away_team.id,
-                        venue_id=(
-                            venue.id
-                            if venue is not None
-                            else None
-                        ),
-                        kickoff=kickoff,
-                        timestamp=self._to_int_or_none(
-                            fixture_data.get("timestamp")
-                        ),
-                        timezone=(
-                            fixture_data.get("timezone")
-                            or "UTC"
-                        ),
-                        round=(
-                            league_data.get("round")
-                            or ""
-                        ),
-                        referee=fixture_data.get(
-                            "referee"
-                        ),
-                        status_short=(
-                            status_data.get("short")
-                            or ""
-                        ),
-                        status_long=(
-                            status_data.get("long")
-                            or ""
-                        ),
-                        elapsed=self._to_int_or_none(
-                            status_data.get("elapsed")
-                        ),
-                        extra_time=self._to_int_or_none(
-                            status_data.get("extra")
-                        ),
-                        home_goals=self._to_int_or_none(
-                            goals_data.get("home")
-                        ),
-                        away_goals=self._to_int_or_none(
-                            goals_data.get("away")
-                        ),
-                        halftime_home=(
-                            self._to_int_or_none(
-                                halftime_data.get("home")
-                            )
-                        ),
-                        halftime_away=(
-                            self._to_int_or_none(
-                                halftime_data.get("away")
-                            )
-                        ),
-                        fulltime_home=(
-                            self._to_int_or_none(
-                                fulltime_data.get("home")
-                            )
-                        ),
-                        fulltime_away=(
-                            self._to_int_or_none(
-                                fulltime_data.get("away")
-                            )
-                        ),
-                        extratime_home=(
-                            self._to_int_or_none(
-                                extratime_data.get("home")
-                            )
-                        ),
-                        extratime_away=(
-                            self._to_int_or_none(
-                                extratime_data.get("away")
-                            )
-                        ),
-                        penalty_home=(
-                            self._to_int_or_none(
-                                penalty_data.get("home")
-                            )
-                        ),
-                        penalty_away=(
-                            self._to_int_or_none(
-                                penalty_data.get("away")
-                            )
-                        ),
+                        **values,
                     )
                 )
 
@@ -322,7 +242,7 @@ class FixtureImporter(BaseImporter):
             f"Добавлено матчей: {added}"
         )
         logger.info(
-            f"Пропущено существующих матчей: {skipped}"
+            f"Обновлено матчей: {updated}"
         )
         logger.warning(
             "Пропущено из-за отсутствующих команд: "
@@ -335,14 +255,115 @@ class FixtureImporter(BaseImporter):
             f"Пустых ответов API: {empty_responses}"
         )
 
+    def _build_values(
+        self,
+        league_season_id: int,
+        home_team_id: int,
+        away_team_id: int,
+        venue: Venue | None,
+        fixture_data: dict[str, Any],
+        league_data: dict[str, Any],
+        goals_data: dict[str, Any],
+        score_data: dict[str, Any],
+        kickoff: datetime,
+    ) -> dict[str, Any]:
+        status_data = (
+            fixture_data.get("status") or {}
+        )
+
+        halftime_data = (
+            score_data.get("halftime") or {}
+        )
+        fulltime_data = (
+            score_data.get("fulltime") or {}
+        )
+        extratime_data = (
+            score_data.get("extratime") or {}
+        )
+        penalty_data = (
+            score_data.get("penalty") or {}
+        )
+
+        return {
+            "league_season_id": league_season_id,
+            "home_team_id": home_team_id,
+            "away_team_id": away_team_id,
+            "venue_id": (
+                venue.id
+                if venue is not None
+                else None
+            ),
+            "kickoff": kickoff,
+            "timestamp": self._to_int_or_none(
+                fixture_data.get("timestamp")
+            ),
+            "timezone": (
+                fixture_data.get("timezone")
+                or "UTC"
+            ),
+            "round": (
+                league_data.get("round")
+                or ""
+            ),
+            "referee": fixture_data.get("referee"),
+            "status_short": (
+                status_data.get("short")
+                or ""
+            ),
+            "status_long": (
+                status_data.get("long")
+                or ""
+            ),
+            "elapsed": self._to_int_or_none(
+                status_data.get("elapsed")
+            ),
+            "extra_time": self._to_int_or_none(
+                status_data.get("extra")
+            ),
+            "home_goals": self._to_int_or_none(
+                goals_data.get("home")
+            ),
+            "away_goals": self._to_int_or_none(
+                goals_data.get("away")
+            ),
+            "halftime_home": self._to_int_or_none(
+                halftime_data.get("home")
+            ),
+            "halftime_away": self._to_int_or_none(
+                halftime_data.get("away")
+            ),
+            "fulltime_home": self._to_int_or_none(
+                fulltime_data.get("home")
+            ),
+            "fulltime_away": self._to_int_or_none(
+                fulltime_data.get("away")
+            ),
+            "extratime_home": self._to_int_or_none(
+                extratime_data.get("home")
+            ),
+            "extratime_away": self._to_int_or_none(
+                extratime_data.get("away")
+            ),
+            "penalty_home": self._to_int_or_none(
+                penalty_data.get("home")
+            ),
+            "penalty_away": self._to_int_or_none(
+                penalty_data.get("away")
+            ),
+        }
+
+    @staticmethod
+    def _update_fixture(
+        fixture: Fixture,
+        values: dict[str, Any],
+    ) -> None:
+        for field, value in values.items():
+            setattr(fixture, field, value)
+
     def _get_venue(
         self,
         fixture_data: dict[str, Any],
     ) -> Venue | None:
-        """
-        Найти стадион матча в локальной базе.
-        """
-
         venue_data = fixture_data.get("venue") or {}
         venue_api_id = venue_data.get("id")
 
@@ -360,16 +381,11 @@ class FixtureImporter(BaseImporter):
         current_number: int,
         total: int,
     ) -> None:
-        """
-        Подождать перед запросом следующего сезона.
-        """
-
         if current_number >= total:
             return
 
         logger.info(
-            f"Ожидание {self.REQUEST_DELAY} секунд "
-            "перед следующей лигой..."
+            f"Ожидание {self.REQUEST_DELAY} секунд..."
         )
 
         time.sleep(self.REQUEST_DELAY)
@@ -378,10 +394,6 @@ class FixtureImporter(BaseImporter):
     def _parse_datetime(
         value: str | None,
     ) -> datetime | None:
-        """
-        Безопасно преобразовать ISO-дату API.
-        """
-
         if not value:
             return None
 
@@ -394,12 +406,6 @@ class FixtureImporter(BaseImporter):
     def _to_int_or_none(
         value: Any,
     ) -> int | None:
-        """
-        Преобразовать значение в int.
-
-        Для отсутствующих значений возвращается None.
-        """
-
         if value is None:
             return None
 
