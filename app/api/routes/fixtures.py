@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
+from app.schemas.fixture import FixtureResponse
 from app.services.fixture_service import FixtureService
+
 
 router = APIRouter(
     prefix="/fixtures",
@@ -10,7 +12,10 @@ router = APIRouter(
 )
 
 
-@router.get("/latest")
+@router.get(
+    "/latest",
+    response_model=list[FixtureResponse],
+)
 def get_latest_fixtures(
     limit: int = 10,
     db: Session = Depends(get_db),
@@ -31,7 +36,10 @@ def get_latest_fixtures(
     ]
 
 
-@router.get("/search")
+@router.get(
+    "/search",
+    response_model=list[FixtureResponse],
+)
 def search_fixtures(
     team: str,
     limit: int = 10,
@@ -53,7 +61,11 @@ def search_fixtures(
         for fixture in fixtures
     ]
 
-@router.get("/{fixture_id}")
+
+@router.get(
+    "/{fixture_id}",
+    response_model=FixtureResponse,
+)
 def get_fixture(
     fixture_id: int,
     db: Session = Depends(get_db),

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
+from app.schemas.prediction import PredictionResponse
 from app.services.prediction_service import PredictionService
 
 
@@ -11,7 +12,10 @@ router = APIRouter(
 )
 
 
-@router.get("/{fixture_id}")
+@router.get(
+    "/{fixture_id}",
+    response_model=PredictionResponse,
+)
 def predict_fixture(
     fixture_id: int,
     db: Session = Depends(get_db),
