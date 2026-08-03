@@ -14,14 +14,14 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_db
 from app.models.fixture import Fixture
 from app.models.league import League
+from app.models.league_season import LeagueSeason
 from app.models.standing import Standing
 from app.models.team import Team
 from app.services.fixture_service import FixtureService
-from app.services.prediction_service import PredictionService
-from app.services.team_service import TeamService
 from app.services.league_service import LeagueService
-from app.models.league_season import LeagueSeason
+from app.services.prediction_service import PredictionService
 from app.services.standing_service import StandingService
+from app.services.team_service import TeamService
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -79,6 +79,73 @@ def dashboard_home(
         or 0
     )
 
+    completed_fixtures = (
+        db.query(func.count(Fixture.id))
+        .filter(
+            Fixture.status_short.in_(
+                ["FT", "AET", "PEN"]
+            ),
+            Fixture.home_goals.isnot(None),
+            Fixture.away_goals.isnot(None),
+        )
+        .scalar()
+        or 0
+    )
+
+    home_wins = (
+        db.query(func.count(Fixture.id))
+        .filter(
+            Fixture.status_short.in_(
+                ["FT", "AET", "PEN"]
+            ),
+            Fixture.home_goals
+            > Fixture.away_goals,
+        )
+        .scalar()
+        or 0
+    )
+
+    draws = (
+        db.query(func.count(Fixture.id))
+        .filter(
+            Fixture.status_short.in_(
+                ["FT", "AET", "PEN"]
+            ),
+            Fixture.home_goals
+            == Fixture.away_goals,
+        )
+        .scalar()
+        or 0
+    )
+
+    away_wins = (
+        db.query(func.count(Fixture.id))
+        .filter(
+            Fixture.status_short.in_(
+                ["FT", "AET", "PEN"]
+            ),
+            Fixture.home_goals
+            < Fixture.away_goals,
+        )
+        .scalar()
+        or 0
+    )
+
+    if completed_fixtures:
+        home_win_percent = (
+            home_wins / completed_fixtures * 100
+        )
+        draw_percent = (
+            draws / completed_fixtures * 100
+        )
+        away_win_percent = (
+            away_wins / completed_fixtures * 100
+        )
+    else:
+        home_win_percent = 0.0
+        draw_percent = 0.0
+        away_win_percent = 0.0
+
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
@@ -90,7 +157,13 @@ def dashboard_home(
             "total_teams": total_teams,
             "total_leagues": total_leagues,
             "total_standings": total_standings,
-            
+            "completed_fixtures": completed_fixtures,
+            "home_wins": home_wins,
+            "draws": draws,
+            "away_wins": away_wins,
+            "home_win_percent": home_win_percent,
+            "draw_percent": draw_percent,
+            "away_win_percent": away_win_percent,
         },
     )
 
@@ -277,6 +350,7 @@ def dashboard_team(
         },
     )
 
+
 @router.get(
     "/leagues",
     response_class=HTMLResponse,
@@ -303,10 +377,8 @@ def dashboard_leagues(
             offset=0,
         )
 
-    serialized = [
-        league_service.serialize(
-            league
-        )
+    serialized_leagues = [
+        league_service.serialize(league)
         for league in leagues
     ]
 
@@ -316,7 +388,7 @@ def dashboard_leagues(
         context={
             "title": "Лиги",
             "active_page": "leagues",
-            "leagues": serialized,
+            "leagues": serialized_leagues,
             "name_query": name or "",
         },
     )
@@ -371,9 +443,11 @@ def dashboard_league(
         None,
     )
 
-    standings = standing_service.get_by_league_and_season(
-        league_id=league_id,
-        season=season,
+    standings = (
+        standing_service.get_by_league_and_season(
+            league_id=league_id,
+            season=season,
+        )
     )
 
     serialized_standings = [
@@ -432,6 +506,7 @@ def dashboard_league(
             "fixtures": serialized_fixtures,
         },
     )
+
 
 @router.get(
     "/standings",

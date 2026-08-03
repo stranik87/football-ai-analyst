@@ -6,7 +6,12 @@
 
 {% block content %}
 
-<h2>Обзор проекта</h2>
+<div class="page-heading">
+    <div>
+        <h2>Обзор проекта</h2>
+        <p>Основные показатели базы и распределение результатов.</p>
+    </div>
+</div>
 
 <section class="cards">
 
@@ -32,10 +37,96 @@
 
 </section>
 
-<section>
-    <h2>Последние матчи</h2>
+<section class="dashboard-section">
+
+    <div class="page-heading">
+        <div>
+            <h2>Распределение исходов</h2>
+            <p>
+                На основе {{ completed_fixtures }}
+                завершённых матчей.
+            </p>
+        </div>
+    </div>
+
+    <div class="outcome-grid">
+
+        <article class="outcome-card">
+            <div class="outcome-header">
+                <span>🏠 Победы хозяев</span>
+                <strong>{{ home_wins }}</strong>
+            </div>
+
+            <div class="progress-track">
+                <div
+                    class="progress-bar home-bar"
+                    style="width: {{ home_win_percent }}%;"
+                ></div>
+            </div>
+
+            <p>
+                {{ "%.1f"|format(home_win_percent) }}%
+            </p>
+        </article>
+
+        <article class="outcome-card">
+            <div class="outcome-header">
+                <span>🤝 Ничьи</span>
+                <strong>{{ draws }}</strong>
+            </div>
+
+            <div class="progress-track">
+                <div
+                    class="progress-bar draw-bar"
+                    style="width: {{ draw_percent }}%;"
+                ></div>
+            </div>
+
+            <p>
+                {{ "%.1f"|format(draw_percent) }}%
+            </p>
+        </article>
+
+        <article class="outcome-card">
+            <div class="outcome-header">
+                <span>✈️ Победы гостей</span>
+                <strong>{{ away_wins }}</strong>
+            </div>
+
+            <div class="progress-track">
+                <div
+                    class="progress-bar away-bar"
+                    style="width: {{ away_win_percent }}%;"
+                ></div>
+            </div>
+
+            <p>
+                {{ "%.1f"|format(away_win_percent) }}%
+            </p>
+        </article>
+
+    </div>
+
+</section>
+
+<section class="dashboard-section">
+
+    <div class="page-heading">
+        <div>
+            <h2>Последние матчи</h2>
+            <p>Последние 10 завершённых матчей.</p>
+        </div>
+
+        <a
+            class="secondary-button"
+            href="/dashboard/fixtures"
+        >
+            Все матчи
+        </a>
+    </div>
 
     <div class="table-wrapper">
+
         <table>
             <thead>
                 <tr>
@@ -49,7 +140,9 @@
             </thead>
 
             <tbody>
+
                 {% for fixture in fixtures %}
+
                 <tr>
                     <td>{{ fixture.fixture_id }}</td>
 
@@ -77,10 +170,14 @@
                         </a>
                     </td>
                 </tr>
+
                 {% endfor %}
+
             </tbody>
         </table>
+
     </div>
+
 </section>
 
 {% endblock %}
