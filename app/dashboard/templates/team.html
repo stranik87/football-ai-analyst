@@ -1,211 +1,167 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
+{% extends "base.html" %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block title %}
+    {{ team.name }}
+{% endblock %}
 
-    <title>{{ title }}</title>
+{% block content %}
 
-    <link
-        rel="stylesheet"
-        href="/static/style.css"
-    >
-</head>
+<a
+    href="/dashboard/teams"
+    class="back-link"
+>
+    ← Назад к командам
+</a>
 
-<body>
+<section class="team-profile">
 
-<header class="header">
-    <h1>⚽ Football AI Analyst</h1>
-</header>
+    <div class="team-profile-logo">
 
-<div class="wrapper">
-
-    <aside class="sidebar">
-        <a href="/dashboard">📊 Dashboard</a>
-        <a href="/dashboard/fixtures">⚽ Матчи</a>
-        <a href="/dashboard/teams">👥 Команды</a>
-        <a href="/dashboard/leagues">🏆 Лиги</a>
-        <a href="/dashboard/standings">
-            📈 Турнирная таблица
-        </a>
-        <a href="/docs">🛠 API Swagger</a>
-    </aside>
-
-    <main class="content">
-
-        <a
-            href="/dashboard/teams"
-            class="back-link"
+        {% if team.logo %}
+        <img
+            src="{{ team.logo }}"
+            alt="{{ team.name }}"
+            loading="lazy"
         >
-            ← Назад к командам
-        </a>
+        {% else %}
+        <div class="team-logo-placeholder">
+            ⚽
+        </div>
+        {% endif %}
 
-        <section class="team-profile">
+    </div>
 
-            <div class="team-profile-logo">
+    <div class="team-profile-info">
 
-                {% if team.logo %}
-                <img
-                    src="{{ team.logo }}"
-                    alt="{{ team.name }}"
-                    loading="lazy"
-                >
+        <h2>{{ team.name }}</h2>
+
+        <div class="team-profile-details">
+
+            <p>
+                <strong>Код:</strong>
+                {{ team.code or "—" }}
+            </p>
+
+            <p>
+                <strong>Страна:</strong>
+                {{ team.country or "—" }}
+            </p>
+
+            <p>
+                <strong>Лига:</strong>
+                {{ team.league_name or "—" }}
+            </p>
+
+            <p>
+                <strong>Стадион:</strong>
+                {{ team.venue_name or "—" }}
+            </p>
+
+            <p>
+                <strong>Год основания:</strong>
+                {% if team.founded %}
+                    {{ team.founded }}
                 {% else %}
-                <div class="team-logo-placeholder">
-                    ⚽
-                </div>
+                    —
                 {% endif %}
+            </p>
 
-            </div>
+        </div>
 
-            <div class="team-profile-info">
+        <div class="team-card-actions">
 
-                <h2>{{ team.name }}</h2>
+            <a
+                class="prediction-button"
+                href="/dashboard/fixtures?team={{ team.name }}"
+            >
+                ⚽ Все матчи
+            </a>
 
-                <div class="team-profile-details">
+            <a
+                class="secondary-button"
+                href="/teams/{{ team.team_id }}"
+                target="_blank"
+            >
+                JSON API
+            </a>
 
-                    <p>
-                        <strong>Код:</strong>
-                        {{ team.code or "—" }}
-                    </p>
+        </div>
 
-                    <p>
-                        <strong>Страна:</strong>
-                        {{ team.country or "—" }}
-                    </p>
+    </div>
 
-                    <p>
-                        <strong>Лига:</strong>
-                        {{ team.league_name or "—" }}
-                    </p>
+</section>
 
-                    <p>
-                        <strong>Стадион:</strong>
-                        {{ team.venue_name or "—" }}
-                    </p>
+<section class="team-fixtures-section">
 
-                    <p>
-                        <strong>Год основания:</strong>
+    <div class="page-heading">
+        <div>
+            <h2>Последние матчи</h2>
+            <p>
+                Последние 10 матчей команды {{ team.name }}.
+            </p>
+        </div>
+    </div>
 
-                        {% if team.founded %}
-                            {{ team.founded }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </p>
+    {% if fixtures %}
 
-                </div>
+    <div class="table-wrapper">
 
-                <div class="team-card-actions">
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Хозяева</th>
+                    <th>Гости</th>
+                    <th>Счёт</th>
+                    <th>Прогноз</th>
+                </tr>
+            </thead>
 
-                    <a
-                        class="prediction-button"
-                        href="/dashboard/fixtures?team={{ team.name }}"
-                    >
-                        ⚽ Все матчи
-                    </a>
+            <tbody>
 
-                    <a
-                        class="secondary-button"
-                        href="/teams/{{ team.team_id }}"
-                        target="_blank"
-                    >
-                        JSON API
-                    </a>
+                {% for fixture in fixtures %}
 
-                </div>
+                <tr>
+                    <td>
+                        {{ fixture.kickoff.strftime(
+                            "%d.%m.%Y %H:%M"
+                        ) }}
+                    </td>
 
-            </div>
+                    <td>{{ fixture.home_team }}</td>
+                    <td>{{ fixture.away_team }}</td>
 
-        </section>
+                    <td>
+                        {{ fixture.home_goals }}
+                        :
+                        {{ fixture.away_goals }}
+                    </td>
 
-        <section class="team-fixtures-section">
+                    <td>
+                        <a
+                            class="prediction-button"
+                            href="/dashboard/predict/{{ fixture.fixture_id }}"
+                        >
+                            📊 Прогноз
+                        </a>
+                    </td>
+                </tr>
 
-            <div class="page-heading">
-                <div>
-                    <h2>Последние матчи</h2>
+                {% endfor %}
 
-                    <p>
-                        Последние 10 матчей команды
-                        {{ team.name }}.
-                    </p>
-                </div>
-            </div>
+            </tbody>
+        </table>
 
-            {% if fixtures %}
+    </div>
 
-            <div class="table-wrapper">
+    {% else %}
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Дата</th>
-                            <th>Хозяева</th>
-                            <th>Гости</th>
-                            <th>Счёт</th>
-                            <th>Прогноз</th>
-                        </tr>
-                    </thead>
+    <div class="empty-state">
+        <h3>Матчи не найдены</h3>
+    </div>
 
-                    <tbody>
+    {% endif %}
 
-                        {% for fixture in fixtures %}
+</section>
 
-                        <tr>
-                            <td>
-                                {{ fixture.kickoff.strftime(
-                                    "%d.%m.%Y %H:%M"
-                                ) }}
-                            </td>
-
-                            <td>
-                                {{ fixture.home_team }}
-                            </td>
-
-                            <td>
-                                {{ fixture.away_team }}
-                            </td>
-
-                            <td>
-                                {{ fixture.home_goals }}
-                                :
-                                {{ fixture.away_goals }}
-                            </td>
-
-                            <td>
-                                <a
-                                    class="prediction-button"
-                                    href="/dashboard/predict/{{ fixture.fixture_id }}"
-                                >
-                                    📊 Прогноз
-                                </a>
-                            </td>
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-                </table>
-
-            </div>
-
-            {% else %}
-
-            <div class="empty-state">
-                <h3>Матчи не найдены</h3>
-            </div>
-
-            {% endif %}
-
-        </section>
-
-    </main>
-
-</div>
-
-</body>
-</html>
+{% endblock %}

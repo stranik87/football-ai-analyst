@@ -1,142 +1,86 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
+{% extends "base.html" %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block title %}
+    Football AI Analyst
+{% endblock %}
 
-    <title>{{ title }}</title>
+{% block content %}
 
-    <link
-        rel="stylesheet"
-        href="/static/style.css"
-    >
-</head>
+<h2>Обзор проекта</h2>
 
-<body>
+<section class="cards">
 
-<header class="header">
-    <h1>⚽ Football AI Analyst</h1>
-</header>
+    <article class="card">
+        <h2>{{ total_fixtures }}</h2>
+        <p>Матчей в базе</p>
+    </article>
 
-<div class="wrapper">
+    <article class="card">
+        <h2>{{ total_teams }}</h2>
+        <p>Команд</p>
+    </article>
 
-    <aside class="sidebar">
-        <a href="/dashboard">
-            📊 Dashboard
-        </a>
+    <article class="card">
+        <h2>{{ total_leagues }}</h2>
+        <p>Лиг</p>
+    </article>
 
-        <a href="/dashboard/fixtures">
-            ⚽ Матчи
-        </a>
+    <article class="card">
+        <h2>{{ total_standings }}</h2>
+        <p>Позиций в таблицах</p>
+    </article>
 
-        <a href="/dashboard/teams">
-            👥 Команды
-        </a>
+</section>
 
-        <a href="/dashboard/leagues">
-            🏆 Лиги
-        </a>
+<section>
+    <h2>Последние матчи</h2>
 
-        <a href="/dashboard/standings">
-            📈 Турнирная таблица
-        </a>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Дата</th>
+                    <th>Хозяева</th>
+                    <th>Гости</th>
+                    <th>Счёт</th>
+                    <th>Прогноз</th>
+                </tr>
+            </thead>
 
-        <a href="/docs">
-            🛠 API Swagger
-        </a>
-    </aside>
+            <tbody>
+                {% for fixture in fixtures %}
+                <tr>
+                    <td>{{ fixture.fixture_id }}</td>
 
-    <main class="content">
+                    <td>
+                        {{ fixture.kickoff.strftime(
+                            "%d.%m.%Y %H:%M"
+                        ) }}
+                    </td>
 
-        <h2>Обзор проекта</h2>
+                    <td>{{ fixture.home_team }}</td>
+                    <td>{{ fixture.away_team }}</td>
 
-        <section class="cards">
+                    <td>
+                        {{ fixture.home_goals }}
+                        :
+                        {{ fixture.away_goals }}
+                    </td>
 
-            <article class="card">
-                <h2>{{ total_fixtures }}</h2>
-                <p>Матчей в базе</p>
-            </article>
+                    <td>
+                        <a
+                            class="prediction-button"
+                            href="/dashboard/predict/{{ fixture.fixture_id }}"
+                        >
+                            📊 Прогноз
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 
-            <article class="card">
-                <h2>{{ total_teams }}</h2>
-                <p>Команд</p>
-            </article>
-
-            <article class="card">
-                <h2>{{ total_leagues }}</h2>
-                <p>Лиг</p>
-            </article>
-
-            <article class="card">
-                <h2>{{ total_standings }}</h2>
-                <p>Позиций в таблицах</p>
-            </article>
-
-        </section>
-
-        <section>
-            <h2>Последние матчи</h2>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Дата</th>
-                        <th>Хозяева</th>
-                        <th>Гости</th>
-                        <th>Счёт</th>
-                        <th>Прогноз</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for fixture in fixtures %}
-                    <tr>
-                        <td>
-                            {{ fixture.fixture_id }}
-                        </td>
-
-                        <td>
-                            {{ fixture.kickoff.strftime(
-                                "%d.%m.%Y %H:%M"
-                            ) }}
-                        </td>
-
-                        <td>
-                            {{ fixture.home_team }}
-                        </td>
-
-                        <td>
-                            {{ fixture.away_team }}
-                        </td>
-
-                        <td>
-                            {{ fixture.home_goals }}
-                            :
-                            {{ fixture.away_goals }}
-                        </td>
-
-                        <td>
-                            <a
-                                href="/dashboard/predict/{{ fixture.fixture_id }}"
-                                target="_blank"
-                            >
-                                Получить прогноз
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
-
-    </main>
-
-</div>
-
-</body>
-</html>
+{% endblock %}

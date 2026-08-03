@@ -1,111 +1,100 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
+{% extends "base.html" %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block title %}
+    Матчи
+{% endblock %}
 
-    <title>{{ title }}</title>
+{% block content %}
 
-    <link
-        rel="stylesheet"
-        href="/static/style.css"
-    >
-</head>
-
-<body>
-
-<header class="header">
-    <h1>⚽ Football AI Analyst</h1>
-</header>
-
-<div class="wrapper">
-
-    <aside class="sidebar">
-        <a href="/dashboard">📊 Dashboard</a>
-        <a href="/dashboard/fixtures">⚽ Матчи</a>
-        <a href="/dashboard/teams">👥 Команды</a>
-        <a href="/dashboard/leagues">🏆 Лиги</a>
-        <a href="/dashboard/standings">📈 Турнирная таблица</a>
-        <a href="/docs">🛠 API Swagger</a>
-    </aside>
-
-    <main class="content">
-
+<div class="page-heading">
+    <div>
         <h2>Матчи</h2>
+        <p>Поиск матчей по названию команды.</p>
+    </div>
+</div>
 
-        <form
-            method="get"
-            action="/dashboard/fixtures"
-            class="search-form"
-        >
-            <input
-                type="text"
-                name="team"
-                value="{{ team_query }}"
-                placeholder="Введите название команды"
-            >
+<form
+    method="get"
+    action="/dashboard/fixtures"
+    class="search-form"
+>
+    <input
+        type="text"
+        name="team"
+        value="{{ team_query }}"
+        placeholder="Введите название команды"
+    >
 
-            <button type="submit">
-                Найти
-            </button>
+    <button type="submit">
+        Найти
+    </button>
 
-            <a href="/dashboard/fixtures">
-                Сбросить
-            </a>
-        </form>
+    <a href="/dashboard/fixtures">
+        Сбросить
+    </a>
+</form>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Дата</th>
-                    <th>Хозяева</th>
-                    <th>Гости</th>
-                    <th>Счёт</th>
-                    <th>Прогноз</th>
-                </tr>
-            </thead>
+{% if fixtures %}
 
-            <tbody>
-                {% for fixture in fixtures %}
-                <tr>
-                    <td>{{ fixture.fixture_id }}</td>
+<div class="table-wrapper">
 
-                    <td>
-                        {{ fixture.kickoff.strftime(
-                            "%d.%m.%Y %H:%M"
-                        ) }}
-                    </td>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата</th>
+                <th>Хозяева</th>
+                <th>Гости</th>
+                <th>Счёт</th>
+                <th>Прогноз</th>
+            </tr>
+        </thead>
 
-                    <td>{{ fixture.home_team }}</td>
-                    <td>{{ fixture.away_team }}</td>
+        <tbody>
 
-                    <td>
-                        {{ fixture.home_goals }}
-                        :
-                        {{ fixture.away_goals }}
-                    </td>
+            {% for fixture in fixtures %}
 
-                    <td>
-                        <a
-                            class="prediction-button"
-                            href="/dashboard/predict/{{ fixture.fixture_id }}"
-                        >
-                            📊 Прогноз
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <tr>
+                <td>{{ fixture.fixture_id }}</td>
 
-    </main>
+                <td>
+                    {{ fixture.kickoff.strftime(
+                        "%d.%m.%Y %H:%M"
+                    ) }}
+                </td>
+
+                <td>{{ fixture.home_team }}</td>
+                <td>{{ fixture.away_team }}</td>
+
+                <td>
+                    {{ fixture.home_goals }}
+                    :
+                    {{ fixture.away_goals }}
+                </td>
+
+                <td>
+                    <a
+                        class="prediction-button"
+                        href="/dashboard/predict/{{ fixture.fixture_id }}"
+                    >
+                        📊 Прогноз
+                    </a>
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+    </table>
 
 </div>
 
-</body>
-</html>
+{% else %}
+
+<div class="empty-state">
+    <h3>Матчи не найдены</h3>
+</div>
+
+{% endif %}
+
+{% endblock %}

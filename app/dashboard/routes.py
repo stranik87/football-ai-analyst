@@ -84,11 +84,13 @@ def dashboard_home(
         name="dashboard.html",
         context={
             "title": "Football AI Analyst",
+            "active_page": "dashboard",
             "fixtures": serialized_fixtures,
             "total_fixtures": total_fixtures,
             "total_teams": total_teams,
             "total_leagues": total_leagues,
             "total_standings": total_standings,
+            
         },
     )
 
@@ -125,6 +127,7 @@ def dashboard_prediction(
         name="prediction.html",
         context={
             "title": "Прогноз матча",
+            "active_page": "fixtures",
             "prediction": prediction,
             "home_percent": (
                 probabilities["home_win"] * 100
@@ -177,6 +180,7 @@ def dashboard_fixtures(
         name="fixtures.html",
         context={
             "title": "Матчи",
+            "active_page": "fixtures",
             "fixtures": serialized_fixtures,
             "team_query": team or "",
         },
@@ -219,6 +223,7 @@ def dashboard_teams(
         name="teams.html",
         context={
             "title": "Команды",
+            "active_page": "teams",
             "teams": serialized_teams,
             "name_query": name or "",
         },
@@ -266,6 +271,7 @@ def dashboard_team(
         name="team.html",
         context={
             "title": team.name,
+            "active_page": "teams",
             "team": team_data,
             "fixtures": serialized_fixtures,
         },
@@ -309,6 +315,7 @@ def dashboard_leagues(
         name="leagues.html",
         context={
             "title": "Лиги",
+            "active_page": "leagues",
             "leagues": serialized,
             "name_query": name or "",
         },
@@ -416,6 +423,7 @@ def dashboard_league(
         name="league.html",
         context={
             "title": league.name,
+            "active_page": "leagues",
             "league": league_data,
             "seasons": seasons,
             "selected_season": season,
@@ -485,6 +493,7 @@ def dashboard_standings(
         name="standings.html",
         context={
             "title": "Турнирная таблица",
+            "active_page": "standings",
             "standings": serialized_standings,
             "leagues": serialized_leagues,
             "selected_league": (

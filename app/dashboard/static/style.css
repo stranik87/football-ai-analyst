@@ -672,3 +672,10 @@ tr:hover{
 .legend-color.relegation{
     background:#fca5a5;
 }
+
+
+.sidebar a.active{
+    background:#2563eb;
+    border-left:4px solid #93c5fd;
+    font-weight:700;
+}

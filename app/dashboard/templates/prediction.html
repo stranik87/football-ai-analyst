@@ -1,199 +1,160 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
+{% extends "base.html" %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block title %}
+    Прогноз матча
+{% endblock %}
 
-    <title>{{ title }}</title>
+{% block content %}
 
-    <link
-        rel="stylesheet"
-        href="/static/style.css"
-    >
-</head>
+<a
+    href="/dashboard"
+    class="back-link"
+>
+    ← Назад к Dashboard
+</a>
 
-<body>
+<section class="prediction-panel">
 
-<header class="header">
-    <h1>⚽ Football AI Analyst</h1>
-</header>
+    <div class="match-header">
 
-<div class="wrapper">
+        <div>
+            <p class="match-label">
+                Хозяева
+            </p>
 
-    <aside class="sidebar">
-        <a href="/dashboard">
-            📊 Dashboard
-        </a>
+            <h2>
+                {{ prediction.home_team }}
+            </h2>
+        </div>
 
-        <a href="/dashboard">
-            ⚽ Матчи
-        </a>
+        <div class="match-separator">
+            VS
+        </div>
 
-        <a href="/dashboard/teams">
-            👥 Команды
-        </a>
+        <div>
+            <p class="match-label">
+                Гости
+            </p>
 
-        <a href="/dashboard/leagues">
-            🏆 Лиги
-        </a>
+            <h2>
+                {{ prediction.away_team }}
+            </h2>
+        </div>
 
-        <a href="/dashboard/standings">
-            📈 Турнирная таблица
-        </a>
+    </div>
 
-        <a href="/docs">
-            🛠 API Swagger
-        </a>
-    </aside>
+    <div class="match-meta">
 
-    <main class="content">
+        <span>
+            📅
+            {{ prediction.kickoff.strftime(
+                "%d.%m.%Y %H:%M"
+            ) }}
+        </span>
 
-        <a
-            href="/dashboard"
-            class="back-link"
-        >
-            ← Назад к Dashboard
-        </a>
+        {% if
+            prediction.actual_score.home_goals
+            is not none
+            and
+            prediction.actual_score.away_goals
+            is not none
+        %}
+        <span>
+            ⚽ Фактический счёт:
+            {{ prediction.actual_score.home_goals }}
+            :
+            {{ prediction.actual_score.away_goals }}
+        </span>
+        {% endif %}
 
-        <section class="prediction-panel">
+    </div>
 
-            <div class="match-header">
-                <div>
-                    <p class="match-label">
-                        Хозяева
-                    </p>
+    <div class="prediction-result">
 
-                    <h2>
-                        {{ prediction.home_team }}
-                    </h2>
-                </div>
+        <p>
+            Прогноз модели
+        </p>
 
-                <div class="match-separator">
-                    VS
-                </div>
+        <h2>
+            {{ prediction.predicted_result_name }}
+        </h2>
 
-                <div>
-                    <p class="match-label">
-                        Гости
-                    </p>
+        <strong>
+            Уверенность:
+            {{ "%.1f"|format(
+                confidence_percent
+            ) }}%
+        </strong>
 
-                    <h2>
-                        {{ prediction.away_team }}
-                    </h2>
-                </div>
-            </div>
+    </div>
 
-            <div class="match-meta">
-                <span>
-                    📅
-                    {{ prediction.kickoff.strftime(
-                        "%d.%m.%Y %H:%M"
-                    ) }}
-                </span>
+    <div class="probabilities">
 
-                {% if
-                    prediction.actual_score.home_goals
-                    is not none
-                    and
-                    prediction.actual_score.away_goals
-                    is not none
-                %}
-                <span>
-                    ⚽ Фактический счёт:
-                    {{ prediction.actual_score.home_goals }}
-                    :
-                    {{ prediction.actual_score.away_goals }}
-                </span>
-                {% endif %}
-            </div>
+        <div class="probability-card">
 
-            <div class="prediction-result">
-                <p>
-                    Прогноз модели
-                </p>
-
-                <h2>
-                    {{ prediction.predicted_result_name }}
-                </h2>
+            <div class="probability-title">
+                <span>🏠 Победа хозяев</span>
 
                 <strong>
-                    Уверенность:
                     {{ "%.1f"|format(
-                        confidence_percent
+                        home_percent
                     ) }}%
                 </strong>
             </div>
 
-            <div class="probabilities">
-
-                <div class="probability-card">
-                    <div class="probability-title">
-                        <span>🏠 Победа хозяев</span>
-                        <strong>
-                            {{ "%.1f"|format(
-                                home_percent
-                            ) }}%
-                        </strong>
-                    </div>
-
-                    <div class="progress-track">
-                        <div
-                            class="progress-bar home-bar"
-                            style="width:
-                                {{ home_percent }}%;"
-                        ></div>
-                    </div>
-                </div>
-
-                <div class="probability-card">
-                    <div class="probability-title">
-                        <span>🤝 Ничья</span>
-                        <strong>
-                            {{ "%.1f"|format(
-                                draw_percent
-                            ) }}%
-                        </strong>
-                    </div>
-
-                    <div class="progress-track">
-                        <div
-                            class="progress-bar draw-bar"
-                            style="width:
-                                {{ draw_percent }}%;"
-                        ></div>
-                    </div>
-                </div>
-
-                <div class="probability-card">
-                    <div class="probability-title">
-                        <span>✈️ Победа гостей</span>
-                        <strong>
-                            {{ "%.1f"|format(
-                                away_percent
-                            ) }}%
-                        </strong>
-                    </div>
-
-                    <div class="progress-track">
-                        <div
-                            class="progress-bar away-bar"
-                            style="width:
-                                {{ away_percent }}%;"
-                        ></div>
-                    </div>
-                </div>
-
+            <div class="progress-track">
+                <div
+                    class="progress-bar home-bar"
+                    style="width: {{ home_percent }}%;"
+                ></div>
             </div>
 
-        </section>
+        </div>
 
-    </main>
+        <div class="probability-card">
 
-</div>
+            <div class="probability-title">
+                <span>🤝 Ничья</span>
 
-</body>
-</html>
+                <strong>
+                    {{ "%.1f"|format(
+                        draw_percent
+                    ) }}%
+                </strong>
+            </div>
+
+            <div class="progress-track">
+                <div
+                    class="progress-bar draw-bar"
+                    style="width: {{ draw_percent }}%;"
+                ></div>
+            </div>
+
+        </div>
+
+        <div class="probability-card">
+
+            <div class="probability-title">
+                <span>✈️ Победа гостей</span>
+
+                <strong>
+                    {{ "%.1f"|format(
+                        away_percent
+                    ) }}%
+                </strong>
+            </div>
+
+            <div class="progress-track">
+                <div
+                    class="progress-bar away-bar"
+                    style="width: {{ away_percent }}%;"
+                ></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

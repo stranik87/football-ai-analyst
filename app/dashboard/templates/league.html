@@ -1,326 +1,273 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
+{% extends "base.html" %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block title %}
+    {{ league.name }}
+{% endblock %}
 
-    <title>{{ title }}</title>
+{% block content %}
 
-    <link
-        rel="stylesheet"
-        href="/static/style.css"
-    >
-</head>
+<a
+    href="/dashboard/leagues"
+    class="back-link"
+>
+    ← Назад к лигам
+</a>
 
-<body>
+<section class="league-profile">
 
-<header class="header">
-    <h1>⚽ Football AI Analyst</h1>
-</header>
+    <div class="league-profile-logo">
 
-<div class="wrapper">
+        {% if league.logo %}
+        <img
+            src="{{ league.logo }}"
+            alt="{{ league.name }}"
+            loading="lazy"
+        >
+        {% else %}
+        <div class="league-logo-placeholder">
+            🏆
+        </div>
+        {% endif %}
 
-    <aside class="sidebar">
-        <a href="/dashboard">📊 Dashboard</a>
-        <a href="/dashboard/fixtures">⚽ Матчи</a>
-        <a href="/dashboard/teams">👥 Команды</a>
-        <a href="/dashboard/leagues">🏆 Лиги</a>
-        <a href="/dashboard/standings">
-            📈 Турнирная таблица
-        </a>
-        <a href="/docs">🛠 API Swagger</a>
-    </aside>
+    </div>
 
-    <main class="content">
+    <div class="league-profile-info">
+
+        <h2>{{ league.name }}</h2>
+
+        <div class="league-profile-details">
+
+            <p>
+                <strong>Страна:</strong>
+                {{ league.country or "—" }}
+            </p>
+
+            <p>
+                <strong>Тип:</strong>
+                {{ league.type or "—" }}
+            </p>
+
+            <p>
+                <strong>API ID:</strong>
+                {{ league.api_id }}
+            </p>
+
+        </div>
+
+        <form
+            method="get"
+            action="/dashboard/league/{{ league.league_id }}"
+            class="season-form"
+        >
+            <label for="season">
+                Сезон:
+            </label>
+
+            <select
+                id="season"
+                name="season"
+            >
+                {% for item in seasons %}
+                <option
+                    value="{{ item.season }}"
+                    {% if item.season == selected_season %}
+                        selected
+                    {% endif %}
+                >
+                    {{ item.season }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">
+                Показать
+            </button>
+        </form>
+
+    </div>
+
+</section>
+
+<section class="league-section">
+
+    <div class="page-heading">
+        <div>
+            <h2>Турнирная таблица</h2>
+            <p>Сезон {{ selected_season }}</p>
+        </div>
+    </div>
+
+    {% if standings %}
+
+    <div class="table-wrapper">
+        <table class="standings-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Команда</th>
+                    <th>И</th>
+                    <th>В</th>
+                    <th>Н</th>
+                    <th>П</th>
+                    <th>Голы</th>
+                    <th>Разница</th>
+                    <th>Очки</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in standings %}
+                <tr>
+                    <td>{{ row.rank }}</td>
+
+                    <td>
+                        <a href="/dashboard/team/{{ row.team_id }}">
+                            {{ row.team_name }}
+                        </a>
+                    </td>
+
+                    <td>{{ row.played }}</td>
+                    <td>{{ row.wins }}</td>
+                    <td>{{ row.draws }}</td>
+                    <td>{{ row.losses }}</td>
+
+                    <td>
+                        {{ row.goals_for }}
+                        :
+                        {{ row.goals_against }}
+                    </td>
+
+                    <td>{{ row.goals_diff }}</td>
+                    <td><strong>{{ row.points }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <h3>Турнирная таблица не найдена</h3>
+        <p>
+            Для сезона {{ selected_season }}
+            данных пока нет.
+        </p>
+    </div>
+
+    {% endif %}
+
+</section>
+
+<section class="league-section">
+
+    <div class="page-heading">
+        <div>
+            <h2>Последние матчи</h2>
+            <p>Последние 10 матчей сезона.</p>
+        </div>
+    </div>
+
+    {% if fixtures %}
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Хозяева</th>
+                    <th>Гости</th>
+                    <th>Счёт</th>
+                    <th>Прогноз</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for fixture in fixtures %}
+                <tr>
+                    <td>
+                        {{ fixture.kickoff.strftime(
+                            "%d.%m.%Y %H:%M"
+                        ) }}
+                    </td>
+
+                    <td>{{ fixture.home_team }}</td>
+                    <td>{{ fixture.away_team }}</td>
+
+                    <td>
+                        {{ fixture.home_goals }}
+                        :
+                        {{ fixture.away_goals }}
+                    </td>
+
+                    <td>
+                        <a
+                            class="prediction-button"
+                            href="/dashboard/predict/{{ fixture.fixture_id }}"
+                        >
+                            📊 Прогноз
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <h3>Матчи не найдены</h3>
+    </div>
+
+    {% endif %}
+
+</section>
+
+<section class="league-section">
+
+    <div class="page-heading">
+        <div>
+            <h2>Команды</h2>
+            <p>Команды этой лиги.</p>
+        </div>
+    </div>
+
+    {% if teams %}
+
+    <div class="league-team-grid">
+
+        {% for team in teams %}
 
         <a
-            href="/dashboard/leagues"
-            class="back-link"
+            class="league-team-card"
+            href="/dashboard/team/{{ team.team_id }}"
         >
-            ← Назад к лигам
+            {% if team.logo %}
+            <img
+                src="{{ team.logo }}"
+                alt="{{ team.name }}"
+                loading="lazy"
+            >
+            {% else %}
+            <span>⚽</span>
+            {% endif %}
+
+            <strong>{{ team.name }}</strong>
         </a>
 
-        <section class="league-profile">
+        {% endfor %}
 
-            <div class="league-profile-logo">
+    </div>
 
-                {% if league.logo %}
-                <img
-                    src="{{ league.logo }}"
-                    alt="{{ league.name }}"
-                    loading="lazy"
-                >
-                {% else %}
-                <div class="league-logo-placeholder">
-                    🏆
-                </div>
-                {% endif %}
+    {% else %}
 
-            </div>
+    <div class="empty-state">
+        <h3>Команды не найдены</h3>
+    </div>
 
-            <div class="league-profile-info">
+    {% endif %}
 
-                <h2>{{ league.name }}</h2>
+</section>
 
-                <div class="league-profile-details">
-
-                    <p>
-                        <strong>Страна:</strong>
-                        {{ league.country or "—" }}
-                    </p>
-
-                    <p>
-                        <strong>Тип:</strong>
-                        {{ league.type or "—" }}
-                    </p>
-
-                    <p>
-                        <strong>API ID:</strong>
-                        {{ league.api_id }}
-                    </p>
-
-                </div>
-
-                <form
-                    method="get"
-                    action="/dashboard/league/{{ league.league_id }}"
-                    class="season-form"
-                >
-                    <label for="season">
-                        Сезон:
-                    </label>
-
-                    <select
-                        id="season"
-                        name="season"
-                    >
-                        {% for item in seasons %}
-                        <option
-                            value="{{ item.season }}"
-                            {% if item.season == selected_season %}
-                                selected
-                            {% endif %}
-                        >
-                            {{ item.season }}
-                        </option>
-                        {% endfor %}
-                    </select>
-
-                    <button type="submit">
-                        Показать
-                    </button>
-                </form>
-
-            </div>
-
-        </section>
-
-        <section class="league-section">
-
-            <div class="page-heading">
-                <div>
-                    <h2>Турнирная таблица</h2>
-
-                    <p>
-                        Сезон {{ selected_season }}
-                    </p>
-                </div>
-            </div>
-
-            {% if standings %}
-
-            <div class="table-wrapper">
-
-                <table class="standings-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Команда</th>
-                            <th>И</th>
-                            <th>В</th>
-                            <th>Н</th>
-                            <th>П</th>
-                            <th>Голы</th>
-                            <th>Разница</th>
-                            <th>Очки</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {% for row in standings %}
-
-                        <tr>
-                            <td>{{ row.rank }}</td>
-
-                            <td>
-                                <a
-                                    href="/dashboard/team/{{ row.team_id }}"
-                                >
-                                    {{ row.team_name }}
-                                </a>
-                            </td>
-
-                            <td>{{ row.played }}</td>
-                            <td>{{ row.wins }}</td>
-                            <td>{{ row.draws }}</td>
-                            <td>{{ row.losses }}</td>
-
-                            <td>
-                                {{ row.goals_for }}
-                                :
-                                {{ row.goals_against }}
-                            </td>
-
-                            <td>{{ row.goals_diff }}</td>
-                            <td><strong>{{ row.points }}</strong></td>
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-                </table>
-
-            </div>
-
-            {% else %}
-
-            <div class="empty-state">
-                <h3>Турнирная таблица не найдена</h3>
-                <p>
-                    Для сезона {{ selected_season }}
-                    данных пока нет.
-                </p>
-            </div>
-
-            {% endif %}
-
-        </section>
-
-        <section class="league-section">
-
-            <div class="page-heading">
-                <div>
-                    <h2>Последние матчи</h2>
-                    <p>Последние 10 матчей сезона.</p>
-                </div>
-            </div>
-
-            {% if fixtures %}
-
-            <div class="table-wrapper">
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Дата</th>
-                            <th>Хозяева</th>
-                            <th>Гости</th>
-                            <th>Счёт</th>
-                            <th>Прогноз</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {% for fixture in fixtures %}
-
-                        <tr>
-                            <td>
-                                {{ fixture.kickoff.strftime(
-                                    "%d.%m.%Y %H:%M"
-                                ) }}
-                            </td>
-
-                            <td>{{ fixture.home_team }}</td>
-                            <td>{{ fixture.away_team }}</td>
-
-                            <td>
-                                {{ fixture.home_goals }}
-                                :
-                                {{ fixture.away_goals }}
-                            </td>
-
-                            <td>
-                                <a
-                                    class="prediction-button"
-                                    href="/dashboard/predict/{{ fixture.fixture_id }}"
-                                >
-                                    📊 Прогноз
-                                </a>
-                            </td>
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-                </table>
-
-            </div>
-
-            {% else %}
-
-            <div class="empty-state">
-                <h3>Матчи не найдены</h3>
-            </div>
-
-            {% endif %}
-
-        </section>
-
-        <section class="league-section">
-
-            <div class="page-heading">
-                <div>
-                    <h2>Команды</h2>
-                    <p>Команды этой лиги.</p>
-                </div>
-            </div>
-
-            {% if teams %}
-
-            <div class="league-team-grid">
-
-                {% for team in teams %}
-
-                <a
-                    class="league-team-card"
-                    href="/dashboard/team/{{ team.team_id }}"
-                >
-                    {% if team.logo %}
-                    <img
-                        src="{{ team.logo }}"
-                        alt="{{ team.name }}"
-                        loading="lazy"
-                    >
-                    {% else %}
-                    <span>⚽</span>
-                    {% endif %}
-
-                    <strong>{{ team.name }}</strong>
-                </a>
-
-                {% endfor %}
-
-            </div>
-
-            {% else %}
-
-            <div class="empty-state">
-                <h3>Команды не найдены</h3>
-            </div>
-
-            {% endif %}
-
-        </section>
-
-    </main>
-
-</div>
-
-</body>
-</html>
+{% endblock %}
