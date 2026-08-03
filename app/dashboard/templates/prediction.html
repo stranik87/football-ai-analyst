@@ -154,6 +154,132 @@
         </div>
 
     </div>
+    <section class="explanation-section">
+
+        <div class="page-heading">
+            <div>
+                <h2>Почему модель выбрала этот исход</h2>
+                <p>{{ explanation.summary }}</p>
+            </div>
+        </div>
+    
+        <div class="explanation-grid">
+    
+            <div class="explanation-column">
+    
+                <h3>✅ Поддерживает прогноз</h3>
+    
+                {% if explanation.supporting_factors %}
+    
+                    {% for factor in explanation.supporting_factors %}
+    
+                    <article class="factor-card factor-support">
+    
+                        <div class="factor-header">
+                            <div>
+                                <strong>{{ factor.label }}</strong>
+    
+                                <span class="factor-side">
+                                    {% if factor.team_side == "home" %}
+                                        Хозяева
+                                    {% elif factor.team_side == "away" %}
+                                        Гости
+                                    {% else %}
+                                        Матч
+                                    {% endif %}
+                                </span>
+                            </div>
+    
+                            <span class="factor-percent">
+                                {{ "%.1f"|format(
+                                    factor.importance_percent
+                                ) }}%
+                            </span>
+                        </div>
+    
+                        <div class="progress-track">
+                            <div
+                                class="progress-bar home-bar"
+                                style="width:
+                                    {{ factor.importance_percent }}%;"
+                            ></div>
+                        </div>
+    
+                        <p>{{ factor.description }}</p>
+    
+                    </article>
+    
+                    {% endfor %}
+    
+                {% else %}
+    
+                    <div class="empty-state">
+                        <p>Поддерживающих факторов не найдено.</p>
+                    </div>
+    
+                {% endif %}
+    
+            </div>
+    
+            <div class="explanation-column">
+    
+                <h3>⚠️ Работает против прогноза</h3>
+    
+                {% if explanation.opposing_factors %}
+    
+                    {% for factor in explanation.opposing_factors %}
+    
+                    <article class="factor-card factor-against">
+    
+                        <div class="factor-header">
+                            <div>
+                                <strong>{{ factor.label }}</strong>
+    
+                                <span class="factor-side">
+                                    {% if factor.team_side == "home" %}
+                                        Хозяева
+                                    {% elif factor.team_side == "away" %}
+                                        Гости
+                                    {% else %}
+                                        Матч
+                                    {% endif %}
+                                </span>
+                            </div>
+    
+                            <span class="factor-percent">
+                                {{ "%.1f"|format(
+                                    factor.importance_percent
+                                ) }}%
+                            </span>
+                        </div>
+    
+                        <div class="progress-track">
+                            <div
+                                class="progress-bar against-bar"
+                                style="width:
+                                    {{ factor.importance_percent }}%;"
+                            ></div>
+                        </div>
+    
+                        <p>{{ factor.description }}</p>
+    
+                    </article>
+    
+                    {% endfor %}
+    
+                {% else %}
+    
+                    <div class="empty-state">
+                        <p>Сдерживающих факторов не найдено.</p>
+                    </div>
+    
+                {% endif %}
+    
+            </div>
+    
+        </div>
+    
+    </section>
 
 </section>
 

@@ -22,7 +22,9 @@ from app.services.league_service import LeagueService
 from app.services.prediction_service import PredictionService
 from app.services.standing_service import StandingService
 from app.services.team_service import TeamService
-
+from app.services.prediction_explanation_service import (
+    PredictionExplanationService,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -186,6 +188,14 @@ def dashboard_prediction(
         prediction = prediction_service.predict(
             fixture_id
         )
+        explanation_service = PredictionExplanationService(
+            session=db
+)
+
+        explanation = explanation_service.explain(
+            fixture_id=fixture_id,
+            limit=8,
+)   
 
     except ValueError as error:
         raise HTTPException(
@@ -202,6 +212,7 @@ def dashboard_prediction(
             "title": "Прогноз матча",
             "active_page": "fixtures",
             "prediction": prediction,
+            "explanation": explanation,
             "home_percent": (
                 probabilities["home_win"] * 100
             ),
