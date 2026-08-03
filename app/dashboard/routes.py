@@ -19,6 +19,9 @@ from app.models.team import Team
 from app.services.fixture_service import FixtureService
 from app.services.prediction_service import PredictionService
 from app.services.team_service import TeamService
+from app.services.league_service import LeagueService
+from app.models.league_season import LeagueSeason
+from app.services.standing_service import StandingService
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -264,6 +267,160 @@ def dashboard_team(
         context={
             "title": team.name,
             "team": team_data,
+            "fixtures": serialized_fixtures,
+        },
+    )
+
+@router.get(
+    "/leagues",
+    response_class=HTMLResponse,
+)
+def dashboard_leagues(
+    request: Request,
+    name: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """
+    HTML-страница списка лиг.
+    """
+
+    league_service = LeagueService(db)
+
+    if name:
+        leagues = league_service.search(
+            name=name,
+            limit=50,
+        )
+    else:
+        leagues = league_service.get_all(
+            limit=50,
+            offset=0,
+        )
+
+    serialized = [
+        league_service.serialize(
+            league
+        )
+        for league in leagues
+    ]
+
+    return templates.TemplateResponse(
+        request=request,
+        name="leagues.html",
+        context={
+            "title": "Лиги",
+            "leagues": serialized,
+            "name_query": name or "",
+        },
+    )
+
+
+@router.get(
+    "/league/{league_id}",
+    response_class=HTMLResponse,
+)
+def dashboard_league(
+    league_id: int,
+    request: Request,
+    season: int = 2024,
+    db: Session = Depends(get_db),
+):
+    """
+    HTML-страница одной лиги.
+    """
+
+    league_service = LeagueService(db)
+    standing_service = StandingService(db)
+    fixture_service = FixtureService(db)
+    team_service = TeamService(db)
+
+    league = league_service.get_by_id(league_id)
+
+    if league is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Лига {league_id} не найдена.",
+        )
+
+    league_data = league_service.serialize(league)
+
+    seasons = (
+        db.query(LeagueSeason)
+        .filter(
+            LeagueSeason.league_id == league_id
+        )
+        .order_by(
+            LeagueSeason.season.desc()
+        )
+        .all()
+    )
+
+    selected_season = next(
+        (
+            item
+            for item in seasons
+            if item.season == season
+        ),
+        None,
+    )
+
+    standings = standing_service.get_by_league_and_season(
+        league_id=league_id,
+        season=season,
+    )
+
+    serialized_standings = [
+        standing_service.serialize(item)
+        for item in standings
+    ]
+
+    teams = (
+        db.query(Team)
+        .filter(
+            Team.league_id == league_id
+        )
+        .order_by(
+            Team.name.asc()
+        )
+        .all()
+    )
+
+    serialized_teams = [
+        team_service.serialize(team)
+        for team in teams
+    ]
+
+    fixtures = []
+
+    if selected_season is not None:
+        fixtures = (
+            db.query(Fixture)
+            .filter(
+                Fixture.league_season_id
+                == selected_season.id
+            )
+            .order_by(
+                Fixture.kickoff.desc()
+            )
+            .limit(10)
+            .all()
+        )
+
+    serialized_fixtures = [
+        fixture_service.serialize(fixture)
+        for fixture in fixtures
+    ]
+
+    return templates.TemplateResponse(
+        request=request,
+        name="league.html",
+        context={
+            "title": league.name,
+            "league": league_data,
+            "seasons": seasons,
+            "selected_season": season,
+            "standings": serialized_standings,
+            "teams": serialized_teams,
             "fixtures": serialized_fixtures,
         },
     )

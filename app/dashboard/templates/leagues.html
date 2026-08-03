@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ title }}</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+
+<header class="header">
+    <h1>⚽ Football AI Analyst</h1>
+</header>
+
+<div class="wrapper">
+
+    <aside class="sidebar">
+        <a href="/dashboard">📊 Dashboard</a>
+        <a href="/dashboard/fixtures">⚽ Матчи</a>
+        <a href="/dashboard/teams">👥 Команды</a>
+        <a href="/dashboard/leagues">🏆 Лиги</a>
+        <a href="/standings/39/2024">
+            📈 Турнирная таблица
+        </a>
+        <a href="/docs">🛠 API Swagger</a>
+    </aside>
+
+    <main class="content">
+
+        <div class="page-heading">
+            <div>
+                <h2>Лиги</h2>
+                <p>
+                    Поиск и просмотр футбольных лиг.
+                </p>
+            </div>
+        </div>
+
+        <form
+            method="get"
+            action="/dashboard/leagues"
+            class="search-form"
+        >
+            <input
+                type="text"
+                name="name"
+                value="{{ name_query }}"
+                placeholder="Введите название лиги"
+            >
+
+            <button type="submit">
+                Найти
+            </button>
+
+            <a href="/dashboard/leagues">
+                Сбросить
+            </a>
+        </form>
+
+        {% if leagues %}
+
+        <section class="league-grid">
+
+            {% for league in leagues %}
+
+            <article class="league-card">
+
+                <div class="league-logo-wrapper">
+
+                    {% if league.logo %}
+                    <img
+                        src="{{ league.logo }}"
+                        alt="{{ league.name }}"
+                        class="league-logo"
+                        loading="lazy"
+                    >
+                    {% else %}
+                    <div class="league-logo-placeholder">
+                        🏆
+                    </div>
+                    {% endif %}
+
+                </div>
+
+                <div class="league-card-body">
+
+                    <h3>
+                        {{ league.name }}
+                    </h3>
+
+                    <div class="league-meta">
+
+                        <p>
+                            <strong>Страна:</strong>
+                            {{ league.country or "—" }}
+                        </p>
+
+                        <p>
+                            <strong>Тип:</strong>
+                            {{ league.type or "—" }}
+                        </p>
+
+                        <p>
+                            <strong>API ID:</strong>
+                            {{ league.api_id }}
+                        </p>
+
+                    </div>
+
+                    <div class="league-card-actions">
+
+                        <a
+                            class="prediction-button"
+                            href="/dashboard/league/{{ league.league_id }}"
+                        >
+                            Открыть лигу
+                        </a>
+
+                        <a
+                            class="secondary-button"
+                            href="/leagues/{{ league.league_id }}"
+                            target="_blank"
+                        >
+                            JSON API
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </section>
+
+        {% else %}
+
+        <div class="empty-state">
+            <h3>Лиги не найдены</h3>
+            <p>
+                Попробуй изменить поисковый запрос.
+            </p>
+        </div>
+
+        {% endif %}
+
+    </main>
+
+</div>
+
+</body>
+</html>
