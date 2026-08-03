@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ title }}</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+
+<header class="header">
+    <h1>⚽ Football AI Analyst</h1>
+</header>
+
+<div class="wrapper">
+
+    <aside class="sidebar">
+        <a href="/dashboard">📊 Dashboard</a>
+        <a href="/dashboard/fixtures">⚽ Матчи</a>
+        <a href="/dashboard/teams">👥 Команды</a>
+        <a href="/dashboard/leagues">🏆 Лиги</a>
+        <a href="/dashboard/standings">📈 Турнирная таблица</a>
+        <a href="/docs">🛠 API Swagger</a>
+    </aside>
+
+    <main class="content">
+
+        <div class="page-heading">
+            <div>
+                <h2>Турнирная таблица</h2>
+
+                <p>
+                    Выбери лигу и сезон.
+                </p>
+            </div>
+        </div>
+
+        <form
+            method="get"
+            action="/dashboard/standings"
+            class="standings-filter"
+        >
+            <div>
+                <label for="league_api_id">
+                    Лига
+                </label>
+
+                <select
+                    id="league_api_id"
+                    name="league_api_id"
+                >
+                    {% for league in leagues %}
+                    <option
+                        value="{{ league.api_id }}"
+                        {% if league.api_id == selected_league_api_id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ league.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="season">
+                    Сезон
+                </label>
+
+                <select
+                    id="season"
+                    name="season"
+                >
+                    {% for year in range(2024, 2027) %}
+                    <option
+                        value="{{ year }}"
+                        {% if year == selected_season %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">
+                Показать
+            </button>
+        </form>
+
+        {% if selected_league %}
+
+        <section class="selected-league-banner">
+
+            {% if selected_league.logo %}
+            <img
+                src="{{ selected_league.logo }}"
+                alt="{{ selected_league.name }}"
+            >
+            {% endif %}
+
+            <div>
+                <h3>{{ selected_league.name }}</h3>
+
+                <p>
+                    {{ selected_league.country }}
+                    ·
+                    сезон {{ selected_season }}
+                </p>
+            </div>
+
+        </section>
+
+        {% endif %}
+
+        {% if standings %}
+
+        <div class="table-wrapper">
+
+            <table class="standings-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Команда</th>
+                        <th>И</th>
+                        <th>В</th>
+                        <th>Н</th>
+                        <th>П</th>
+                        <th>Голы</th>
+                        <th>Разница</th>
+                        <th>Очки</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for row in standings %}
+
+                    <tr
+                        class="
+                            {% if row.rank <= 4 %}
+                                zone-champions
+                            {% elif row.rank <= 6 %}
+                                zone-europa
+                            {% elif row.rank >= 18 %}
+                                zone-relegation
+                            {% endif %}
+                        "
+                    >
+                        <td>
+                            {{ row.rank }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="/dashboard/team/{{ row.team_id }}"
+                            >
+                                {{ row.team_name }}
+                            </a>
+                        </td>
+
+                        <td>{{ row.played }}</td>
+                        <td>{{ row.wins }}</td>
+                        <td>{{ row.draws }}</td>
+                        <td>{{ row.losses }}</td>
+
+                        <td>
+                            {{ row.goals_for }}
+                            :
+                            {{ row.goals_against }}
+                        </td>
+
+                        <td>
+                            {{ row.goals_diff }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ row.points }}
+                            </strong>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="standings-legend">
+            <span class="legend-item">
+                <span class="legend-color champions"></span>
+                Лига чемпионов
+            </span>
+
+            <span class="legend-item">
+                <span class="legend-color europa"></span>
+                Лига Европы
+            </span>
+
+            <span class="legend-item">
+                <span class="legend-color relegation"></span>
+                Вылет
+            </span>
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+            <h3>Турнирная таблица не найдена</h3>
+
+            <p>
+                Для выбранной лиги и сезона данных нет.
+            </p>
+        </div>
+
+        {% endif %}
+
+    </main>
+
+</div>
+
+</body>
+</html>

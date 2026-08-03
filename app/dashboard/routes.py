@@ -424,3 +424,77 @@ def dashboard_league(
             "fixtures": serialized_fixtures,
         },
     )
+
+@router.get(
+    "/standings",
+    response_class=HTMLResponse,
+)
+def dashboard_standings(
+    request: Request,
+    league_api_id: int = 39,
+    season: int = 2024,
+    db: Session = Depends(get_db),
+):
+    """
+    HTML-страница турнирной таблицы.
+    """
+
+    standing_service = StandingService(db)
+    league_service = LeagueService(db)
+
+    standings = (
+        standing_service.get_by_league_api_id_and_season(
+            league_api_id=league_api_id,
+            season=season,
+        )
+    )
+
+    leagues = (
+        db.query(League)
+        .filter(
+            League.api_id.in_(
+                [39, 61, 78, 135, 140]
+            )
+        )
+        .order_by(
+            League.name.asc()
+        )
+        .all()
+    )
+
+    selected_league = (
+        db.query(League)
+        .filter(
+            League.api_id == league_api_id
+        )
+        .first()
+    )
+
+    serialized_standings = [
+        standing_service.serialize(item)
+        for item in standings
+    ]
+
+    serialized_leagues = [
+        league_service.serialize(league)
+        for league in leagues
+    ]
+
+    return templates.TemplateResponse(
+        request=request,
+        name="standings.html",
+        context={
+            "title": "Турнирная таблица",
+            "standings": serialized_standings,
+            "leagues": serialized_leagues,
+            "selected_league": (
+                league_service.serialize(
+                    selected_league
+                )
+                if selected_league is not None
+                else None
+            ),
+            "selected_league_api_id": league_api_id,
+            "selected_season": season,
+        },
+    )
