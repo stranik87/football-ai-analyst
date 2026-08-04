@@ -1,0 +1,3 @@
+model,iterations,depth,learning_rate,l2_leaf_reg,random_strength,bagging_temperature,test_accuracy,test_log_loss
+optimized,300,7,0.05,7,1.0,1.0,0.5340909090909091,0.9901051800065643
+baseline,500,6,0.05,3,1.0,1.0,0.5113636363636364,1.0017829127873634

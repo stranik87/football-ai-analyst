@@ -33,6 +33,7 @@ def main():
             features = builder.build_match(fixture)
 
             features["fixture_id"] = fixture.id
+            features["kickoff"] = fixture.kickoff
             features["home_team_id"] = fixture.home_team_id
             features["away_team_id"] = fixture.away_team_id
 

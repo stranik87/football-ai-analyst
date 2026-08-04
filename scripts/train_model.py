@@ -19,6 +19,7 @@ TARGET_COLUMN = "result"
 
 EXCLUDED_COLUMNS = [
     "fixture_id",
+    "kickoff",
     "home_team_id",
     "away_team_id",
     "home_goals",
