@@ -221,7 +221,7 @@ def build_features(
     return dataframe
 
 
-def test_predictions(
+def run_predictions_test(
     limit: int | None,
 ) -> None:
     dataframe, model, feature_columns = (
@@ -450,7 +450,7 @@ if __name__ == "__main__":
     arguments = parse_arguments()
 
     try:
-        test_predictions(
+        run_predictions_test(
             limit=arguments.limit
         )
     except Exception as error:
