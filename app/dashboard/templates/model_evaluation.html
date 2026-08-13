@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Оценка модели</h1>
+    <p>
+        Честная оценка CatBoost на финальной временной выборке.
+    </p>
+</div>
+
+<section class="dashboard-section">
+    <h2>Основные метрики</h2>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">
+                Accuracy
+            </div>
+            <div class="stat-value">
+                {{ "%.2f"|format(
+                    evaluation.metrics.accuracy * 100
+                ) }}%
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Log Loss
+            </div>
+            <div class="stat-value">
+                {{ "%.4f"|format(
+                    evaluation.metrics.log_loss
+                ) }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Тестовых матчей
+            </div>
+            <div class="stat-value">
+                {{ evaluation.test.matches }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Признаков
+            </div>
+            <div class="stat-value">
+                {{ evaluation.features_count }}
+            </div>
+        </div>
+    </div>
+
+    <p>
+        Период тестирования:
+        {{ evaluation.test.period_start }}
+        —
+        {{ evaluation.test.period_end }}
+    </p>
+</section>
+
+
+<section class="dashboard-section">
+    <h2>Качество по исходам</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Исход</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1</th>
+                    <th>Матчей</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for class_name in ["H", "D", "A"] %}
+                {% set item = evaluation.classification[class_name] %}
+
+                <tr>
+                    <td>
+                        {% if class_name == "H" %}
+                            Победа хозяев
+                        {% elif class_name == "D" %}
+                            Ничья
+                        {% else %}
+                            Победа гостей
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ "%.2f"|format(
+                            item.precision * 100
+                        ) }}%
+                    </td>
+
+                    <td>
+                        {{ "%.2f"|format(
+                            item.recall * 100
+                        ) }}%
+                    </td>
+
+                    <td>
+                        {{ "%.2f"|format(
+                            item.f1_score * 100
+                        ) }}%
+                    </td>
+
+                    <td>
+                        {{ item.support }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+<section class="dashboard-section">
+    <h2>Confusion Matrix</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Факт / Прогноз</th>
+                    <th>Хозяева</th>
+                    <th>Ничья</th>
+                    <th>Гости</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Хозяева</td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_H.predicted_H
+                        }}
+                    </td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_H.predicted_D
+                        }}
+                    </td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_H.predicted_A
+                        }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Ничья</td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_D.predicted_H
+                        }}
+                    </td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_D.predicted_D
+                        }}
+                    </td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_D.predicted_A
+                        }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Гости</td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_A.predicted_H
+                        }}
+                    </td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_A.predicted_D
+                        }}
+                    </td>
+                    <td>
+                        {{
+                            evaluation.confusion_matrix.actual_A.predicted_A
+                        }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+<section class="dashboard-section">
+    <h2>Сравнение с baseline</h2>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">
+                CatBoost
+            </div>
+            <div class="stat-value">
+                {{ "%.2f"|format(
+                    evaluation.metrics.accuracy * 100
+                ) }}%
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Всегда хозяева
+            </div>
+            <div class="stat-value">
+                {{ "%.2f"|format(
+                    evaluation.baselines.always_home.accuracy * 100
+                ) }}%
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Самый частый класс
+            </div>
+            <div class="stat-value">
+                {{ "%.2f"|format(
+                    evaluation.baselines.most_frequent_class.accuracy * 100
+                ) }}%
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="dashboard-section">
+    <h2>Accuracy по лигам</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Лига</th>
+                    <th>Матчей</th>
+                    <th>Accuracy</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for league_name, item in evaluation.accuracy_by_league.items() %}
+                <tr>
+                    <td>
+                        {{ league_name }}
+                    </td>
+                    <td>
+                        {{ item.matches }}
+                    </td>
+                    <td>
+                        {{ "%.2f"|format(
+                            item.accuracy * 100
+                        ) }}%
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+<section class="dashboard-section">
+    <h2>Accuracy по уверенности модели</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Уверенность</th>
+                    <th>Матчей</th>
+                    <th>Accuracy</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% set confidence_names = {
+                    "below_40": "Ниже 40%",
+                    "40_to_50": "40–50%",
+                    "50_to_60": "50–60%",
+                    "60_and_above": "60% и выше"
+                } %}
+
+                {% for key, item in evaluation.accuracy_by_confidence.items() %}
+                <tr>
+                    <td>
+                        {{ confidence_names[key] }}
+                    </td>
+
+                    <td>
+                        {{ item.matches }}
+                    </td>
+
+                    <td>
+                        {% if item.accuracy is not none %}
+                            {{ "%.2f"|format(
+                                item.accuracy * 100
+                            ) }}%
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

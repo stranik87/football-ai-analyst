@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import joblib
@@ -10,17 +11,20 @@ from sklearn.metrics import (
     confusion_matrix,
     log_loss,
 )
-from sklearn.model_selection import train_test_split
+
+from app.database.session import SessionLocal
+from app.models.fixture import Fixture
+from app.models.league import League
+from app.models.league_season import LeagueSeason
+from scripts.optimize_model import (
+    TARGET_COLUMN,
+    load_dataset,
+    prepare_dataframe,
+    temporal_split,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-
-DATASET_PATH = (
-    BASE_DIR
-    / "data"
-    / "datasets"
-    / "matches_dataset.csv"
-)
 
 MODEL_PATH = (
     BASE_DIR
@@ -36,24 +40,28 @@ FEATURES_PATH = (
     / "match_result_features.joblib"
 )
 
-TARGET_COLUMN = "result"
+REPORT_DIR = (
+    BASE_DIR
+    / "data"
+    / "reports"
+)
 
-CLASS_ORDER = ["H", "D", "A"]
+REPORT_PATH = (
+    REPORT_DIR
+    / "model_evaluation.json"
+)
 
-TEST_SIZE = 0.20
-RANDOM_STATE = 42
+CLASS_ORDER = [
+    "H",
+    "D",
+    "A",
+]
 
 
-def load_resources() -> tuple[
-    pd.DataFrame,
+def load_model_resources() -> tuple[
     CatBoostClassifier,
     list[str],
 ]:
-    if not DATASET_PATH.exists():
-        raise FileNotFoundError(
-            f"Датасет не найден: {DATASET_PATH}"
-        )
-
     if not MODEL_PATH.exists():
         raise FileNotFoundError(
             f"Модель не найдена: {MODEL_PATH}"
@@ -64,22 +72,25 @@ def load_resources() -> tuple[
             f"Файл признаков не найден: {FEATURES_PATH}"
         )
 
-    dataframe = pd.read_csv(DATASET_PATH)
-
     feature_columns = joblib.load(
         FEATURES_PATH
     )
 
     model = CatBoostClassifier()
-    model.load_model(MODEL_PATH)
+    model.load_model(
+        MODEL_PATH
+    )
 
-    return dataframe, model, feature_columns
+    return (
+        model,
+        feature_columns,
+    )
 
 
-def prepare_data(
+def prepare_model_features(
     dataframe: pd.DataFrame,
     feature_columns: list[str],
-) -> tuple[pd.DataFrame, pd.Series]:
+) -> pd.DataFrame:
     missing_columns = [
         column
         for column in feature_columns
@@ -92,19 +103,9 @@ def prepare_data(
             + ", ".join(missing_columns)
         )
 
-    if TARGET_COLUMN not in dataframe.columns:
-        raise ValueError(
-            f"Нет целевой колонки: {TARGET_COLUMN}"
-        )
-
-    x = dataframe[feature_columns].copy()
-
-    y = (
-        dataframe[TARGET_COLUMN]
-        .astype(str)
-        .str.strip()
-        .str.upper()
-    )
+    x = dataframe[
+        feature_columns
+    ].copy()
 
     x = x.apply(
         pd.to_numeric,
@@ -112,69 +113,492 @@ def prepare_data(
     )
 
     x = x.replace(
-        [float("inf"), float("-inf")],
+        [
+            float("inf"),
+            float("-inf"),
+        ],
         pd.NA,
     )
 
     x = x.fillna(0)
 
-    valid_mask = y.isin(CLASS_ORDER)
+    return x
 
-    x = x.loc[valid_mask].reset_index(
-        drop=True
-    )
 
-    y = y.loc[valid_mask].reset_index(
-        drop=True
-    )
+def get_fixture_leagues(
+    fixture_ids: list[int],
+) -> dict[int, str]:
+    session = SessionLocal()
 
-    if x.empty:
-        raise ValueError(
-            "После очистки данные отсутствуют."
+    try:
+        rows = (
+            session.query(
+                Fixture.id,
+                League.name,
+            )
+            .join(
+                LeagueSeason,
+                Fixture.league_season_id
+                == LeagueSeason.id,
+            )
+            .join(
+                League,
+                LeagueSeason.league_id
+                == League.id,
+            )
+            .filter(
+                Fixture.id.in_(
+                    fixture_ids
+                )
+            )
+            .all()
         )
 
-    return x, y
+        return {
+            fixture_id: league_name
+            for fixture_id, league_name in rows
+        }
+
+    finally:
+        session.close()
 
 
-def evaluate_model() -> None:
-    dataframe, model, feature_columns = (
-        load_resources()
+def calculate_classification_metrics(
+    y_true: pd.Series,
+    predictions,
+) -> dict:
+    report = classification_report(
+        y_true,
+        predictions,
+        labels=CLASS_ORDER,
+        output_dict=True,
+        zero_division=0,
+    )
+
+    result = {}
+
+    for class_name in CLASS_ORDER:
+        class_report = report[
+            class_name
+        ]
+
+        result[class_name] = {
+            "precision": float(
+                class_report["precision"]
+            ),
+            "recall": float(
+                class_report["recall"]
+            ),
+            "f1_score": float(
+                class_report["f1-score"]
+            ),
+            "support": int(
+                class_report["support"]
+            ),
+        }
+
+    return result
+
+
+def calculate_confusion_matrix(
+    y_true: pd.Series,
+    predictions,
+) -> dict:
+    matrix = confusion_matrix(
+        y_true,
+        predictions,
+        labels=CLASS_ORDER,
+    )
+
+    matrix_dataframe = pd.DataFrame(
+        matrix,
+        index=[
+            "actual_H",
+            "actual_D",
+            "actual_A",
+        ],
+        columns=[
+            "predicted_H",
+            "predicted_D",
+            "predicted_A",
+        ],
     )
 
     logger.info(
-        "Загружена модель: {}",
+        "Confusion Matrix:\n{}",
+        matrix_dataframe.to_string(),
+    )
+
+    return {
+        row_name: {
+            column_name: int(
+                matrix_dataframe.loc[
+                    row_name,
+                    column_name,
+                ]
+            )
+            for column_name
+            in matrix_dataframe.columns
+        }
+        for row_name
+        in matrix_dataframe.index
+    }
+
+
+def calculate_baselines(
+    train_dataframe: pd.DataFrame,
+    y_test: pd.Series,
+) -> dict:
+    train_results = (
+        train_dataframe[TARGET_COLUMN]
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
+
+    train_results = train_results[
+        train_results.isin(
+            CLASS_ORDER
+        )
+    ]
+
+    most_frequent_class = (
+        train_results
+        .value_counts()
+        .idxmax()
+    )
+
+    always_home_predictions = [
+        "H"
+        for _ in range(
+            len(y_test)
+        )
+    ]
+
+    most_frequent_predictions = [
+        most_frequent_class
+        for _ in range(
+            len(y_test)
+        )
+    ]
+
+    always_home_accuracy = (
+        accuracy_score(
+            y_test,
+            always_home_predictions,
+        )
+    )
+
+    most_frequent_accuracy = (
+        accuracy_score(
+            y_test,
+            most_frequent_predictions,
+        )
+    )
+
+    return {
+        "always_home": {
+            "class": "H",
+            "accuracy": float(
+                always_home_accuracy
+            ),
+        },
+        "most_frequent_class": {
+            "class": (
+                most_frequent_class
+            ),
+            "accuracy": float(
+                most_frequent_accuracy
+            ),
+        },
+    }
+
+
+def calculate_accuracy_by_league(
+    test_dataframe: pd.DataFrame,
+    y_test: pd.Series,
+    predictions,
+) -> dict:
+    fixture_ids = (
+        test_dataframe[
+            "fixture_id"
+        ]
+        .astype(int)
+        .tolist()
+    )
+
+    league_mapping = (
+        get_fixture_leagues(
+            fixture_ids
+        )
+    )
+
+    evaluation_dataframe = (
+        pd.DataFrame(
+            {
+                "fixture_id": fixture_ids,
+                "actual": (
+                    y_test
+                    .reset_index(drop=True)
+                ),
+                "predicted": (
+                    pd.Series(
+                        predictions
+                    )
+                    .reset_index(drop=True)
+                ),
+            }
+        )
+    )
+
+    evaluation_dataframe[
+        "league"
+    ] = (
+        evaluation_dataframe[
+            "fixture_id"
+        ]
+        .map(
+            league_mapping
+        )
+        .fillna("Unknown")
+    )
+
+    results = {}
+
+    for league_name, group in (
+        evaluation_dataframe
+        .groupby(
+            "league"
+        )
+    ):
+        accuracy = accuracy_score(
+            group["actual"],
+            group["predicted"],
+        )
+
+        results[
+            str(league_name)
+        ] = {
+            "matches": int(
+                len(group)
+            ),
+            "accuracy": float(
+                accuracy
+            ),
+        }
+
+    return results
+
+
+def calculate_confidence_accuracy(
+    y_test: pd.Series,
+    predictions,
+    probabilities,
+) -> dict:
+    probability_dataframe = (
+        pd.DataFrame(
+            probabilities
+        )
+    )
+
+    confidence = (
+        probability_dataframe
+        .max(
+            axis=1
+        )
+    )
+
+    evaluation_dataframe = (
+        pd.DataFrame(
+            {
+                "actual": (
+                    y_test
+                    .reset_index(drop=True)
+                ),
+                "predicted": (
+                    pd.Series(
+                        predictions
+                    )
+                    .reset_index(drop=True)
+                ),
+                "confidence": (
+                    confidence
+                    .reset_index(drop=True)
+                ),
+            }
+        )
+    )
+
+    bins = [
+        (
+            "below_40",
+            0.0,
+            0.40,
+        ),
+        (
+            "40_to_50",
+            0.40,
+            0.50,
+        ),
+        (
+            "50_to_60",
+            0.50,
+            0.60,
+        ),
+        (
+            "60_and_above",
+            0.60,
+            1.01,
+        ),
+    ]
+
+    results = {}
+
+    for (
+        name,
+        minimum,
+        maximum,
+    ) in bins:
+        group = (
+            evaluation_dataframe[
+                (
+                    evaluation_dataframe[
+                        "confidence"
+                    ]
+                    >= minimum
+                )
+                & (
+                    evaluation_dataframe[
+                        "confidence"
+                    ]
+                    < maximum
+                )
+            ]
+        )
+
+        if group.empty:
+            results[name] = {
+                "matches": 0,
+                "accuracy": None,
+            }
+
+            continue
+
+        accuracy = accuracy_score(
+            group["actual"],
+            group["predicted"],
+        )
+
+        results[name] = {
+            "matches": int(
+                len(group)
+            ),
+            "accuracy": float(
+                accuracy
+            ),
+        }
+
+    return results
+
+
+def evaluate_model() -> None:
+    logger.info(
+        "Загрузка датасета..."
+    )
+
+    dataframe = load_dataset()
+
+    (
+        prepared_dataframe,
+        _,
+        date_column,
+    ) = prepare_dataframe(
+        dataframe
+    )
+
+    (
+        train_dataframe,
+        validation_dataframe,
+        test_dataframe,
+    ) = temporal_split(
+        prepared_dataframe
+    )
+
+    combined_train_dataframe = (
+        pd.concat(
+            [
+                train_dataframe,
+                validation_dataframe,
+            ],
+            ignore_index=True,
+        )
+    )
+
+    (
+        model,
+        feature_columns,
+    ) = load_model_resources()
+
+    logger.info(
+        "Модель: {}",
         MODEL_PATH,
     )
 
     logger.info(
-        "Количество признаков: {}",
+        "Количество признаков модели: {}",
         len(feature_columns),
     )
 
-    x, y = prepare_data(
-        dataframe,
-        feature_columns,
-    )
-
-    _, x_test, _, y_test = train_test_split(
-        x,
-        y,
-        test_size=TEST_SIZE,
-        random_state=RANDOM_STATE,
-        stratify=y,
+    logger.info(
+        "Train + validation: {} матчей",
+        len(
+            combined_train_dataframe
+        ),
     )
 
     logger.info(
-        "Количество тестовых матчей: {}",
-        len(x_test),
+        "Финальный тест: {} матчей",
+        len(
+            test_dataframe
+        ),
     )
 
-    predictions = model.predict(
-        x_test
-    ).reshape(-1)
+    logger.info(
+        "Период финального теста: {} — {}",
+        test_dataframe[
+            date_column
+        ].min(),
+        test_dataframe[
+            date_column
+        ].max(),
+    )
 
-    probabilities = model.predict_proba(
-        x_test
+    x_test = prepare_model_features(
+        test_dataframe,
+        feature_columns,
+    )
+
+    y_test = (
+        test_dataframe[
+            TARGET_COLUMN
+        ]
+        .astype(str)
+        .str.strip()
+        .str.upper()
+        .reset_index(drop=True)
+    )
+
+    predictions = (
+        model.predict(
+            x_test
+        )
+        .reshape(-1)
+    )
+
+    probabilities = (
+        model.predict_proba(
+            x_test
+        )
     )
 
     accuracy = accuracy_score(
@@ -202,69 +626,200 @@ def evaluate_model() -> None:
         loss,
     )
 
-    report = classification_report(
-        y_test,
-        predictions,
-        labels=CLASS_ORDER,
-        zero_division=0,
+    classification_metrics = (
+        calculate_classification_metrics(
+            y_test,
+            predictions,
+        )
     )
 
-    logger.info(
-        "Classification report:\n{}",
-        report,
+    for (
+        class_name,
+        values,
+    ) in classification_metrics.items():
+        logger.info(
+            "{} — Precision: {:.4f}, "
+            "Recall: {:.4f}, "
+            "F1: {:.4f}, "
+            "Support: {}",
+            class_name,
+            values["precision"],
+            values["recall"],
+            values["f1_score"],
+            values["support"],
+        )
+
+    confusion = (
+        calculate_confusion_matrix(
+            y_test,
+            predictions,
+        )
     )
 
-    matrix = confusion_matrix(
-        y_test,
-        predictions,
-        labels=CLASS_ORDER,
-    )
-
-    matrix_dataframe = pd.DataFrame(
-        matrix,
-        index=[
-            "actual_H",
-            "actual_D",
-            "actual_A",
-        ],
-        columns=[
-            "predicted_H",
-            "predicted_D",
-            "predicted_A",
-        ],
-    )
-
-    logger.info(
-        "Confusion matrix:\n{}",
-        matrix_dataframe.to_string(),
-    )
-
-    prediction_distribution = (
-        pd.Series(predictions)
-        .value_counts()
-        .reindex(
-            CLASS_ORDER,
-            fill_value=0,
+    baselines = (
+        calculate_baselines(
+            combined_train_dataframe,
+            y_test,
         )
     )
 
     logger.info(
-        "Распределение прогнозов:\n{}",
-        prediction_distribution.to_string(),
-    )
-
-    probability_dataframe = pd.DataFrame(
-        probabilities,
-        columns=model_classes,
+        "Baseline always_home Accuracy: {:.4f}",
+        baselines[
+            "always_home"
+        ][
+            "accuracy"
+        ],
     )
 
     logger.info(
-        "Средние вероятности модели:\n{}",
-        probability_dataframe.mean().to_string(),
+        "Baseline most_frequent ({}) Accuracy: {:.4f}",
+        baselines[
+            "most_frequent_class"
+        ][
+            "class"
+        ],
+        baselines[
+            "most_frequent_class"
+        ][
+            "accuracy"
+        ],
+    )
+
+    accuracy_by_league = (
+        calculate_accuracy_by_league(
+            test_dataframe,
+            y_test,
+            predictions,
+        )
+    )
+
+    logger.info(
+        "Accuracy по лигам:"
+    )
+
+    for (
+        league_name,
+        values,
+    ) in accuracy_by_league.items():
+        logger.info(
+            "{} — матчей: {}, Accuracy: {:.4f}",
+            league_name,
+            values["matches"],
+            values["accuracy"],
+        )
+
+    confidence_accuracy = (
+        calculate_confidence_accuracy(
+            y_test,
+            predictions,
+            probabilities,
+        )
+    )
+
+    logger.info(
+        "Accuracy по уровням уверенности:"
+    )
+
+    for (
+        group_name,
+        values,
+    ) in confidence_accuracy.items():
+        if values[
+            "accuracy"
+        ] is None:
+            logger.info(
+                "{} — матчей: 0",
+                group_name,
+            )
+
+            continue
+
+        logger.info(
+            "{} — матчей: {}, Accuracy: {:.4f}",
+            group_name,
+            values["matches"],
+            values["accuracy"],
+        )
+
+    report = {
+        "model": str(
+            MODEL_PATH
+        ),
+        "features_count": int(
+            len(
+                feature_columns
+            )
+        ),
+        "test": {
+            "matches": int(
+                len(
+                    test_dataframe
+                )
+            ),
+            "period_start": (
+                test_dataframe[
+                    date_column
+                ]
+                .min()
+                .isoformat()
+            ),
+            "period_end": (
+                test_dataframe[
+                    date_column
+                ]
+                .max()
+                .isoformat()
+            ),
+        },
+        "metrics": {
+            "accuracy": float(
+                accuracy
+            ),
+            "log_loss": float(
+                loss
+            ),
+        },
+        "classification": (
+            classification_metrics
+        ),
+        "confusion_matrix": (
+            confusion
+        ),
+        "baselines": (
+            baselines
+        ),
+        "accuracy_by_league": (
+            accuracy_by_league
+        ),
+        "accuracy_by_confidence": (
+            confidence_accuracy
+        ),
+    }
+
+    REPORT_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    with REPORT_PATH.open(
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            report,
+            file,
+            ensure_ascii=False,
+            indent=4,
+        )
+
+    logger.success(
+        "Отчёт сохранён: {}",
+        REPORT_PATH,
     )
 
     logger.success(
-        "Честная проверка качества завершена."
+        "Честная оценка модели завершена."
     )
 
 

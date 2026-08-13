@@ -1,0 +1,100 @@
+{
+    "model": "D:\\analyses\\football-ai-analyst\\data\\models\\match_result_catboost.cbm",
+    "features_count": 58,
+    "test": {
+        "matches": 264,
+        "period_start": "2025-04-19T19:05:00",
+        "period_end": "2025-05-29T18:30:00"
+    },
+    "metrics": {
+        "accuracy": 0.5340909090909091,
+        "log_loss": 0.9901051800065643
+    },
+    "classification": {
+        "H": {
+            "precision": 0.5714285714285714,
+            "recall": 0.6728971962616822,
+            "f1_score": 0.6180257510729614,
+            "support": 107
+        },
+        "D": {
+            "precision": 0.24,
+            "recall": 0.10344827586206896,
+            "f1_score": 0.14457831325301204,
+            "support": 58
+        },
+        "A": {
+            "precision": 0.5575221238938053,
+            "recall": 0.6363636363636364,
+            "f1_score": 0.5943396226415094,
+            "support": 99
+        }
+    },
+    "confusion_matrix": {
+        "actual_H": {
+            "predicted_H": 72,
+            "predicted_D": 10,
+            "predicted_A": 25
+        },
+        "actual_D": {
+            "predicted_H": 27,
+            "predicted_D": 6,
+            "predicted_A": 25
+        },
+        "actual_A": {
+            "predicted_H": 27,
+            "predicted_D": 9,
+            "predicted_A": 63
+        }
+    },
+    "baselines": {
+        "always_home": {
+            "class": "H",
+            "accuracy": 0.4053030303030303
+        },
+        "most_frequent_class": {
+            "class": "H",
+            "accuracy": 0.4053030303030303
+        }
+    },
+    "accuracy_by_league": {
+        "Bundesliga": {
+            "matches": 41,
+            "accuracy": 0.3902439024390244
+        },
+        "La Liga": {
+            "matches": 66,
+            "accuracy": 0.5757575757575758
+        },
+        "Ligue 1": {
+            "matches": 45,
+            "accuracy": 0.5333333333333333
+        },
+        "Premier League": {
+            "matches": 55,
+            "accuracy": 0.5272727272727272
+        },
+        "Serie A": {
+            "matches": 57,
+            "accuracy": 0.5964912280701754
+        }
+    },
+    "accuracy_by_confidence": {
+        "below_40": {
+            "matches": 31,
+            "accuracy": 0.4838709677419355
+        },
+        "40_to_50": {
+            "matches": 100,
+            "accuracy": 0.44
+        },
+        "50_to_60": {
+            "matches": 71,
+            "accuracy": 0.5211267605633803
+        },
+        "60_and_above": {
+            "matches": 62,
+            "accuracy": 0.7258064516129032
+        }
+    }
+}

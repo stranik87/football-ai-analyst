@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from fastapi import (
@@ -27,6 +28,13 @@ from app.services.prediction_explanation_service import (
 )
 
 BASE_DIR = Path(__file__).resolve().parent
+
+MODEL_EVALUATION_PATH = (
+    BASE_DIR.parent.parent
+    / "data"
+    / "reports"
+    / "model_evaluation.json"
+)
 
 templates = Jinja2Templates(
     directory=str(BASE_DIR / "templates")
@@ -591,5 +599,42 @@ def dashboard_standings(
             ),
             "selected_league_api_id": league_api_id,
             "selected_season": season,
+        },
+    )
+
+@router.get(
+    "/model-evaluation",
+    response_class=HTMLResponse,
+)
+def dashboard_model_evaluation(
+    request: Request,
+):
+    """
+    HTML-страница честной оценки ML-модели.
+    """
+
+    if not MODEL_EVALUATION_PATH.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Отчёт оценки модели не найден. "
+                "Запустите: "
+                "python -m scripts.evaluate_model"
+            ),
+        )
+
+    with MODEL_EVALUATION_PATH.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
+        evaluation = json.load(file)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="model_evaluation.html",
+        context={
+            "title": "Оценка модели",
+            "active_page": "model_evaluation",
+            "evaluation": evaluation,
         },
     )
