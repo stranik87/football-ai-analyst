@@ -22,6 +22,7 @@ from app.bot.handlers import (
     unknown_message_handler,
     fixture_callback_handler,
     show_fixture_list,
+    next_matches_command,
 )
 from app.core.logger import logger
 
@@ -107,6 +108,13 @@ class FootballTelegramBot:
                 predict_command,
             )
         )
+
+        application.add_handler(
+            CommandHandler(
+                "next",
+                next_matches_command,
+    )
+)
 
         application.add_handler(
             prediction_conversation

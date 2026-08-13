@@ -638,3 +638,37 @@ def dashboard_model_evaluation(
             "evaluation": evaluation,
         },
     )
+
+
+@router.get(
+    "/upcoming",
+    response_class=HTMLResponse,
+)
+def dashboard_upcoming(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """
+    HTML-страница ближайших будущих матчей.
+    """
+
+    fixture_service = FixtureService(db)
+
+    fixtures = fixture_service.get_upcoming_matches(
+        limit=50,
+    )
+
+    serialized_fixtures = [
+        fixture_service.serialize(fixture)
+        for fixture in fixtures
+    ]
+
+    return templates.TemplateResponse(
+        request=request,
+        name="upcoming.html",
+        context={
+            "title": "Ближайшие матчи",
+            "active_page": "upcoming",
+            "fixtures": serialized_fixtures,
+        },
+    )

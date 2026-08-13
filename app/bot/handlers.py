@@ -12,6 +12,7 @@ from telegram import (
     InlineKeyboardMarkup,
     ReplyKeyboardMarkup,
     Update,
+    
 )
 
 from app.services.fixture_service import FixtureService
@@ -525,6 +526,79 @@ def build_prediction_text(
         f"{confidence:.1f}%"
     )
 
+async def next_matches_command(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> None:
+    """
+    Команда /next.
+
+    Показать ближайшие будущие матчи.
+    """
+
+    if update.message is None:
+        return
+
+    session = SessionLocal()
+
+    try:
+        fixture_service = FixtureService(session)
+
+        fixtures = fixture_service.get_upcoming_matches(
+            limit=5,
+        )
+
+        if not fixtures:
+            await update.message.reply_text(
+                "📅 Ближайших матчей пока нет.\n\n"
+                "В текущей базе нет будущих матчей.",
+                reply_markup=MAIN_MENU_KEYBOARD,
+            )
+            return
+
+        keyboard = []
+
+        for fixture in fixtures:
+            home_team = (
+                fixture.home_team.name
+                if fixture.home_team is not None
+                else "Неизвестная команда"
+            )
+
+            away_team = (
+                fixture.away_team.name
+                if fixture.away_team is not None
+                else "Неизвестная команда"
+            )
+
+            kickoff_text = fixture.kickoff.strftime(
+                "%d.%m.%Y %H:%M"
+            )
+
+            keyboard.append(
+                [
+                    InlineKeyboardButton(
+                        text=(
+                            f"{kickoff_text} | "
+                            f"{home_team} — {away_team}"
+                        ),
+                        callback_data=(
+                            f"predict_fixture:{fixture.id}"
+                        ),
+                    )
+                ]
+            )
+
+        await update.message.reply_text(
+            "📅 Ближайшие матчи:\n"
+            "Выбери матч для прогноза:",
+            reply_markup=InlineKeyboardMarkup(
+                keyboard
+            ),
+        )
+
+    finally:
+        session.close()
 
 async def cancel_command(
     update: Update,

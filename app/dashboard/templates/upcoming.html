@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Ближайшие матчи</h1>
+    <p>
+        Будущие матчи, для которых Football AI Analyst
+        может построить прогноз до начала игры.
+    </p>
+</div>
+
+<section class="dashboard-section">
+    {% if fixtures %}
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Хозяева</th>
+                        <th>Гости</th>
+                        <th>Статус</th>
+                        <th>Прогноз</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for fixture in fixtures %}
+                    <tr>
+                        <td>
+                            {{ fixture.kickoff }}
+                        </td>
+
+                        <td>
+                            {{ fixture.home_team }}
+                        </td>
+
+                        <td>
+                            {{ fixture.away_team }}
+                        </td>
+
+                        <td>
+                            {{ fixture.status_short }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="/dashboard/predict/{{ fixture.fixture_id }}"
+                            >
+                                Открыть прогноз
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+            <h2>Будущих матчей пока нет</h2>
+
+            <p>
+                В текущей базе нет запланированных матчей.
+                На Free-тарифе API-Football актуальный сезон
+                сейчас недоступен.
+            </p>
+
+            <p>
+                Когда в базе появятся матчи со статусом NS,
+                они автоматически появятся на этой странице.
+            </p>
+        </div>
+
+    {% endif %}
+</section>
+{% endblock %}

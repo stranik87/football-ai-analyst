@@ -35,6 +35,29 @@ def get_latest_fixtures(
         for fixture in fixtures
     ]
 
+@router.get(
+    "/upcoming",
+    response_model=list[FixtureResponse],
+)
+def get_upcoming_fixtures(
+    limit: int = 10,
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """
+    Получить ближайшие будущие матчи.
+    """
+
+    service = FixtureService(db)
+
+    fixtures = service.get_upcoming_matches(
+        limit=limit
+    )
+
+    return [
+        service.serialize(fixture)
+        for fixture in fixtures
+    ]
+
 
 @router.get(
     "/search",
