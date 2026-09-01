@@ -16,14 +16,14 @@ MODEL_PATH = (
     BASE_DIR
     / "data"
     / "models"
-    / "match_result_catboost.cbm"
+    / "match_result_catboost_optimized.cbm"
 )
 
 FEATURES_PATH = (
     BASE_DIR
     / "data"
     / "models"
-    / "match_result_features.joblib"
+    / "match_result_features_optimized.joblib"
 )
 
 RESULT_NAMES = {

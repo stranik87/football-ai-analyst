@@ -11,7 +11,10 @@ from app.analytics.team_venue_split_analyzer import TeamVenueSplitAnalyzer
 
 
 class FeatureBuilder:
-    """Построение признаков для ML без использования будущих матчей."""
+    """
+    Построение признаков для ML
+    без использования будущих матчей.
+    """
 
     def __init__(self, session):
         self.session = session
@@ -24,6 +27,47 @@ class FeatureBuilder:
         self.passing = TeamPassAnalyzer(session)
         self.shot_efficiency = TeamShotEfficiencyAnalyzer(session)
         self.goalkeeper = TeamGoalkeeperAnalyzer(session)
+
+    @staticmethod
+    def _difference(home, away):
+        """
+        Абсолютная разница между хозяевами и гостями.
+        """
+        return abs(
+            float(home or 0)
+            - float(away or 0)
+        )
+
+    @staticmethod
+    def _signed_difference(home, away):
+        """
+        Разница хозяева - гости.
+        """
+        return (
+            float(home or 0)
+            - float(away or 0)
+        )
+
+    @staticmethod
+    def _closeness(home, away):
+        """
+        Близость двух команд.
+        1.0 = показатели одинаковые.
+        0.0 = показатели сильно различаются.
+        """
+        home = float(home or 0)
+        away = float(away or 0)
+
+        denominator = (
+            abs(home)
+            + abs(away)
+            + 1e-9
+        )
+
+        return 1.0 - (
+            abs(home - away)
+            / denominator
+        )
 
     def build(
         self,
@@ -118,7 +162,11 @@ class FeatureBuilder:
             **common,
         )
 
-        return {
+        features = {
+            # ==========================================================
+            # БАЗОВЫЕ ПРИЗНАКИ
+            # ==========================================================
+
             "home_points_per_match":
                 home_form.points_per_match,
 
@@ -293,3 +341,157 @@ class FeatureBuilder:
             "away_clean_sheet_percentage":
                 away_goalkeeper.clean_sheet_percentage,
         }
+
+        # ==============================================================
+        # НОВЫЕ ПАРНЫЕ ПРИЗНАКИ
+        # ==============================================================
+
+        features.update(
+            {
+                # Форма
+                "points_difference":
+                    self._signed_difference(
+                        home_form.points_per_match,
+                        away_form.points_per_match,
+                    ),
+
+                "points_closeness":
+                    self._closeness(
+                        home_form.points_per_match,
+                        away_form.points_per_match,
+                    ),
+
+                # Атака
+                "goals_for_difference":
+                    self._signed_difference(
+                        home_form.average_goals_for,
+                        away_form.average_goals_for,
+                    ),
+
+                "goals_for_closeness":
+                    self._closeness(
+                        home_form.average_goals_for,
+                        away_form.average_goals_for,
+                    ),
+
+                # Защита
+                "goals_against_difference":
+                    self._signed_difference(
+                        home_form.average_goals_against,
+                        away_form.average_goals_against,
+                    ),
+
+                # Владение
+                "possession_difference":
+                    self._signed_difference(
+                        home_possession.average_possession,
+                        away_possession.average_possession,
+                    ),
+
+                "possession_closeness":
+                    self._closeness(
+                        home_possession.average_possession,
+                        away_possession.average_possession,
+                    ),
+
+                # Передачи
+                "total_passes_difference":
+                    self._signed_difference(
+                        home_passing.average_total_passes,
+                        away_passing.average_total_passes,
+                    ),
+
+                "accurate_passes_difference":
+                    self._signed_difference(
+                        home_passing.average_accurate_passes,
+                        away_passing.average_accurate_passes,
+                    ),
+
+                "pass_accuracy_difference":
+                    self._signed_difference(
+                        home_passing.average_pass_accuracy,
+                        away_passing.average_pass_accuracy,
+                    ),
+
+                "pass_accuracy_closeness":
+                    self._closeness(
+                        home_passing.average_pass_accuracy,
+                        away_passing.average_pass_accuracy,
+                    ),
+
+                "high_accuracy_difference":
+                    self._signed_difference(
+                        home_passing.above_85_accuracy_percentage,
+                        away_passing.above_85_accuracy_percentage,
+                    ),
+
+                # Удары
+                "total_shots_difference":
+                    self._signed_difference(
+                        home_shooting.average_total_shots,
+                        away_shooting.average_total_shots,
+                    ),
+
+                "shots_on_goal_difference":
+                    self._signed_difference(
+                        home_shooting.average_shots_on_goal,
+                        away_shooting.average_shots_on_goal,
+                    ),
+
+                "shot_accuracy_difference":
+                    self._signed_difference(
+                        home_shooting.shot_accuracy_percentage,
+                        away_shooting.shot_accuracy_percentage,
+                    ),
+
+                "goal_conversion_difference":
+                    self._signed_difference(
+                        home_shooting.goal_conversion_percentage,
+                        away_shooting.goal_conversion_percentage,
+                    ),
+
+                "shots_per_goal_difference":
+                    self._signed_difference(
+                        home_shooting.shots_per_goal,
+                        away_shooting.shots_per_goal,
+                    ),
+
+                # Вратари
+                "saves_difference":
+                    self._signed_difference(
+                        home_goalkeeper.average_saves,
+                        away_goalkeeper.average_saves,
+                    ),
+
+                "save_percentage_difference":
+                    self._signed_difference(
+                        home_goalkeeper.save_percentage,
+                        away_goalkeeper.save_percentage,
+                    ),
+
+                "clean_sheet_difference":
+                    self._signed_difference(
+                        home_goalkeeper.clean_sheet_percentage,
+                        away_goalkeeper.clean_sheet_percentage,
+                    ),
+
+                # Общая близость атаки
+                "attack_closeness":
+                    (
+                        self._closeness(
+                            home_form.average_goals_for,
+                            away_form.average_goals_for,
+                        )
+                        + self._closeness(
+                            home_shooting.goal_conversion_percentage,
+                            away_shooting.goal_conversion_percentage,
+                        )
+                        + self._closeness(
+                            home_shooting.shot_accuracy_percentage,
+                            away_shooting.shot_accuracy_percentage,
+                        )
+                    ) / 3.0,
+            }
+        )
+
+        return features

@@ -23,7 +23,7 @@ class FixtureTeamStatisticsImporter(BaseImporter):
     """
 
     REQUEST_DELAY = 2
-    LIMIT = 10
+    LIMIT = 100
 
     FINISHED_STATUSES = (
         "FT",
@@ -68,6 +68,9 @@ class FixtureTeamStatisticsImporter(BaseImporter):
                     0,
                 )
                 < 2
+            )
+            .filter(
+                Fixture.kickoff >= "2026-08-01"
             )
             .order_by(
                 Fixture.kickoff.asc()

@@ -24,7 +24,7 @@ class TeamImporter(BaseImporter):
         61,
     ]
 
-    SEASON = 2024
+    SEASON = 2026
     REQUEST_DELAY = 2
 
     def import_data(self) -> None:

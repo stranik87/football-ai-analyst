@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import joblib
 import pandas as pd
 from catboost import CatBoostClassifier
 from sqlalchemy.orm import Session
@@ -8,15 +9,24 @@ from app.ml.feature_builder import FeatureBuilder
 from app.models.fixture import Fixture
 
 
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+MODEL_PATH = (
+    BASE_DIR
+    / "data"
+    / "models"
+    / "match_result_catboost_optimized.cbm"
+)
+
+FEATURES_PATH = (
+    BASE_DIR
+    / "data"
+    / "models"
+    / "match_result_features_optimized.joblib"
+)
+
+
 class PredictionService:
-    MODEL_PATH = Path(
-        "data/models/match_result_model.cbm"
-    )
-
-    FEATURE_IMPORTANCE_PATH = Path(
-        "data/models/feature_importance.csv"
-    )
-
     VALID_CLASSES = (
         "A",
         "D",
@@ -35,37 +45,33 @@ class PredictionService:
 
         self.model = CatBoostClassifier()
 
-        if not self.MODEL_PATH.exists():
+        if not MODEL_PATH.exists():
             raise FileNotFoundError(
                 "Файл модели не найден: "
-                f"{self.MODEL_PATH}"
+                f"{MODEL_PATH}"
             )
 
         self.model.load_model(
-            self.MODEL_PATH
+            MODEL_PATH
         )
 
-        if not self.FEATURE_IMPORTANCE_PATH.exists():
+        if not FEATURES_PATH.exists():
             raise FileNotFoundError(
                 "Файл признаков не найден: "
-                f"{self.FEATURE_IMPORTANCE_PATH}"
+                f"{FEATURES_PATH}"
             )
 
-        importance = pd.read_csv(
-            self.FEATURE_IMPORTANCE_PATH
+        self.feature_columns = joblib.load(
+            FEATURES_PATH
         )
 
-        if "feature" not in importance.columns:
-            raise ValueError(
-                "В файле важности признаков "
-                "отсутствует колонка feature"
+        if not isinstance(
+            self.feature_columns,
+            list,
+        ):
+            raise TypeError(
+                "Файл признаков должен содержать список."
             )
-
-        self.feature_columns = (
-            importance["feature"]
-            .astype(str)
-            .tolist()
-        )
 
     def predict_fixture(
         self,
