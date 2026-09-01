@@ -69,9 +69,6 @@ class FixtureTeamStatisticsImporter(BaseImporter):
                 )
                 < 2
             )
-            .filter(
-                Fixture.kickoff >= "2026-08-01"
-            )
             .order_by(
                 Fixture.kickoff.asc()
             )
@@ -294,25 +291,25 @@ class FixtureTeamStatisticsImporter(BaseImporter):
                     f"api_id={fixture.api_id}"
                 )
 
-                # Ошибка передаётся BaseImporter.
-                # При исчерпании API-лимита импорт
-                # корректно остановится, а уже сохранённые
-                # матчи останутся в базе.
                 raise
 
         logger.success(
             "Импорт статистики завершён. "
             f"Обработано матчей: {completed_fixtures}"
         )
+
         logger.info(
             f"Добавлено записей: {total_added}"
         )
+
         logger.info(
             f"Пропущено существующих: {total_skipped}"
         )
+
         logger.warning(
             f"Команды не найдены: {total_missing_teams}"
         )
+
         logger.warning(
             f"Пустых ответов API: {empty_responses}"
         )

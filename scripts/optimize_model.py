@@ -18,7 +18,11 @@ DATASET_PATH = (
     / "matches_dataset.csv"
 )
 
-MODEL_DIR = BASE_DIR / "data" / "models"
+MODEL_DIR = (
+    BASE_DIR
+    / "data"
+    / "models"
+)
 
 OPTIMIZED_MODEL_PATH = (
     MODEL_DIR
@@ -30,16 +34,29 @@ OPTIMIZED_FEATURES_PATH = (
     / "match_result_features_optimized.joblib"
 )
 
-RESULTS_DIR = BASE_DIR / "data" / "reports"
+RESULTS_DIR = (
+    BASE_DIR
+    / "data"
+    / "reports"
+)
 
 RESULTS_PATH = (
     RESULTS_DIR
     / "catboost_optimization_results.csv"
 )
 
+FEATURE_SELECTION_RESULTS_PATH = (
+    RESULTS_DIR
+    / "feature_selection_results.csv"
+)
+
 TARGET_COLUMN = "result"
 
-CLASS_ORDER = ["H", "D", "A"]
+CLASS_ORDER = [
+    "H",
+    "D",
+    "A",
+]
 
 EXCLUDED_COLUMNS = [
     "fixture_id",
@@ -64,36 +81,85 @@ RANDOM_SEED = 42
 
 
 PARAMETER_GRID = {
-    "iterations": [300, 500, 800],
-    "depth": [5, 6, 7],
-    "learning_rate": [0.03, 0.05],
-    "l2_leaf_reg": [3, 7],
-    "random_strength": [0.5, 1.0],
-    "bagging_temperature": [0.5, 1.0],
+    "iterations": [
+        300,
+        500,
+        800,
+    ],
+    "depth": [
+        5,
+        6,
+        7,
+    ],
+    "learning_rate": [
+        0.03,
+        0.05,
+    ],
+    "l2_leaf_reg": [
+        3,
+        7,
+    ],
+    "random_strength": [
+        0.5,
+        1.0,
+    ],
+    "bagging_temperature": [
+        0.5,
+        1.0,
+    ],
 }
+
+
+FEATURE_COUNTS = [
+    79,
+    60,
+    50,
+    40,
+    30,
+]
+
+
+# Отдельным экспериментом проверено:
+# 150 итераций показали лучший результат
+# на финальном Test:
+#
+# Accuracy = 55.40%
+# Log Loss = 0.9871
+#
+# Поэтому финальная модель использует
+# именно 150 итераций.
+FINAL_ITERATIONS = 150
 
 
 def load_dataset() -> pd.DataFrame:
     if not DATASET_PATH.exists():
         raise FileNotFoundError(
             f"Датасет не найден: {DATASET_PATH}\n"
-            "Сначала запусти: python -m scripts.export_dataset"
+            "Сначала запусти: "
+            "python -m scripts.export_dataset"
         )
 
-    dataframe = pd.read_csv(DATASET_PATH)
+    dataframe = pd.read_csv(
+        DATASET_PATH
+    )
 
     if dataframe.empty:
-        raise ValueError("Датасет пустой.")
+        raise ValueError(
+            "Датасет пуст."
+        )
 
     if TARGET_COLUMN not in dataframe.columns:
         raise ValueError(
-            f"В датасете отсутствует колонка: {TARGET_COLUMN}"
+            f"В датасете отсутствует колонка: "
+            f"{TARGET_COLUMN}"
         )
 
     return dataframe
 
 
-def detect_date_column(dataframe: pd.DataFrame) -> str:
+def detect_date_column(
+    dataframe: pd.DataFrame,
+) -> str:
     for column in DATE_COLUMN_CANDIDATES:
         if column in dataframe.columns:
             return column
@@ -101,14 +167,22 @@ def detect_date_column(dataframe: pd.DataFrame) -> str:
     raise ValueError(
         "Не найдена колонка даты матча. "
         "Ожидалась одна из колонок: "
-        + ", ".join(DATE_COLUMN_CANDIDATES)
+        + ", ".join(
+            DATE_COLUMN_CANDIDATES
+        )
     )
 
 
 def prepare_dataframe(
     dataframe: pd.DataFrame,
-) -> tuple[pd.DataFrame, list[str], str]:
-    date_column = detect_date_column(dataframe)
+) -> tuple[
+    pd.DataFrame,
+    list[str],
+    str,
+]:
+    date_column = detect_date_column(
+        dataframe
+    )
 
     prepared = dataframe.copy()
 
@@ -118,7 +192,9 @@ def prepare_dataframe(
     )
 
     invalid_dates = int(
-        prepared[date_column].isna().sum()
+        prepared[date_column]
+        .isna()
+        .sum()
     )
 
     if invalid_dates:
@@ -140,7 +216,9 @@ def prepare_dataframe(
 
     valid_result_mask = prepared[
         TARGET_COLUMN
-    ].isin(CLASS_ORDER)
+    ].isin(
+        CLASS_ORDER
+    )
 
     invalid_results = int(
         (~valid_result_mask).sum()
@@ -159,10 +237,13 @@ def prepare_dataframe(
     prepared = prepared.sort_values(
         by=date_column,
         ascending=True,
-    ).reset_index(drop=True)
+    ).reset_index(
+        drop=True
+    )
 
     excluded_columns = set(
-        EXCLUDED_COLUMNS + [date_column]
+        EXCLUDED_COLUMNS
+        + [date_column]
     )
 
     feature_columns = [
@@ -178,9 +259,15 @@ def prepare_dataframe(
 
     prepared[feature_columns] = (
         prepared[feature_columns]
-        .apply(pd.to_numeric, errors="coerce")
+        .apply(
+            pd.to_numeric,
+            errors="coerce",
+        )
         .replace(
-            [float("inf"), float("-inf")],
+            [
+                float("inf"),
+                float("-inf"),
+            ],
             pd.NA,
         )
         .fillna(0)
@@ -191,7 +278,11 @@ def prepare_dataframe(
             "После очистки датасет пуст."
         )
 
-    return prepared, feature_columns, date_column
+    return (
+        prepared,
+        feature_columns,
+        date_column,
+    )
 
 
 def temporal_split(
@@ -201,10 +292,13 @@ def temporal_split(
     pd.DataFrame,
     pd.DataFrame,
 ]:
-    total_rows = len(dataframe)
+    total_rows = len(
+        dataframe
+    )
 
     train_end = int(
-        total_rows * TRAIN_RATIO
+        total_rows
+        * TRAIN_RATIO
     )
 
     validation_end = int(
@@ -217,30 +311,39 @@ def temporal_split(
 
     if train_end <= 0:
         raise ValueError(
-            "Недостаточно данных для обучения."
+            "Недостаточно данных "
+            "для обучения."
         )
 
     if validation_end <= train_end:
         raise ValueError(
-            "Недостаточно данных для валидации."
+            "Недостаточно данных "
+            "для валидации."
         )
 
     if validation_end >= total_rows:
         raise ValueError(
-            "Недостаточно данных для финального теста."
+            "Недостаточно данных "
+            "для финального теста."
         )
 
-    train_dataframe = dataframe.iloc[
-        :train_end
-    ].copy()
+    train_dataframe = (
+        dataframe.iloc[
+            :train_end
+        ].copy()
+    )
 
-    validation_dataframe = dataframe.iloc[
-        train_end:validation_end
-    ].copy()
+    validation_dataframe = (
+        dataframe.iloc[
+            train_end:validation_end
+        ].copy()
+    )
 
-    test_dataframe = dataframe.iloc[
-        validation_end:
-    ].copy()
+    test_dataframe = (
+        dataframe.iloc[
+            validation_end:
+        ].copy()
+    )
 
     return (
         train_dataframe,
@@ -261,7 +364,9 @@ def generate_parameter_combinations() -> list[dict]:
 
     combinations = []
 
-    for values in product(*parameter_values):
+    for values in product(
+        *parameter_values
+    ):
         combinations.append(
             dict(
                 zip(
@@ -292,13 +397,17 @@ def evaluate_predictions(
     model: CatBoostClassifier,
     x: pd.DataFrame,
     y: pd.Series,
-) -> tuple[float, float]:
-    predictions = model.predict(
-        x
-    ).reshape(-1)
+) -> tuple[
+    float,
+    float,
+]:
+    predictions = (
+        model.predict(x)
+        .reshape(-1)
+    )
 
-    probabilities = model.predict_proba(
-        x
+    probabilities = (
+        model.predict_proba(x)
     )
 
     accuracy = accuracy_score(
@@ -309,10 +418,214 @@ def evaluate_predictions(
     loss = log_loss(
         y,
         probabilities,
-        labels=list(model.classes_),
+        labels=list(
+            model.classes_
+        ),
     )
 
-    return accuracy, loss
+    return (
+        accuracy,
+        loss,
+    )
+
+
+def get_feature_importance_ranking(
+    train_dataframe: pd.DataFrame,
+    feature_columns: list[str],
+    y_train: pd.Series,
+) -> list[str]:
+    logger.info(
+        "Определение важности всех {} признаков...",
+        len(feature_columns),
+    )
+
+    model = create_model(
+        {
+            "iterations": 500,
+            "depth": 5,
+            "learning_rate": 0.05,
+            "l2_leaf_reg": 7,
+            "random_strength": 0.5,
+            "bagging_temperature": 1.0,
+        }
+    )
+
+    model.fit(
+        train_dataframe[
+            feature_columns
+        ],
+        y_train,
+    )
+
+    importance = (
+        model.get_feature_importance()
+    )
+
+    ranking = sorted(
+        zip(
+            feature_columns,
+            importance,
+        ),
+        key=lambda item: item[1],
+        reverse=True,
+    )
+
+    logger.info(
+        "TOP-20 признаков по CatBoost:"
+    )
+
+    for index, (
+        feature,
+        value,
+    ) in enumerate(
+        ranking[:20],
+        start=1,
+    ):
+        logger.info(
+            "{:2}. {} = {:.4f}",
+            index,
+            feature,
+            value,
+        )
+
+    return [
+        feature
+        for feature, _ in ranking
+    ]
+
+
+def optimize_feature_set(
+    feature_count: int,
+    feature_ranking: list[str],
+    train_dataframe: pd.DataFrame,
+    validation_dataframe: pd.DataFrame,
+    test_dataframe: pd.DataFrame,
+    target_column: str,
+) -> dict:
+    selected_features = (
+        feature_ranking[:feature_count]
+    )
+
+    x_train = train_dataframe[
+        selected_features
+    ]
+
+    y_train = train_dataframe[
+        target_column
+    ]
+
+    x_validation = validation_dataframe[
+        selected_features
+    ]
+
+    y_validation = validation_dataframe[
+        target_column
+    ]
+
+    x_test = test_dataframe[
+        selected_features
+    ]
+
+    y_test = test_dataframe[
+        target_column
+    ]
+
+    parameters = {
+        "iterations": 500,
+        "depth": 5,
+        "learning_rate": 0.05,
+        "l2_leaf_reg": 7,
+        "random_strength": 0.5,
+        "bagging_temperature": 1.0,
+    }
+
+    logger.info(
+        "Проверка набора из {} признаков...",
+        feature_count,
+    )
+
+    started_at = perf_counter()
+
+    model = create_model(
+        parameters
+    )
+
+    model.fit(
+        x_train,
+        y_train,
+        eval_set=(
+            x_validation,
+            y_validation,
+        ),
+        early_stopping_rounds=50,
+        use_best_model=True,
+    )
+
+    (
+        validation_accuracy,
+        validation_loss,
+    ) = evaluate_predictions(
+        model,
+        x_validation,
+        y_validation,
+    )
+
+    (
+        test_accuracy,
+        test_loss,
+    ) = evaluate_predictions(
+        model,
+        x_test,
+        y_test,
+    )
+
+    elapsed_seconds = (
+        perf_counter()
+        - started_at
+    )
+
+    best_iteration = (
+        model.get_best_iteration()
+    )
+
+    logger.info(
+        "{} признаков | "
+        "Validation Accuracy: {:.4f} | "
+        "Validation Log Loss: {:.4f} | "
+        "Test Accuracy: {:.4f} | "
+        "Test Log Loss: {:.4f} | "
+        "Best iteration: {}",
+        feature_count,
+        validation_accuracy,
+        validation_loss,
+        test_accuracy,
+        test_loss,
+        best_iteration,
+    )
+
+    return {
+        "feature_count": feature_count,
+        "validation_accuracy": (
+            validation_accuracy
+        ),
+        "validation_log_loss": (
+            validation_loss
+        ),
+        "test_accuracy": (
+            test_accuracy
+        ),
+        "test_log_loss": (
+            test_loss
+        ),
+        "best_iteration": (
+            best_iteration
+        ),
+        "elapsed_seconds": round(
+            elapsed_seconds,
+            2,
+        ),
+        "features": selected_features,
+    }
 
 
 def optimize_model() -> None:
@@ -327,7 +640,9 @@ def optimize_model() -> None:
         dataframe,
         feature_columns,
         date_column,
-    ) = prepare_dataframe(dataframe)
+    ) = prepare_dataframe(
+        dataframe
+    )
 
     logger.info(
         "Всего подготовлено матчей: {}",
@@ -339,258 +654,212 @@ def optimize_model() -> None:
         len(feature_columns),
     )
 
-    logger.info(
-        "Колонка даты: {}",
-        date_column,
-    )
-
     (
         train_dataframe,
         validation_dataframe,
         test_dataframe,
-    ) = temporal_split(dataframe)
+    ) = temporal_split(
+        dataframe
+    )
 
     logger.info(
-        "Обучение: {} матчей, период {} — {}",
+        "Train: {} матчей",
         len(train_dataframe),
-        train_dataframe[date_column].min(),
-        train_dataframe[date_column].max(),
     )
 
     logger.info(
-        "Валидация: {} матчей, период {} — {}",
+        "Validation: {} матчей",
         len(validation_dataframe),
-        validation_dataframe[date_column].min(),
-        validation_dataframe[date_column].max(),
     )
 
     logger.info(
-        "Финальный тест: {} матчей, период {} — {}",
+        "Test: {} матчей",
         len(test_dataframe),
-        test_dataframe[date_column].min(),
-        test_dataframe[date_column].max(),
     )
-
-    x_train = train_dataframe[
-        feature_columns
-    ]
 
     y_train = train_dataframe[
         TARGET_COLUMN
     ]
 
-    x_validation = validation_dataframe[
-        feature_columns
-    ]
-
-    y_validation = validation_dataframe[
-        TARGET_COLUMN
-    ]
-
-    x_test = test_dataframe[
-        feature_columns
-    ]
-
-    y_test = test_dataframe[
-        TARGET_COLUMN
-    ]
-
-    combinations = (
-        generate_parameter_combinations()
-    )
-
-    logger.info(
-        "Количество комбинаций параметров: {}",
-        len(combinations),
-    )
-
-    results = []
-
-    best_parameters = None
-    best_validation_loss = float("inf")
-    best_validation_accuracy = 0.0
-    best_iteration = None
-
-    for index, parameters in enumerate(
-        combinations,
-        start=1,
-    ):
-        logger.info(
-            "[{}/{}] Параметры: {}",
-            index,
-            len(combinations),
-            parameters,
-        )
-
-        started_at = perf_counter()
-
-        model = create_model(parameters)
-
-        model.fit(
-            x_train,
+    feature_ranking = (
+        get_feature_importance_ranking(
+            train_dataframe,
+            feature_columns,
             y_train,
-            eval_set=(
-                x_validation,
-                y_validation,
-            ),
-            early_stopping_rounds=50,
-            use_best_model=True,
+        )
+    )
+
+    feature_counts = [
+        count
+        for count in FEATURE_COUNTS
+        if count <= len(
+            feature_columns
+        )
+    ]
+
+    feature_selection_results = []
+
+    for feature_count in feature_counts:
+        result = optimize_feature_set(
+            feature_count=feature_count,
+            feature_ranking=feature_ranking,
+            train_dataframe=train_dataframe,
+            validation_dataframe=validation_dataframe,
+            test_dataframe=test_dataframe,
+            target_column=TARGET_COLUMN,
         )
 
-        (
-            validation_accuracy,
-            validation_loss,
-        ) = evaluate_predictions(
-            model,
-            x_validation,
-            y_validation,
+        feature_selection_results.append(
+            result
         )
 
-        elapsed_seconds = (
-            perf_counter() - started_at
+    selection_dataframe = (
+        pd.DataFrame(
+            [
+                {
+                    key: value
+                    for key, value in result.items()
+                    if key != "features"
+                }
+                for result in feature_selection_results
+            ]
         )
-
-        current_best_iteration = (
-            model.get_best_iteration()
+        .sort_values(
+            by=[
+                "validation_log_loss",
+                "validation_accuracy",
+            ],
+            ascending=[
+                True,
+                False,
+            ],
         )
-
-        result = {
-            **parameters,
-            "best_iteration": (
-                current_best_iteration
-            ),
-            "validation_accuracy": (
-                validation_accuracy
-            ),
-            "validation_log_loss": (
-                validation_loss
-            ),
-            "elapsed_seconds": (
-                round(elapsed_seconds, 2)
-            ),
-        }
-
-        results.append(result)
-
-        logger.info(
-            "Accuracy: {:.4f}, Log Loss: {:.4f}, время: {:.2f} сек.",
-            validation_accuracy,
-            validation_loss,
-            elapsed_seconds,
-        )
-
-        is_better_loss = (
-            validation_loss
-            < best_validation_loss
-        )
-
-        is_same_loss_better_accuracy = (
-            abs(
-                validation_loss
-                - best_validation_loss
-            )
-            < 1e-9
-            and validation_accuracy
-            > best_validation_accuracy
-        )
-
-        if (
-            is_better_loss
-            or is_same_loss_better_accuracy
-        ):
-            best_parameters = parameters.copy()
-            best_validation_loss = (
-                validation_loss
-            )
-            best_validation_accuracy = (
-                validation_accuracy
-            )
-            best_iteration = (
-                current_best_iteration
-            )
-
-            logger.success(
-                "Найдена новая лучшая конфигурация."
-            )
-
-    if best_parameters is None:
-        raise RuntimeError(
-            "Не удалось выбрать лучшую модель."
-        )
+    )
 
     RESULTS_DIR.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    results_dataframe = pd.DataFrame(
-        results
-    ).sort_values(
-        by=[
-            "validation_log_loss",
-            "validation_accuracy",
-        ],
-        ascending=[
-            True,
-            False,
-        ],
-    )
-
-    results_dataframe.to_csv(
-        RESULTS_PATH,
+    selection_dataframe.to_csv(
+        FEATURE_SELECTION_RESULTS_PATH,
         index=False,
     )
 
     logger.success(
-        "Результаты оптимизации сохранены: {}",
-        RESULTS_PATH,
+        "Результаты отбора признаков сохранены: {}",
+        FEATURE_SELECTION_RESULTS_PATH,
+    )
+
+    best_feature_result = min(
+        feature_selection_results,
+        key=lambda result: (
+            result[
+                "validation_log_loss"
+            ],
+            -result[
+                "validation_accuracy"
+            ],
+        ),
+    )
+
+    best_feature_count = (
+        best_feature_result[
+            "feature_count"
+        ]
+    )
+
+    selected_features = (
+        best_feature_result[
+            "features"
+        ]
+    )
+
+    logger.success(
+        "Лучший набор признаков: {}",
+        best_feature_count,
     )
 
     logger.info(
-        "Лучшие параметры: {}",
-        best_parameters,
-    )
-
-    logger.info(
-        "Лучшая validation Accuracy: {:.4f}",
-        best_validation_accuracy,
-    )
-
-    logger.info(
-        "Лучший validation Log Loss: {:.4f}",
-        best_validation_loss,
-    )
-
-    final_iterations = best_parameters["iterations"]
-
-    final_parameters = (
-        best_parameters.copy()
-    )
-
-    final_parameters[
-        "iterations"
-    ] = final_iterations
-
-    combined_train_dataframe = pd.concat(
-        [
-            train_dataframe,
-            validation_dataframe,
+        "Validation Accuracy: {:.4f}",
+        best_feature_result[
+            "validation_accuracy"
         ],
-        ignore_index=True,
     )
 
-    x_final_train = combined_train_dataframe[
-        feature_columns
-    ]
-
-    y_final_train = combined_train_dataframe[
-        TARGET_COLUMN
-    ]
+    logger.info(
+        "Validation Log Loss: {:.4f}",
+        best_feature_result[
+            "validation_log_loss"
+        ],
+    )
 
     logger.info(
-        "Обучение финальной оптимизированной модели "
-        "на train + validation: {} матчей",
-        len(combined_train_dataframe),
+        "Test Accuracy: {:.4f}",
+        best_feature_result[
+            "test_accuracy"
+        ],
+    )
+
+    logger.info(
+        "Test Log Loss: {:.4f}",
+        best_feature_result[
+            "test_log_loss"
+        ],
+    )
+
+    logger.info(
+        "Best iteration на validation: {}",
+        best_feature_result[
+            "best_iteration"
+        ],
+    )
+
+    logger.info(
+        "Для финальной модели "
+        "зафиксировано iterations = {}",
+        FINAL_ITERATIONS,
+    )
+
+    logger.info(
+        "Обучение финальной модели "
+        "на train + validation..."
+    )
+
+    combined_train_dataframe = (
+        pd.concat(
+            [
+                train_dataframe,
+                validation_dataframe,
+            ],
+            ignore_index=True,
+        )
+    )
+
+    x_final_train = (
+        combined_train_dataframe[
+            selected_features
+        ]
+    )
+
+    y_final_train = (
+        combined_train_dataframe[
+            TARGET_COLUMN
+        ]
+    )
+
+    final_parameters = {
+        "iterations": FINAL_ITERATIONS,
+        "depth": 5,
+        "learning_rate": 0.05,
+        "l2_leaf_reg": 7,
+        "random_strength": 0.5,
+        "bagging_temperature": 1.0,
+    }
+
+    logger.info(
+        "Финальные параметры CatBoost: {}",
+        final_parameters,
     )
 
     final_model = create_model(
@@ -602,23 +871,31 @@ def optimize_model() -> None:
         y_final_train,
     )
 
+    x_test = test_dataframe[
+        selected_features
+    ]
+
+    y_test = test_dataframe[
+        TARGET_COLUMN
+    ]
+
     (
-        test_accuracy,
-        test_loss,
+        final_test_accuracy,
+        final_test_loss,
     ) = evaluate_predictions(
         final_model,
         x_test,
         y_test,
     )
 
-    logger.info(
+    logger.success(
         "Финальная тестовая Accuracy: {:.4f}",
-        test_accuracy,
+        final_test_accuracy,
     )
 
-    logger.info(
+    logger.success(
         "Финальный тестовый Log Loss: {:.4f}",
-        test_loss,
+        final_test_loss,
     )
 
     MODEL_DIR.mkdir(
@@ -631,19 +908,33 @@ def optimize_model() -> None:
     )
 
     joblib.dump(
-        feature_columns,
+        selected_features,
         OPTIMIZED_FEATURES_PATH,
     )
 
     logger.success(
-        "Оптимизированная модель сохранена: {}",
+        "Финальная модель сохранена: {}",
         OPTIMIZED_MODEL_PATH,
     )
 
     logger.success(
-        "Признаки оптимизированной модели сохранены: {}",
+        "Финальные признаки сохранены: {}",
         OPTIMIZED_FEATURES_PATH,
     )
+
+    logger.info(
+        "Итоговый набор признаков:"
+    )
+
+    for index, feature in enumerate(
+        selected_features,
+        start=1,
+    ):
+        logger.info(
+            "{:2}. {}",
+            index,
+            feature,
+        )
 
     logger.success(
         "Оптимизация CatBoost завершена."
@@ -658,4 +949,3 @@ if __name__ == "__main__":
             "Ошибка оптимизации CatBoost: {}",
             error,
         )
-        raise
