@@ -1,0 +1,5 @@
+cat_prediction,hybrid_prediction,matches,hybrid_correct,cat_correct
+A,H,9,2,3
+D,A,1,0,1
+D,H,2,1,1
+H,A,16,7,3

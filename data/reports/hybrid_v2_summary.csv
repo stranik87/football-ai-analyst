@@ -1,0 +1,2 @@
+alpha,weight_catboost,weight_poisson,mean_accuracy,mean_logloss,mean_draw_precision,mean_draw_recall,mean_draw_f1,mean_predicted_draws
+0.1,0.7000000000000001,0.29999999999999993,0.5261261261261262,0.9992085305730569,0.1111111111111111,0.008771929824561403,0.016260162601626015,1.0
