@@ -18,7 +18,7 @@ OUTPUT_PATH = Path("data/reports/odds/api_football_odds.csv")
 
 # 0 = все матчи
 # Для теста сейчас 100 самых свежих.
-LIMIT = 100
+LIMIT = 20
 
 BASE_URL = "https://v3.football.api-sports.io"
 
@@ -614,41 +614,27 @@ def main():
 
         data = result["data"]
 
-        results = data.get(
+        # ---------------------------------------------------------------------
+        # API-FOOTBALL RESPONSE
+        # ---------------------------------------------------------------------
+        # В API-Football поле "results" содержит количество результатов
+        # (int), а сами данные находятся в поле "response".
+        # ---------------------------------------------------------------------
+
+        result_count = data.get(
             "results",
-            [],
+            0,
         )
 
-        # ---------------------------------------------------------------------
-        # ВАЖНО:
-        # API должен вернуть список.
-        # Если сервер вернул int/string/dict — не падаем.
-        # ---------------------------------------------------------------------
-
-        if isinstance(results, int):
-
-            print(
-                f"INVALID RESULTS TYPE: int={results}"
-            )
-
-            errors += 1
-
-            continue
-
-        if isinstance(results, dict):
-
-            print(
-                "INVALID RESULTS TYPE: dict"
-            )
-
-            errors += 1
-
-            continue
+        results = data.get(
+            "response",
+            [],
+        )
 
         if not isinstance(results, list):
 
             print(
-                f"INVALID RESULTS TYPE: "
+                f"INVALID RESPONSE TYPE: "
                 f"{type(results).__name__}"
             )
 
@@ -658,11 +644,25 @@ def main():
 
         if len(results) == 0:
 
-            without_odds += 1
+            if (
+                isinstance(result_count, int)
+                and result_count > 0
+            ):
 
-            print(
-                "NO ODDS"
-            )
+                print(
+                    f"INVALID/EMPTY RESPONSE: "
+                    f"results={result_count}"
+                )
+
+                errors += 1
+
+            else:
+
+                without_odds += 1
+
+                print(
+                    "NO ODDS"
+                )
 
             continue
 
