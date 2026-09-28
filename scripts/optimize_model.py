@@ -119,16 +119,8 @@ FEATURE_COUNTS = [
 ]
 
 
-# Отдельным экспериментом проверено:
-# 150 итераций показали лучший результат
-# на финальном Test:
-#
-# Accuracy = 55.40%
-# Log Loss = 0.9871
-#
-# Поэтому финальная модель использует
-# именно 150 итераций.
-FINAL_ITERATIONS = 150
+# Количество итераций для финальной модели
+# определяется текущей оптимизацией на Validation.
 
 
 def load_dataset() -> pd.DataFrame:
@@ -815,10 +807,17 @@ def optimize_model() -> None:
         ],
     )
 
+    final_iterations = max(
+        1,
+        best_feature_result["best_iteration"] + 1,
+    )
+
     logger.info(
         "Для финальной модели "
-        "зафиксировано iterations = {}",
-        FINAL_ITERATIONS,
+        "выбрано iterations = {} "
+        "(best_iteration = {})",
+        final_iterations,
+        best_feature_result["best_iteration"],
     )
 
     logger.info(
@@ -849,7 +848,7 @@ def optimize_model() -> None:
     )
 
     final_parameters = {
-        "iterations": FINAL_ITERATIONS,
+        "iterations": final_iterations,
         "depth": 5,
         "learning_rate": 0.05,
         "l2_leaf_reg": 7,

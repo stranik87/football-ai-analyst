@@ -6,6 +6,8 @@ from app.api.fixture_statistics import FixtureStatisticsService
 from app.core.logger import logger
 from app.importers.base_importer import BaseImporter
 from app.models.fixture import Fixture
+from app.models.league_season import LeagueSeason
+from app.models.league import League
 from app.models.fixture_team_statistics import FixtureTeamStatistics
 from app.models.team import Team
 from app.repositories.fixture_team_statistics_repository import (
@@ -24,6 +26,12 @@ class FixtureTeamStatisticsImporter(BaseImporter):
 
     REQUEST_DELAY = 2
     LIMIT = 100
+    TARGET_SEASON = None
+    TARGET_LEAGUE_IDS = (39, 61, 78, 135, 140)
+
+    def __init__(self, season: int | None = None):
+        super().__init__()
+        self.TARGET_SEASON = season
 
     FINISHED_STATUSES = (
         "FT",
@@ -52,6 +60,8 @@ class FixtureTeamStatisticsImporter(BaseImporter):
 
         fixtures = (
             db.query(Fixture)
+            .join(LeagueSeason, Fixture.league_season_id == LeagueSeason.id)
+            .join(League, LeagueSeason.league_id == League.id)
             .outerjoin(
                 statistics_count,
                 statistics_count.c.fixture_id
@@ -62,6 +72,8 @@ class FixtureTeamStatisticsImporter(BaseImporter):
                     self.FINISHED_STATUSES
                 )
             )
+            .filter(League.api_id.in_(self.TARGET_LEAGUE_IDS))
+            .filter(LeagueSeason.season == self.TARGET_SEASON if self.TARGET_SEASON is not None else True)
             .filter(
                 func.coalesce(
                     statistics_count.c.statistics_count,
