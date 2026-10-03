@@ -1,0 +1,9 @@
+﻿target,available_matches,missing_matches,fill_pct,min,max,mean,median,std,trainability,quality_comment
+goals,3762,1502,71.47,0.0,10.0,2.8121,3.0,1.669,CANDIDATE,"Данных достаточно для дальнейшей проверки leakage, baseline и temporal model evaluation."
+corners,3627,1637,68.9,1.0,28.0,9.6016,9.0,3.4134,CANDIDATE,"Данных достаточно для дальнейшей проверки leakage, baseline и temporal model evaluation."
+yellow_cards,3521,1743,66.89,1.0,15.0,4.0846,4.0,2.0008,CANDIDATE,"Данных достаточно для дальнейшей проверки leakage, baseline и temporal model evaluation."
+shots,3627,1637,68.9,8.0,54.0,25.2644,25.0,5.9658,CANDIDATE,"Данных достаточно для дальнейшей проверки leakage, baseline и temporal model evaluation."
+shots_on_target,3627,1637,68.9,0.0,20.0,8.7221,9.0,3.1084,CANDIDATE,"Данных достаточно для дальнейшей проверки leakage, baseline и temporal model evaluation."
+offsides,3434,1830,65.24,1.0,14.0,3.5865,3.0,1.9735,CANDIDATE,"Данных достаточно для дальнейшей проверки leakage, baseline и temporal model evaluation."
+fouls,3627,1637,68.9,6.0,47.0,23.5274,23.0,5.7633,CANDIDATE,"Данных достаточно для дальнейшей проверки leakage, baseline и temporal model evaluation."
+throw_ins,0,5264,0.0,,,,,,INSUFFICIENT_DATA,Поле throw-ins отсутствует в БД; обучение невозможно.

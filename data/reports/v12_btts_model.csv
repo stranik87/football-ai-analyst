@@ -1,0 +1,2 @@
+target,train_matches,validation_matches,test_matches,baseline_accuracy,baseline_logloss,baseline_brier,model_accuracy,model_precision,model_recall,model_f1,model_logloss,model_brier,status,feature_count
+btts,2633,527,602,0.5664451827242525,0.6854279999849592,0.2461475933255602,0.5332225913621262,0.6094890510948905,0.4897360703812317,0.5430894308943089,0.693682720149531,0.25023937724648015,WORSE_THAN_BASELINE,79

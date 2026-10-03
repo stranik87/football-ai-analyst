@@ -75,9 +75,15 @@ class PredictionExplanationService:
             fixture_id
         )
 
+        full_dataframe = (
+            self.prediction_service._build_full_dataframe(
+                fixture
+            )
+        )
+
         dataframe = (
             self.prediction_service._build_dataframe(
-                fixture
+                full_dataframe
             )
         )
 

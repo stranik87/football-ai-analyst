@@ -1,0 +1,10 @@
+target,type,status,reason,test_matches,model_mae,baseline_mae,model_rmse,baseline_rmse
+goals,regression,READY_CANDIDATE,Model beats baseline,563,1.336,1.3695,1.6784,1.7303
+btts,classification,NOT_READY,Mixed result versus baseline,563,,,,
+corners,regression,READY_CANDIDATE,Model beats baseline,545,2.8778,2.9173,3.6174,3.6414
+yellow_cards,regression,NOT_READY,Mixed result versus baseline,529,1.5576,1.5538,1.9486,1.9592
+shots,regression,WORSE_THAN_BASELINE,Model worse on MAE and RMSE,545,5.5004,5.4272,7.2326,7.0358
+shots_on_target,regression,READY_CANDIDATE,Model beats baseline,545,2.639,2.6902,3.2786,3.3292
+offsides,regression,READY_CANDIDATE,Model beats baseline,517,1.5765,1.6147,2.0378,2.1162
+fouls,regression,READY_CANDIDATE,Model beats baseline,545,4.5415,4.6465,5.6112,5.7807
+throw_ins,regression,INSUFFICIENT_DATA,No throw-in data available,0,,,,

@@ -21,6 +21,7 @@ from app.bot.handlers import (
     start_prediction_dialog,
     unknown_message_handler,
     fixture_callback_handler,
+    fixture_section_callback_handler,
     show_fixture_list,
     next_matches_command,
 )
@@ -117,7 +118,35 @@ class FootballTelegramBot:
 )
 
         application.add_handler(
+            MessageHandler(
+                filters.Regex(r"^\U0001f4c5 \u0411\u043b\u0438\u0436\u0430\u0439\u0448\u0438\u0435 \u043c\u0430\u0442\u0447\u0438$"),
+                next_matches_command,
+            )
+        )
+
+        application.add_handler(
+            MessageHandler(
+                filters.Regex(r"^\u2139\ufe0f \u041f\u043e\u043c\u043e\u0449\u044c$"),
+                help_command,
+            )
+        )
+
+        application.add_handler(
             prediction_conversation
+        )
+
+        application.add_handler(
+            CallbackQueryHandler(
+                fixture_callback_handler,
+                pattern=r"^predict_fixture:\d+$",
+            )
+        )
+
+        application.add_handler(
+            CallbackQueryHandler(
+                fixture_section_callback_handler,
+                pattern=r"^(fixture_section:|fixture_back_to_menu$|fixture_back_to_list$|fixture_main_menu$)",
+            )
         )
 
         application.add_handler(
@@ -160,3 +189,6 @@ class FootballTelegramBot:
             allowed_updates=Update.ALL_TYPES,
             drop_pending_updates=True,
         )
+
+if __name__ == "__main__":
+    FootballTelegramBot().run()

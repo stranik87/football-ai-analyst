@@ -284,65 +284,114 @@ def temporal_split(
     pd.DataFrame,
     pd.DataFrame,
 ]:
-    total_rows = len(
-        dataframe
-    )
-
-    train_end = int(
-        total_rows
-        * TRAIN_RATIO
-    )
-
-    validation_end = int(
-        total_rows
-        * (
-            TRAIN_RATIO
-            + VALIDATION_RATIO
-        )
-    )
-
-    if train_end <= 0:
+    if dataframe.empty:
         raise ValueError(
-            "Недостаточно данных "
-            "для обучения."
+            "Недостаточно данных для временного разбиения."
         )
+
+    if "kickoff" not in dataframe.columns:
+        raise ValueError(
+            "Для временного разбиения требуется колонка kickoff."
+        )
+
+    dataframe = dataframe.sort_values(
+        by="kickoff",
+        ascending=True,
+    ).reset_index(drop=True)
+
+    total_rows = len(dataframe)
+
+    target_train_end = int(
+        total_rows * TRAIN_RATIO
+    )
+    target_validation_end = int(
+        total_rows * (
+            TRAIN_RATIO + VALIDATION_RATIO
+        )
+    )
+
+    if target_train_end <= 0:
+        raise ValueError(
+            "Недостаточно данных для обучения."
+        )
+
+    if target_validation_end <= target_train_end:
+        raise ValueError(
+            "Недостаточно данных для валидации."
+        )
+
+    if target_validation_end >= total_rows:
+        raise ValueError(
+            "Недостаточно данных для финального теста."
+        )
+
+    kickoff_values = dataframe["kickoff"].tolist()
+
+    train_end = target_train_end
+    while (
+        train_end < total_rows
+        and train_end > 0
+        and kickoff_values[train_end - 1]
+        == kickoff_values[train_end]
+    ):
+        train_end += 1
+
+    if train_end >= total_rows:
+        raise ValueError(
+            "Невозможно сформировать Validation после границы Train."
+        )
+
+    validation_end = target_validation_end
 
     if validation_end <= train_end:
-        raise ValueError(
-            "Недостаточно данных "
-            "для валидации."
-        )
+        validation_end = train_end + 1
+
+    while (
+        validation_end < total_rows
+        and validation_end > 0
+        and kickoff_values[validation_end - 1]
+        == kickoff_values[validation_end]
+    ):
+        validation_end += 1
 
     if validation_end >= total_rows:
         raise ValueError(
-            "Недостаточно данных "
-            "для финального теста."
+            "Невозможно сформировать Test после границы Validation."
         )
 
-    train_dataframe = (
-        dataframe.iloc[
-            :train_end
-        ].copy()
-    )
+    train_dataframe = dataframe.iloc[
+        :train_end
+    ].copy()
 
-    validation_dataframe = (
-        dataframe.iloc[
-            train_end:validation_end
-        ].copy()
-    )
+    validation_dataframe = dataframe.iloc[
+        train_end:validation_end
+    ].copy()
 
-    test_dataframe = (
-        dataframe.iloc[
-            validation_end:
-        ].copy()
-    )
+    test_dataframe = dataframe.iloc[
+        validation_end:
+    ].copy()
+
+    if (
+        train_dataframe["kickoff"].max()
+        >= validation_dataframe["kickoff"].min()
+    ):
+        raise ValueError(
+            "Temporal split error: Train и Validation пересекаются по времени."
+        )
+
+    if (
+        validation_dataframe["kickoff"].max()
+        >= test_dataframe["kickoff"].min()
+    ):
+        raise ValueError(
+            "Temporal split error: Validation и Test пересекаются по времени."
+        )
 
     return (
         train_dataframe,
         validation_dataframe,
         test_dataframe,
     )
-
 
 def generate_parameter_combinations() -> list[dict]:
     parameter_names = list(

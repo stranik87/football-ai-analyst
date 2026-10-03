@@ -275,29 +275,64 @@ def check_train_test_overlap(df):
         )
         return
 
-    dates = pd.to_datetime(
+    df = df.copy()
+
+    df["_kickoff"] = pd.to_datetime(
         df["kickoff"],
         errors="coerce",
     )
 
-    df = df.copy()
-    df["_kickoff"] = dates
-
     df = (
-        df.sort_values("_kickoff")
+        df.dropna(subset=["_kickoff"])
+        .sort_values("_kickoff")
         .reset_index(drop=True)
     )
 
     n = len(df)
 
-    train_end = int(n * 0.70)
-    val_end = int(n * 0.85)
+    train_target = int(n * 0.70)
+    validation_target = int(n * 0.85)
+
+    train_end = train_target
+
+    while (
+        train_end < n
+        and train_end > 0
+        and df.loc[train_end - 1, "_kickoff"]
+        == df.loc[train_end, "_kickoff"]
+    ):
+        train_end += 1
+
+    if train_end >= n:
+        print(
+            "ОШИБКА: невозможно сформировать Validation."
+        )
+        return
+
+    validation_end = max(
+        validation_target,
+        train_end + 1,
+    )
+
+    while (
+        validation_end < n
+        and validation_end > 0
+        and df.loc[validation_end - 1, "_kickoff"]
+        == df.loc[validation_end, "_kickoff"]
+    ):
+        validation_end += 1
+
+    if validation_end >= n:
+        print(
+            "ОШИБКА: невозможно сформировать Test."
+        )
+        return
 
     train = df.iloc[:train_end]
     validation = df.iloc[
-        train_end:val_end
+        train_end:validation_end
     ]
-    test = df.iloc[val_end:]
+    test = df.iloc[validation_end:]
 
     print(
         f"Train:      {len(train)}"
@@ -334,32 +369,36 @@ def check_train_test_overlap(df):
         f"{test['_kickoff'].max()}"
     )
 
-    if (
+    train_val_overlap = (
         train["_kickoff"].max()
         >= validation["_kickoff"].min()
-    ):
-        print(
-            "\n❌ Train/Validation пересекаются!"
-        )
-    else:
-        print(
-            "\n✓ Train → Validation "
-            "хронологически корректны."
-        )
+    )
 
-    if (
+    validation_test_overlap = (
         validation["_kickoff"].max()
         >= test["_kickoff"].min()
-    ):
+    )
+
+    print("\nПроверка пересечения:")
+
+    print(
+        "Train/Validation overlap:",
+        train_val_overlap,
+    )
+
+    print(
+        "Validation/Test overlap:",
+        validation_test_overlap,
+    )
+
+    if train_val_overlap or validation_test_overlap:
         print(
-            "❌ Validation/Test пересекаются!"
+            "\n❌ ОБНАРУЖЕНО ВРЕМЕННОЕ ПЕРЕСЕЧЕНИЕ."
         )
     else:
         print(
-            "✓ Validation → Test "
-            "хронологически корректны."
+            "\n✅ Временного пересечения нет."
         )
-
 
 def check_same_kickoff(df):
     print_section(

@@ -1,0 +1,10 @@
+target,type,status,reason,test_matches,model_mae,baseline_mae,model_rmse,baseline_rmse,final_status,mae_improvement,rmse_improvement
+goals,regression,READY_CANDIDATE,Model beats baseline,563,1.336,1.3695,1.6784,1.7303,READY,0.03349999999999986,0.05190000000000006
+btts,classification,NOT_READY,Mixed result versus baseline,563,,,,,NOT_READY,,
+corners,regression,READY_CANDIDATE,Model beats baseline,545,2.8778,2.9173,3.6174,3.6414,READY,0.03949999999999987,0.02400000000000002
+yellow_cards,regression,NOT_READY,Mixed result versus baseline,529,1.5576,1.5538,1.9486,1.9592,NOT_READY,-0.0038000000000000256,0.010599999999999943
+shots,regression,WORSE_THAN_BASELINE,Model worse on MAE and RMSE,545,5.5004,5.4272,7.2326,7.0358,WORSE_THAN_BASELINE,-0.07319999999999993,-0.19679999999999964
+shots_on_target,regression,READY_CANDIDATE,Model beats baseline,545,2.639,2.6902,3.2786,3.3292,READY,0.051200000000000134,0.0506000000000002
+offsides,regression,READY_CANDIDATE,Model beats baseline,517,1.5765,1.6147,2.0378,2.1162,READY,0.03820000000000001,0.07840000000000025
+fouls,regression,READY_CANDIDATE,Model beats baseline,545,4.5415,4.6465,5.6112,5.7807,READY,0.10499999999999954,0.1695000000000002
+throw_ins,regression,INSUFFICIENT_DATA,No throw-in data available,0,,,,,INSUFFICIENT_DATA,,
