@@ -22,7 +22,6 @@ WAITING_FIXTURE_ID = 1
 
 MAIN_MENU_KEYBOARD = ReplyKeyboardMarkup(
     keyboard=[
-        ["📊 Прогноз матча"],
         ["📅 Ближайшие матчи"],
         ["ℹ️ Помощь"],
     ],
@@ -44,16 +43,7 @@ async def start_command(
 
     context.user_data.clear()
 
-    text = (
-        "⚽ Football AI Analyst\n\n"
-        "Бот анализирует футбольные матчи "
-        "и рассчитывает вероятности исходов.\n\n"
-        "Нажми «📊 Прогноз матча» "
-        "или используй команду:\n"
-        "/predict <ID матча>\n\n"
-        "Пример:\n"
-        "/predict 1377"
-    )
+    text = '⚽ Football AI Analyst\n\nДобро пожаловать!\n\n🤖 Бот анализирует футбольные матчи с помощью статистических моделей и показывает:\n\n• вероятность исхода матча\n• прогноз голов\n• угловые\n• жёлтые карточки\n• удары и удары в створ\n• офсайды\n• фолы\n\n📊 Выберите матч в разделе «Ближайшие матчи», чтобы посмотреть анализ.\n\n⚠️ Прогнозы носят статистический характер и не гарантируют результат матча.'
 
     await update.message.reply_text(
         text,
@@ -72,18 +62,8 @@ async def help_command(
     if update.message is None:
         return
 
-    text = (
-        "📖 Помощь\n\n"
-        "Получить прогноз можно двумя способами:\n\n"
-        "1. Нажать кнопку «📊 Прогноз матча» "
-        "и отправить ID матча.\n\n"
-        "2. Ввести команду:\n"
-        "/predict <ID матча>\n\n"
-        "Пример:\n"
-        "/predict 1377\n\n"
-        "Для отмены ввода используй:\n"
-        "/cancel"
-    )
+    parts = ["Помощь", "", "Как пользоваться ботом:", "", "1. Нажмите кнопку Ближайшие матчи.", "2. Выберите интересующий матч.", "3. Бот покажет основной прогноз.", "4. Внутри прогноза доступны разделы:", "   Голы", "   Угловые", "   Жёлтые карточки", "   Удары", "   Удары в створ", "   Офсайды", "   Фолы", "", "В списке матчей можно переходить между страницами по 10 матчей.", "", "Прогноз является статистическим анализом и не гарантирует результат матча.", "", "Перезапуск бота: /start"]
+    text = chr(10).join(parts)
 
     await update.message.reply_text(
         text,
@@ -157,9 +137,7 @@ async def show_fixture_list(
 
         await update.message.reply_text(
             "⚽ Выбери матч:",
-            reply_markup=InlineKeyboardMarkup(
-                keyboard
-            ),
+            reply_markup=keyboard,
         )
 
         return WAITING_FIXTURE_ID
@@ -230,18 +208,18 @@ async def fixture_callback_handler(
         )
         return ConversationHandler.END
 
-    fixture_id_value = callback_data.split(
-        ":",
-        maxsplit=1,
-    )[1]
+    parts = callback_data.split(":")
 
     try:
-        fixture_id = int(fixture_id_value)
-    except ValueError:
+        fixture_id = int(parts[1])
+        page = int(parts[2]) if len(parts) > 2 else 0
+    except (ValueError, IndexError):
         await query.edit_message_text(
-            "Invalid fixture ID."
+            "Invalid fixture selection."
         )
         return ConversationHandler.END
+
+    context.user_data["upcoming_page"] = max(0, page)
 
     await query.edit_message_text(
         "Analyzing fixture..."
@@ -483,18 +461,21 @@ async def fixture_section_callback_handler(
 
         try:
             fixture_service = FixtureService(session)
-            fixtures = fixture_service.get_latest_matches(limit=5)
+            page = context.user_data.get("upcoming_page", 0)
+            fixtures = fixture_service.get_upcoming_matches(
+                limit=(page + 1) * 10,
+            )
+            fixtures = fixtures[page * 10:(page + 1) * 10]
 
             if not fixtures:
                 await query.edit_message_text(
-                    "\u041c\u0430\u0442\u0447\u0438 \u0432 \u0431\u0430\u0437\u0435 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u044b.",
-                    reply_markup=build_section_keyboard(),
+                    "⚠️ Больше ближайших матчей нет."
                 )
                 return
 
             await query.edit_message_text(
-                "\u26bd \u0412\u044b\u0431\u0435\u0440\u0438 \u043c\u0430\u0442\u0447:",
-                reply_markup=build_fixture_list_keyboard(fixtures),
+                build_upcoming_matches_text(fixtures, page),
+                reply_markup=build_upcoming_matches_keyboard(fixtures, page),
             )
         finally:
             session.close()
@@ -749,7 +730,6 @@ def build_prediction_text(
 
 
     return (
-        "⚽ Прогноз матча\n\n"
         f"{prediction['home_team']} — "
         f"{prediction['away_team']}\n"
         f"Дата: {kickoff_text}\n"
@@ -767,79 +747,102 @@ def build_prediction_text(
         f"{confidence:.1f}%"
     )
 
-async def next_matches_command(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-) -> None:
-    """
-    Команда /next.
+def build_upcoming_matches_keyboard(fixtures, page=0):
+    keyboard = []
+    for fixture in fixtures:
+        home_team = fixture.home_team.name if fixture.home_team is not None else 'Неизвестная команда'
+        away_team = fixture.away_team.name if fixture.away_team is not None else 'Неизвестная команда'
+        kickoff_text = fixture.kickoff.strftime('%d.%m.%Y %H:%M')
+        keyboard.append([InlineKeyboardButton(text=f'{kickoff_text} | {home_team} — {away_team}', callback_data=f'predict_fixture:{fixture.id}:{page}')])
+    navigation = []
+    if page > 0:
+        navigation.append(InlineKeyboardButton('Назад', callback_data=f'upcoming_page:{page - 1}'))
+    if len(fixtures) == 10:
+        navigation.append(InlineKeyboardButton('Следующие 10', callback_data=f'upcoming_page:{page + 1}'))
+    if navigation:
+        keyboard.append(navigation)
+    keyboard.append([InlineKeyboardButton('Главное меню', callback_data='upcoming_main_menu')])
+    return InlineKeyboardMarkup(keyboard)
 
-    Показать ближайшие будущие матчи.
-    """
 
-    if update.message is None:
-        return
+def build_upcoming_matches_text(fixtures, page=0):
+    start_number = page * 10 + 1
+    lines = ['Ближайшие матчи', '']
+    for index, fixture in enumerate(fixtures, start=start_number):
+        home_team = fixture.home_team.name if fixture.home_team is not None else 'Неизвестная команда'
+        away_team = fixture.away_team.name if fixture.away_team is not None else 'Неизвестная команда'
+        lines.append(f'{index}. {home_team} — {away_team}')
+    lines.append('')
+    lines.append(f'Страница {page + 1}')
+    lines.append('Выбери матч:')
+    return '\n'.join(lines)
 
+
+async def next_matches_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     session = SessionLocal()
-
     try:
         fixture_service = FixtureService(session)
-
-        fixtures = fixture_service.get_upcoming_matches(
-            limit=5,
-        )
+        fixtures = fixture_service.get_upcoming_matches(limit=10)
 
         if not fixtures:
             await update.message.reply_text(
-                "📅 Ближайших матчей пока нет.\n\n"
-                "В текущей базе нет будущих матчей.",
-                reply_markup=MAIN_MENU_KEYBOARD,
+                '⚠️ Сейчас в базе нет ближайших матчей.'
             )
             return
 
-        keyboard = []
-
-        for fixture in fixtures:
-            home_team = (
-                fixture.home_team.name
-                if fixture.home_team is not None
-                else "Неизвестная команда"
-            )
-
-            away_team = (
-                fixture.away_team.name
-                if fixture.away_team is not None
-                else "Неизвестная команда"
-            )
-
-            kickoff_text = fixture.kickoff.strftime(
-                "%d.%m.%Y %H:%M"
-            )
-
-            keyboard.append(
-                [
-                    InlineKeyboardButton(
-                        text=(
-                            f"{kickoff_text} | "
-                            f"{home_team} — {away_team}"
-                        ),
-                        callback_data=(
-                            f"predict_fixture:{fixture.id}"
-                        ),
-                    )
-                ]
-            )
-
         await update.message.reply_text(
-            "📅 Ближайшие матчи:\n"
-            "Выбери матч для прогноза:",
-            reply_markup=InlineKeyboardMarkup(
-                keyboard
-            ),
+            build_upcoming_matches_text(fixtures, 0),
+            reply_markup=build_upcoming_matches_keyboard(fixtures, 0),
         )
-
     finally:
         session.close()
+
+async def upcoming_page_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    if query is None:
+        return
+
+    await query.answer()
+    callback_data = query.data or ''
+
+    if callback_data == 'upcoming_main_menu':
+        await query.edit_message_text('Главное меню.')
+        await query.message.reply_text(
+            'Выберите действие:',
+            reply_markup=MAIN_MENU_KEYBOARD,
+        )
+        return
+
+    if not callback_data.startswith('upcoming_page:'):
+        return
+
+    try:
+        page = int(callback_data.split(':', 1)[1])
+    except ValueError:
+        return
+
+    if page < 0:
+        page = 0
+
+    session = SessionLocal()
+    try:
+        fixture_service = FixtureService(session)
+        fixtures = fixture_service.get_upcoming_matches(
+            limit=(page + 1) * 10,
+        )
+        fixtures = fixtures[page * 10:(page + 1) * 10]
+
+        if not fixtures:
+            await query.answer('Больше будущих матчей нет.', show_alert=True)
+            return
+
+        await query.edit_message_text(
+            build_upcoming_matches_text(fixtures, page),
+            reply_markup=build_upcoming_matches_keyboard(fixtures, page),
+        )
+    finally:
+        session.close()
+
 
 async def cancel_command(
     update: Update,

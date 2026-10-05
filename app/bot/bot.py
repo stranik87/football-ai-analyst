@@ -24,6 +24,7 @@ from app.bot.handlers import (
     fixture_section_callback_handler,
     show_fixture_list,
     next_matches_command,
+    upcoming_page_callback_handler,
 )
 from app.core.logger import logger
 
@@ -65,7 +66,7 @@ class FootballTelegramBot:
                     CallbackQueryHandler(
                         fixture_callback_handler,
                         pattern=(
-                            r"^(predict_fixture:\d+|"
+                            r"^(predict_fixture:\d+(?::\d+)?|"
                             r"predict_manual)$"
             ),
         ),
@@ -138,7 +139,7 @@ class FootballTelegramBot:
         application.add_handler(
             CallbackQueryHandler(
                 fixture_callback_handler,
-                pattern=r"^predict_fixture:\d+$",
+                pattern=r"^predict_fixture:\d+(?::\d+)?$",
             )
         )
 
@@ -146,6 +147,13 @@ class FootballTelegramBot:
             CallbackQueryHandler(
                 fixture_section_callback_handler,
                 pattern=r"^(fixture_section:|fixture_back_to_menu$|fixture_back_to_list$|fixture_main_menu$)",
+            )
+        )
+
+        application.add_handler(
+            CallbackQueryHandler(
+                upcoming_page_callback_handler,
+                pattern=r"^(upcoming_page:\d+|upcoming_main_menu)$",
             )
         )
 
